@@ -1,0 +1,534 @@
+{
+  "consumer": {
+    "name": "catalog-web-client"
+  },
+  "interactions": [
+    {
+      "description": "a request to create a receta",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "instrucciones": "Hornear 25 minutos",
+            "nombre": "Salmon al horno"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/v1/recetas"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "data": "6f9619ff-8b86-d011-b42d-00c04fc964ff",
+            "message": "Receta creada exitosamente",
+            "success": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to create an alimento",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "calorias": 52,
+            "cantidad": 100,
+            "carbohidratos": 14,
+            "categoria": "Frutas",
+            "grasas": 0.2,
+            "nombre": "Manzana",
+            "proteinas": 0.3,
+            "unidadMedida": 1
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/v1/alimentos"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "data": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+            "message": "Alimento creado exitosamente",
+            "success": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to list alimentos",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existen alimentos registrados"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/alimentos",
+        "query": {
+          "page": [
+            "1"
+          ],
+          "pageSize": [
+            "10"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "data": {
+              "hasNextPage": false,
+              "hasPreviousPage": false,
+              "items": [
+                {
+                  "calorias": 52,
+                  "cantidad": 100,
+                  "carbohidratos": 14,
+                  "categoria": "Frutas",
+                  "grasas": 0.2,
+                  "id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                  "nombre": "Manzana",
+                  "proteinas": 0.3,
+                  "unidadMedida": "Gramos"
+                }
+              ],
+              "page": 1,
+              "pageSize": 10,
+              "totalCount": 0
+            },
+            "message": "Listado de alimentos obtenido exitosamente",
+            "success": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.data.hasNextPage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.hasPreviousPage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data.items[*].calorias": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].cantidad": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].carbohidratos": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].categoria": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].grasas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].nombre": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].proteinas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].unidadMedida": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.page": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.data.pageSize": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.data.totalCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to list recetas",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existen recetas registradas"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/recetas",
+        "query": {
+          "page": [
+            "1"
+          ],
+          "pageSize": [
+            "10"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "data": {
+              "hasNextPage": false,
+              "hasPreviousPage": false,
+              "items": [
+                {
+                  "id": "6f9619ff-8b86-d011-b42d-00c04fc964ff",
+                  "ingredientes": [
+                    {
+                      "alimentoId": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                      "cantidad": 150
+                    }
+                  ],
+                  "instrucciones": "Hornear 25 minutos",
+                  "nombre": "Salmon al horno"
+                }
+              ],
+              "page": 1,
+              "pageSize": 10,
+              "totalCount": 0
+            },
+            "message": "Listado de recetas obtenido exitosamente",
+            "success": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.data.hasNextPage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.hasPreviousPage": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].ingredientes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data.items[*].ingredientes[*].alimentoId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].ingredientes[*].cantidad": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].instrucciones": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.items[*].nombre": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data.page": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.data.pageSize": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.data.totalCount": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.4.23",
+      "models": "1.2.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "catalog-api"
+  }
+}
