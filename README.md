@@ -127,6 +127,38 @@ Al arrancar, la aplicación aplica las migraciones pendientes automáticamente. 
 
 ## Pruebas
 
+El proyecto de tests vive en `Test/` (xUnit + Moq para unit tests, WebApplicationFactory para integration tests y PactNet para contract testing):
+
+```
+Test/
+├── UnitTest/          # Unit tests: Domain (entidades, value objects, factories) y Application (handlers CQRS)
+├── IntegrationTest/   # Integration tests: flujos HTTP completos por controlador (WebApplicationFactory + EF InMemory)
+└── ContractTest/      # Contract testing con Pact: consumer + provider (pact committeado en pacts/)
+```
+
+Las reglas y skills usados para generar/verificar los tests están en [`ai/`](ai/): `ai/project/*.md` (reglas de unit, integration y pact) y `ai/skill/*` (skills generadoras y verificadoras).
+
+### Ejecutar la suite completa
+
 ```bash
 dotnet test
 ```
+
+### Ejecutar con reporte de code coverage
+
+```bash
+dotnet test Test/Test.csproj --collect:"XPlat Code Coverage" --results-directory Test/coverage
+```
+
+El reporte `coverage.cobertura.xml` se genera dentro de `Test/coverage/` (carpeta excluida de git).
+
+### Ver el reporte de coverage en HTML
+
+```bash
+dotnet tool install --global dotnet-reportgenerator-globaltool   # una sola vez
+reportgenerator "-reports:Test\coverage\**\coverage.cobertura.xml" "-targetdir:Test\coverage\report" "-reporttypes:Html"
+```
+
+Luego abrir `Test/coverage/report/index.html` en el navegador.
+
+Cobertura objetivo (según `ai/project/unit-testing-rules.md`): Domain ≥ 90%, Application ≥ 80%, Value Objects ≥ 95%.
