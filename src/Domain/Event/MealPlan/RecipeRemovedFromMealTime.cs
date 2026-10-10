@@ -1,0 +1,21 @@
+using Shared.Core;
+
+namespace Catalog.Domain.Event.MealPlan
+{
+    public record RecipeRemovedFromMealTime : DomainEvent
+    {
+        public Guid PlanId { get; }
+        public int DayNumber { get; }
+        public Guid MealTimeId { get; }
+        public Guid RecipeId { get; }
+
+        public RecipeRemovedFromMealTime(Guid planId, int dayNumber, Guid mealTimeId, Guid recipeId)
+            : base(DateTime.UtcNow)
+        {
+            PlanId = planId;
+            DayNumber = dayNumber;
+            MealTimeId = mealTimeId;
+            RecipeId = recipeId;
+        }
+    }
+}

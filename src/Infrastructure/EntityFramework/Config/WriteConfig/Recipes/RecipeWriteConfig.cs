@@ -1,0 +1,57 @@
+using Catalog.Domain.Model.Recipes;
+using Catalog.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace Catalog.Infrastructure.EntityFramework.Config.WriteConfig.Recipes
+{
+    public class RecipeWriteConfig : IEntityTypeConfiguration<Recipe>
+    {
+        public void Configure(EntityTypeBuilder<Recipe> builder)
+        {
+            builder.ToTable("Recipe");
+            builder.HasKey(x => x.Id);
+
+            var recipeNameConverter = new ValueConverter<RecipeName, string>(
+                name => name.Name,
+                s => (RecipeName)s
+            );
+
+            builder.Property(x => x.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            builder.Property(x => x.Name)
+                .HasConversion(recipeNameConverter)
+                .HasColumnName("name")
+                .HasMaxLength(500);
+
+            builder.Property(x => x.Instructions)
+                .HasColumnName("instructions")
+                .HasMaxLength(4000);
+
+            builder.Property(x => x.CreatedAt).HasColumnName("createdAt");
+            builder.Property(x => x.UpdatedAt).HasColumnName("updatedAt");
+            builder.Property(x => x.DeletedAt).HasColumnName("deletedAt");
+            builder.Property(x => x.IsDeleted).HasColumnName("isDeleted").HasDefaultValue(false);
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
+            builder.Ignore(x => x.DomainEvents);
+            builder.Ignore(x => x.Ingredients);
+
+            builder.OwnsMany<RecipeIngredient>("_ingredients", ing =>
+            {
+                ing.Property<Guid>("Id").ValueGeneratedOnAdd();
+
+                ing.Property(x => x.FoodId)
+                    .HasColumnName("foodId");
+
+                ing.OwnsOne(x => x.Portion, portion =>
+                {
+                    portion.Property(p => p.Quantity).HasColumnName("portionQuantity").HasPrecision(12, 4);
+                });
+            });
+        }
+    }
+}

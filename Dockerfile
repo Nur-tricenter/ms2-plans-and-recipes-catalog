@@ -2,15 +2,15 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 
-COPY Shared/Shared.csproj Shared/
-COPY Domain/Catalog.Domain.csproj Domain/
-COPY Application/Catalog.Application.csproj Application/
-COPY Infrastructure/Catalog.Infrastructure.csproj Infrastructure/
-COPY WebApi/WebApi.csproj WebApi/
-RUN dotnet restore WebApi/WebApi.csproj
+COPY src/Shared/Shared.csproj src/Shared/
+COPY src/Domain/Catalog.Domain.csproj src/Domain/
+COPY src/Application/Catalog.Application.csproj src/Application/
+COPY src/Infrastructure/Catalog.Infrastructure.csproj src/Infrastructure/
+COPY src/WebApi/WebApi.csproj src/WebApi/
+RUN dotnet restore src/WebApi/WebApi.csproj
 
 COPY . .
-RUN dotnet publish WebApi/WebApi.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/WebApi/WebApi.csproj -c Release -o /app/publish --no-restore
 
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

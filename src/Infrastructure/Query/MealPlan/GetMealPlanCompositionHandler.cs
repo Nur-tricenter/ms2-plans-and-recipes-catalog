@@ -1,0 +1,102 @@
+using Catalog.Application.UseCase.Query.MealPlan;
+using Catalog.Application.Utils;
+using Catalog.Domain.Repository.Food;
+using Catalog.Domain.Repository.MealPlan;
+using Catalog.Domain.Repository.Recipe;
+using Shared.Core;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace Catalog.Infrastructure.Query.MealPlan
+{
+    public class GetMealPlanCompositionHandler : IRequestHandler<GetMealPlanCompositionQuery, Result<MealPlanCompositionDto>>
+    {
+        private readonly IMealPlanRepository _planRepository;
+        private readonly IRecipeRepository _recipeRepository;
+        private readonly IFoodRepository _foodRepository;
+        private readonly ILogger<GetMealPlanCompositionHandler> _logger;
+
+        public GetMealPlanCompositionHandler(
+            IMealPlanRepository planRepository,
+            IRecipeRepository recipeRepository,
+            IFoodRepository foodRepository,
+            ILogger<GetMealPlanCompositionHandler> logger)
+        {
+            _planRepository = planRepository;
+            _recipeRepository = recipeRepository;
+            _foodRepository = foodRepository;
+            _logger = logger;
+        }
+
+        public async Task<Result<MealPlanCompositionDto>> Handle(GetMealPlanCompositionQuery request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var mealPlan = await _planRepository.FindByIdAsync(request.MealPlanId);
+                if (mealPlan == null)
+                    return Result.Fail<MealPlanCompositionDto>("Meal plan not found");
+
+                var dto = new MealPlanCompositionDto
+                {
+                    MealPlanId = mealPlan.Id,
+                    Name = mealPlan.Name
+                };
+
+                foreach (var day in mealPlan.PlanDays.OrderBy(d => d.DayNumber))
+                {
+                    var dayDto = new PlanDayCompositionDto { DayNumber = day.DayNumber };
+
+                    foreach (var mealTime in day.MealTimes.OrderBy(t => t.Order))
+                    {
+                        var mtDto = new MealTimeCompositionDto
+                        {
+                            MealTimeId = mealTime.Id,
+                            Name = mealTime.Name,
+                            Order = mealTime.Order
+                        };
+
+                        foreach (var asig in mealTime.AssignedRecipes)
+                        {
+                            var recipe = await _recipeRepository.FindByIdAsync(asig.RecipeId);
+                            if (recipe == null) continue;
+
+                            var recipeDto = new AssignedRecipeCompositionDto
+                            {
+                                RecipeId = recipe.Id,
+                                RecipeName = recipe.Name,
+                                Ration = new RationDto { Quantity = asig.Ration.Quantity }
+                            };
+
+                            foreach (var ing in recipe.Ingredients)
+                            {
+                                var food = await _foodRepository.FindByIdAsync(ing.FoodId);
+                                recipeDto.Ingredients.Add(new IngredientCompositionDto
+                                {
+                                    FoodId = ing.FoodId,
+                                    FoodName = food?.Name ?? "Unknown",
+                                    Portion = new PortionDto
+                                    {
+                                        Quantity = ing.Portion.Quantity
+                                    }
+                                });
+                            }
+
+                            mtDto.Recipes.Add(recipeDto);
+                        }
+
+                        dayDto.MealTimes.Add(mtDto);
+                    }
+
+                    dto.Days.Add(dayDto);
+                }
+
+                return Result.Ok<MealPlanCompositionDto>(dto, "Meal plan composition retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting meal plan composition for {MealPlanId}", request.MealPlanId);
+                return Result.Fail<MealPlanCompositionDto>(ex.Message);
+            }
+        }
+    }
+}

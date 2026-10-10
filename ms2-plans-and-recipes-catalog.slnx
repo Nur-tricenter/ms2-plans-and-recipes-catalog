@@ -1,8 +1,8 @@
 <Solution>
-  <Project Path="Shared\Shared.csproj" Id="858a352a-aba3-4ee4-9948-ef01b7d40c57" />
-  <Project Path="Domain\Catalog.Domain.csproj" Id="c8ecb74d-47b2-4de0-b717-f453c34adcbe" />
-  <Project Path="Application\Catalog.Application.csproj" Id="bd3fb095-391c-4647-a2c6-85e84a401710" />
-  <Project Path="Infrastructure\Catalog.Infrastructure.csproj" />
-  <Project Path="WebApi\WebApi.csproj" />
+  <Project Path="src\Shared\Shared.csproj" Id="858a352a-aba3-4ee4-9948-ef01b7d40c57" />
+  <Project Path="src\Domain\Catalog.Domain.csproj" Id="c8ecb74d-47b2-4de0-b717-f453c34adcbe" />
+  <Project Path="src\Application\Catalog.Application.csproj" Id="bd3fb095-391c-4647-a2c6-85e84a401710" />
+  <Project Path="src\Infrastructure\Catalog.Infrastructure.csproj" />
+  <Project Path="src\WebApi\WebApi.csproj" />
   <Project Path="Test\Test.csproj" />
 </Solution>
