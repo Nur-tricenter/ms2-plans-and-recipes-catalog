@@ -84,7 +84,8 @@ namespace Catalog.Tests.Domain
             var asignacion = Assert.Single(tiempo.RecetasAsignadas);
             Assert.Equal(recetaId, asignacion.RecetaId);
             Assert.Equal(2, asignacion.Racion.Cantidad);
-            Assert.Equal(2, plan.DomainEvents.Count);
+            // 3 eventos: PlanAlimentarioCreado, TiempoComidaAgregadoAPlan, RecetaAsignadaATiempo
+            Assert.Equal(3, plan.DomainEvents.Count);
             var evento = Assert.IsType<RecetaAsignadaATiempo>(plan.DomainEvents.Last());
             Assert.Equal(1, evento.NumeroDia);
             Assert.Equal(recetaId, evento.RecetaId);
@@ -176,7 +177,8 @@ namespace Catalog.Tests.Domain
 
             // Assert
             Assert.Empty(tiempo.RecetasAsignadas);
-            Assert.Equal(3, plan.DomainEvents.Count);
+            // 4 eventos: PlanAlimentarioCreado, TiempoComidaAgregadoAPlan, RecetaAsignadaATiempo, RecetaRemovidaDeTiempo
+            Assert.Equal(4, plan.DomainEvents.Count);
             var evento = Assert.IsType<RecetaRemovidaDeTiempo>(plan.DomainEvents.Last());
             Assert.Equal(recetaId, evento.RecetaId);
         }

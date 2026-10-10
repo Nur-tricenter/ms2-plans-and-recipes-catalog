@@ -28,6 +28,16 @@ namespace Catalog.Domain.Model.Recetas
             AddDomainEvent(new RecetaCreada(Id, Nombre));
         }
 
+        public void Actualizar(string instrucciones)
+        {
+            if (string.IsNullOrWhiteSpace(instrucciones))
+                throw new BussinessRuleValidationException("Recipe instructions cannot be empty");
+
+            Instrucciones = instrucciones;
+
+            AddDomainEvent(new RecetaActualizada(Id, Nombre, Instrucciones));
+        }
+
         public void AgregarIngrediente(Guid alimentoId, Porcion porcion)
         {
             if (_ingredientes.Any(i => i.AlimentoId == alimentoId))

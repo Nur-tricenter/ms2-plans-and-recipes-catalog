@@ -34,6 +34,18 @@ namespace Catalog.Domain.Model.PlanesAlimentarios
             AddDomainEvent(new PlanAlimentarioCreado(Id, Nombre, Duracion.Tipo.ToString(), Duracion.Dias(), comidasPorDia));
         }
 
+        public void Actualizar(PlanName nombre, DuracionPlan duracion, int comidasPorDia)
+        {
+            if (!duracion.EsValida())
+                throw new BussinessRuleValidationException("Invalid plan duration");
+
+            Nombre = nombre;
+            Duracion = duracion;
+            ComidasPorDia = comidasPorDia;
+
+            AddDomainEvent(new PlanAlimentarioActualizado(Id, Nombre, Duracion.Tipo.ToString(), Duracion.Dias(), comidasPorDia));
+        }
+
         public void AgregarTiempoDeComidaADia(int numDia, TipoTiempoComida tipo)
         {
             var dia = _diasDelPlan.FirstOrDefault(d => d.NumeroDia == numDia);
@@ -41,6 +53,9 @@ namespace Catalog.Domain.Model.PlanesAlimentarios
                 throw new BussinessRuleValidationException($"Día {numDia} no existe en el plan");
 
             dia.AgregarTiempoDeComida(tipo);
+
+            var tiempoAgregado = dia.TiemposDeComida.First(t => t.Orden == (int)tipo);
+            AddDomainEvent(new TiempoComidaAgregadoAPlan(Id, numDia, tiempoAgregado.Id, tipo.ToDisplayName(), tiempoAgregado.Orden));
         }
 
         public void AsignarRecetaATiempo(int numDia, Guid tId, Guid recetaId, Racion racion)

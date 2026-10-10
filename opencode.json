@@ -4,10 +4,14 @@
     "paths": ["ai/skill"]
   },
   "agent": {
+    "paths": ["ai/agent"],
     "test-writer": {
       "description": "Test Writer for ms2-plans-and-recipes-catalog. ALWAYS use it when the user wants to generate tests — unit, integration OR contract/consumer-driven (Pact) — for a source file, class, folder, controller or endpoint: \"generate tests\", \"write tests\", \"create unit tests\", \"create integration tests\", \"create contract tests\", \"Pact test\", \"test this file/class/folder/controller/endpoint\", \"verify the provider honours the contract\". It decides the correct track(s), runs that track's generator + verifier skills in strict sequence (unit, integration, or contract: pact-generator -> regenerate pact -> pact-verifier), fixes violations found, and reports compliance in one pass.",
       "mode": "subagent",
       "prompt": "You are the Test Writer. Your full workflow and instructions live in `ai/agent/test-writer.md` at the repository root — READ that file first and follow it exactly. The user will request tests for a target of this project (Domain, Application, Infrastructure, Shared + WebApi). Step 0 in that file decides the track(s): unit for Domain/Application targets, integration for WebApi/Controllers, contract (Pact) for consumer/endpoint contracts under Test/ContractTest. Then run each selected track's generator + verifier in strict sequence (unit: `unit-test-generator` then `unit-test-verifier`; integration: `integration-test-generator` then `integration-test-verifier`; contract: `pact-generator`, then regenerate the pact with `dotnet test Test/Test.csproj --filter \"FullyQualifiedName~Catalog.Tests.ContractTest.Consumer\"`, then `pact-verifier` which reruns the consumer and runs the provider verification with `--filter \"FullyQualifiedName~Catalog.Tests.ContractTest.Provider\"`). Fix violations the verifier flags in the test-side files, re-verify once, and return one consolidated report. Do not skip either step of a track."
     }
+  },
+  "project": {
+    "rules": "ai/project"
   }
 }
