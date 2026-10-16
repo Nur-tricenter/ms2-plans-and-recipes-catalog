@@ -25,6 +25,22 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!--
+      Required by Test/IntegrationTest/RabbitMq: the broker round-trip, retry and dead-letter tests
+      exercise the real publisher and the real consumer against a live AMQP broker, so the test
+      project compiles against the library itself instead of only reaching it transitively through
+      Catalog.WorkerService. RabbitMQ.Client (7.1.2) flows in transitively and is used to poll
+      queue depth, read dead-letter headers and clean up the exchanges/queues the tests declare.
+    -->
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" Version="1.1.0" />
+    <!--
+      Pin: Joseco.Communication.External.RabbitMQ 1.1.0 drags OpenTelemetry.Api 1.12.0, which
+      carries advisory GHSA-g94r-2vxg-569j (NU1902). 1.15.3 is the lowest already-pinned
+      non-vulnerable version used by Catalog.Infrastructure and Catalog.WorkerService, so the whole
+      graph converges on it. Do NOT remove this pin unless the RabbitMQ package stops requesting
+      OpenTelemetry.Api < 1.15.3.
+    -->
+    <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
   </ItemGroup>
 
   <ItemGroup>
