@@ -32,6 +32,11 @@
     <ProjectReference Include="..\src\Catalog.Domain\Catalog.Domain.csproj" />
     <ProjectReference Include="..\src\Catalog.WebApi\Catalog.WebApi.csproj" />
     <ProjectReference Include="..\src\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+    <!--
+      Referenced so the WorkerService composition root (RabbitMqExtensions.AddCatalogRabbitMq and
+      DefaultQueueRegistrar) can be unit-tested without a live broker.
+    -->
+    <ProjectReference Include="..\src\Catalog.WorkerService\Catalog.WorkerService.csproj" />
   </ItemGroup>
 
 </Project>

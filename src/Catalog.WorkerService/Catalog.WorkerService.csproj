@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" Version="1.1.0" />
+    <!--
+      Pin: Joseco.Communication.External.RabbitMQ 1.1.0 drags OpenTelemetry.Api 1.12.0, which
+      carries advisory GHSA-g94r-2vxg-569j (NU1902). 1.15.3 is the lowest already-pinned
+      non-vulnerable version used by Catalog.Infrastructure, so the whole graph converges on it.
+      Do NOT remove this pin unless the RabbitMQ package stops requesting OpenTelemetry.Api < 1.15.3.
+    -->
+    <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
   </ItemGroup>

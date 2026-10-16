@@ -21,6 +21,17 @@ services:
       start_period: 5s
     restart: unless-stopped
 
+  # NOTE: RabbitMQ is intentionally NOT declared here.
+  # The broker is provided project-level by the container `nurtricenter-rabbitmq`
+  # (image rabbitmq:3-management-alpine) attached to the `nurtricenter-net` network, and it is
+  # published on the host at AMQP 5672 / management 15672 with catalogUser/catalogUserPassword
+  # on vhost "/". Declaring a second broker here would collide with that published port.
+  #
+  # Host port 5672 is a hard requirement, not a default:
+  # Joseco.Communication.External.RabbitMQ 1.1.0 builds its ConnectionFactory from
+  # HostName/UserName/Password only and silently ignores RabbitMqSettings.Port and UseSsl, so any
+  # other host port makes the publisher and consumer talk to the wrong broker with no error.
+
   webapi:
     image: robertperezlino/ms2-plans-and-recipes-catalog:latest
     container_name: ms2-plans-and-recipes-catalog-api
