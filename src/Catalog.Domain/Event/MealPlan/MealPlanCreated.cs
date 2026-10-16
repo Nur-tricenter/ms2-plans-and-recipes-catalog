@@ -10,6 +10,10 @@ namespace Catalog.Domain.Event.MealPlan
         public int TotalDays { get; }
         public int MealsPerDay { get; }
 
+        public MealPlanCreated() : this(Guid.Empty, string.Empty, string.Empty, 0, 0)
+        {
+        }
+
         public MealPlanCreated(Guid planId, string name, string durationType, int totalDays, int mealsPerDay)
         {
             OccuredOn = DateTime.UtcNow;

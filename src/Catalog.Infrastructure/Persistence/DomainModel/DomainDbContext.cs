@@ -7,6 +7,8 @@ using Catalog.Infrastructure.Persistence.DomainModel.Config.Recipe;
 using Microsoft.EntityFrameworkCore;
 using Catalog.Domain.Primitives;
 using Joseco.DDD.Core.Abstractions;
+using Joseco.Outbox.Contracts.Model;
+using Joseco.Outbox.EFCore.Persistence;
 
 namespace Catalog.Infrastructure.Persistence.DomainModel
 {
@@ -15,6 +17,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel
         public virtual DbSet<MealPlan> MealPlans { get; set; } = null!;
         public virtual DbSet<Recipe> Recipes { get; set; } = null!;
         public virtual DbSet<Food> Foods { get; set; } = null!;
+        public DbSet<OutboxMessage<DomainEvent>> OutboxMessages { get; set; } = null!;
 
         public DomainDbContext(DbContextOptions<DomainDbContext> options) : base(options)
         {
@@ -36,6 +39,8 @@ namespace Catalog.Infrastructure.Persistence.DomainModel
             modelBuilder.ApplyConfiguration<Food>(foodConfig);
 
             modelBuilder.Ignore<DomainEvent>();
+
+            modelBuilder.AddOutboxModel<DomainEvent>();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

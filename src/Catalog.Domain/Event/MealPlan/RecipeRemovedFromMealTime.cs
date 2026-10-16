@@ -9,6 +9,10 @@ namespace Catalog.Domain.Event.MealPlan
         public Guid MealTimeId { get; }
         public Guid RecipeId { get; }
 
+        public RecipeRemovedFromMealTime() : this(Guid.Empty, 0, Guid.Empty, Guid.Empty)
+        {
+        }
+
         public RecipeRemovedFromMealTime(Guid planId, int dayNumber, Guid mealTimeId, Guid recipeId)
         {
             OccuredOn = DateTime.UtcNow;

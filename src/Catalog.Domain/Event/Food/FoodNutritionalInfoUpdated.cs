@@ -9,6 +9,10 @@ namespace Catalog.Domain.Event.Food
         public NutritionalInfo PreviousNutritionalInfo { get; }
         public NutritionalInfo NewNutritionalInfo { get; }
 
+        public FoodNutritionalInfoUpdated() : this(Guid.Empty, default!, default!)
+        {
+        }
+
         public FoodNutritionalInfoUpdated(Guid foodId, NutritionalInfo previousNutritionalInfo, NutritionalInfo newNutritionalInfo)
         {
             OccuredOn = DateTime.UtcNow;

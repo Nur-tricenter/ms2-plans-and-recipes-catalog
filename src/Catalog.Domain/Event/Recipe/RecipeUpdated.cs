@@ -8,6 +8,10 @@ namespace Catalog.Domain.Event.Recipe
         public string Name { get; }
         public string Instructions { get; }
 
+        public RecipeUpdated() : this(Guid.Empty, string.Empty, string.Empty)
+        {
+        }
+
         public RecipeUpdated(Guid recipeId, string name, string instructions)
         {
             OccuredOn = DateTime.UtcNow;

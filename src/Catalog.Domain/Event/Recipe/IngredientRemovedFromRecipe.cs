@@ -8,6 +8,10 @@ namespace Catalog.Domain.Event.Recipe
         public Guid FoodId { get; }
         public decimal PortionQuantity { get; }
 
+        public IngredientRemovedFromRecipe() : this(Guid.Empty, Guid.Empty, 0)
+        {
+        }
+
         public IngredientRemovedFromRecipe(Guid recipeId, Guid foodId, decimal portionQuantity)
         {
             OccuredOn = DateTime.UtcNow;

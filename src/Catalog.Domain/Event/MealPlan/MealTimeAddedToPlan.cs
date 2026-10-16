@@ -10,6 +10,10 @@ namespace Catalog.Domain.Event.MealPlan
         public string MealTimeType { get; }
         public int Order { get; }
 
+        public MealTimeAddedToPlan() : this(Guid.Empty, 0, Guid.Empty, string.Empty, 0)
+        {
+        }
+
         public MealTimeAddedToPlan(Guid planId, int dayNumber, Guid mealTimeId, string mealTimeType, int order)
         {
             OccuredOn = DateTime.UtcNow;

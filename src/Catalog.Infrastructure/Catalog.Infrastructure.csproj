@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Joseco.DDD.Core" Version="1.0.3" />
+    <PackageReference Include="Joseco.Outbox.EFCore" Version="1.1.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0-preview.2.25163.8">
       <PrivateAssets>all</PrivateAssets>
@@ -17,6 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
     <PackageReference Include="Scrutor" Version="6.0.1" />
   </ItemGroup>
 

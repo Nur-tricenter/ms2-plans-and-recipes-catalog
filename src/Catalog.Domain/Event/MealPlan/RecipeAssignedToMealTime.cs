@@ -10,6 +10,10 @@ namespace Catalog.Domain.Event.MealPlan
         public Guid RecipeId { get; }
         public int RationQuantity { get; }
 
+        public RecipeAssignedToMealTime() : this(Guid.Empty, 0, Guid.Empty, Guid.Empty, 0)
+        {
+        }
+
         public RecipeAssignedToMealTime(Guid planId, int dayNumber, Guid mealTimeId, Guid recipeId, int rationQuantity)
         {
             OccuredOn = DateTime.UtcNow;
