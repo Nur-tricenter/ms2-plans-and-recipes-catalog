@@ -4,13 +4,19 @@
   },
   "interactions": [
     {
-      "description": "a request to create a receta",
+      "description": "a request to create a food",
       "pending": false,
       "request": {
         "body": {
           "content": {
-            "instrucciones": "Hornear 25 minutos",
-            "nombre": "Salmon al horno"
+            "calories": 52,
+            "carbs": 14,
+            "category": "Frutas",
+            "fat": 0.2,
+            "name": "Manzana",
+            "protein": 0.3,
+            "quantity": 100,
+            "unitOfMeasure": 1
           },
           "contentType": "application/json",
           "encoded": false
@@ -21,86 +27,13 @@
           ]
         },
         "method": "POST",
-        "path": "/api/v1/recetas"
-      },
-      "response": {
-        "body": {
-          "content": {
-            "data": "6f9619ff-8b86-d011-b42d-00c04fc964ff",
-            "message": "Receta creada exitosamente",
-            "success": true
-          },
-          "contentType": "application/json",
-          "encoded": false
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json; charset=utf-8"
-          ]
-        },
-        "matchingRules": {
-          "body": {
-            "$.data": {
-              "combine": "AND",
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ]
-            },
-            "$.message": {
-              "combine": "AND",
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ]
-            },
-            "$.success": {
-              "combine": "AND",
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ]
-            }
-          }
-        },
-        "status": 200
-      },
-      "type": "Synchronous/HTTP"
-    },
-    {
-      "description": "a request to create an alimento",
-      "pending": false,
-      "request": {
-        "body": {
-          "content": {
-            "calorias": 52,
-            "cantidad": 100,
-            "carbohidratos": 14,
-            "categoria": "Frutas",
-            "grasas": 0.2,
-            "nombre": "Manzana",
-            "proteinas": 0.3,
-            "unidadMedida": 1
-          },
-          "contentType": "application/json",
-          "encoded": false
-        },
-        "headers": {
-          "Content-Type": [
-            "application/json"
-          ]
-        },
-        "method": "POST",
-        "path": "/api/v1/alimentos"
+        "path": "/api/v1/foods"
       },
       "response": {
         "body": {
           "content": {
             "data": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-            "message": "Alimento creado exitosamente",
+            "message": "Food created successfully",
             "success": true
           },
           "contentType": "application/json",
@@ -144,7 +77,74 @@
       "type": "Synchronous/HTTP"
     },
     {
-      "description": "a request to list alimentos",
+      "description": "a request to create a recipe",
+      "pending": false,
+      "request": {
+        "body": {
+          "content": {
+            "instructions": "Hornear 25 minutos",
+            "name": "Salmon al horno"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/v1/recipes"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "data": "6f9619ff-8b86-d011-b42d-00c04fc964ff",
+            "message": "Recipe created successfully",
+            "success": true
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request to list foods",
       "pending": false,
       "providerStates": [
         {
@@ -153,7 +153,7 @@
       ],
       "request": {
         "method": "GET",
-        "path": "/api/v1/alimentos",
+        "path": "/api/v1/foods",
         "query": {
           "page": [
             "1"
@@ -171,22 +171,22 @@
               "hasPreviousPage": false,
               "items": [
                 {
-                  "calorias": 52,
-                  "cantidad": 100,
-                  "carbohidratos": 14,
-                  "categoria": "Frutas",
-                  "grasas": 0.2,
+                  "calories": 52,
+                  "carbs": 14,
+                  "category": "Frutas",
+                  "fat": 0.2,
                   "id": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-                  "nombre": "Manzana",
-                  "proteinas": 0.3,
-                  "unidadMedida": "Gramos"
+                  "name": "Manzana",
+                  "protein": 0.3,
+                  "quantity": 100,
+                  "unitOfMeasure": "Gram"
                 }
               ],
               "page": 1,
               "pageSize": 10,
               "totalCount": 0
             },
-            "message": "Listado de alimentos obtenido exitosamente",
+            "message": "Food list retrieved successfully",
             "success": true
           },
           "contentType": "application/json",
@@ -224,7 +224,7 @@
                 }
               ]
             },
-            "$.data.items[*].calorias": {
+            "$.data.items[*].calories": {
               "combine": "AND",
               "matchers": [
                 {
@@ -232,7 +232,7 @@
                 }
               ]
             },
-            "$.data.items[*].cantidad": {
+            "$.data.items[*].carbs": {
               "combine": "AND",
               "matchers": [
                 {
@@ -240,15 +240,7 @@
                 }
               ]
             },
-            "$.data.items[*].carbohidratos": {
-              "combine": "AND",
-              "matchers": [
-                {
-                  "match": "number"
-                }
-              ]
-            },
-            "$.data.items[*].categoria": {
+            "$.data.items[*].category": {
               "combine": "AND",
               "matchers": [
                 {
@@ -256,7 +248,7 @@
                 }
               ]
             },
-            "$.data.items[*].grasas": {
+            "$.data.items[*].fat": {
               "combine": "AND",
               "matchers": [
                 {
@@ -272,7 +264,7 @@
                 }
               ]
             },
-            "$.data.items[*].nombre": {
+            "$.data.items[*].name": {
               "combine": "AND",
               "matchers": [
                 {
@@ -280,7 +272,7 @@
                 }
               ]
             },
-            "$.data.items[*].proteinas": {
+            "$.data.items[*].protein": {
               "combine": "AND",
               "matchers": [
                 {
@@ -288,7 +280,15 @@
                 }
               ]
             },
-            "$.data.items[*].unidadMedida": {
+            "$.data.items[*].quantity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$.data.items[*].unitOfMeasure": {
               "combine": "AND",
               "matchers": [
                 {
@@ -343,7 +343,7 @@
       "type": "Synchronous/HTTP"
     },
     {
-      "description": "a request to list recetas",
+      "description": "a request to list recipes",
       "pending": false,
       "providerStates": [
         {
@@ -352,7 +352,7 @@
       ],
       "request": {
         "method": "GET",
-        "path": "/api/v1/recetas",
+        "path": "/api/v1/recipes",
         "query": {
           "page": [
             "1"
@@ -371,21 +371,21 @@
               "items": [
                 {
                   "id": "6f9619ff-8b86-d011-b42d-00c04fc964ff",
-                  "ingredientes": [
+                  "ingredients": [
                     {
-                      "alimentoId": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
-                      "cantidad": 150
+                      "foodId": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+                      "quantity": 150
                     }
                   ],
-                  "instrucciones": "Hornear 25 minutos",
-                  "nombre": "Salmon al horno"
+                  "instructions": "Hornear 25 minutos",
+                  "name": "Salmon al horno"
                 }
               ],
               "page": 1,
               "pageSize": 10,
               "totalCount": 0
             },
-            "message": "Listado de recetas obtenido exitosamente",
+            "message": "Recipe list retrieved successfully",
             "success": true
           },
           "contentType": "application/json",
@@ -431,7 +431,7 @@
                 }
               ]
             },
-            "$.data.items[*].ingredientes": {
+            "$.data.items[*].ingredients": {
               "combine": "AND",
               "matchers": [
                 {
@@ -440,7 +440,7 @@
                 }
               ]
             },
-            "$.data.items[*].ingredientes[*].alimentoId": {
+            "$.data.items[*].ingredients[*].foodId": {
               "combine": "AND",
               "matchers": [
                 {
@@ -448,7 +448,7 @@
                 }
               ]
             },
-            "$.data.items[*].ingredientes[*].cantidad": {
+            "$.data.items[*].ingredients[*].quantity": {
               "combine": "AND",
               "matchers": [
                 {
@@ -456,7 +456,7 @@
                 }
               ]
             },
-            "$.data.items[*].instrucciones": {
+            "$.data.items[*].instructions": {
               "combine": "AND",
               "matchers": [
                 {
@@ -464,7 +464,7 @@
                 }
               ]
             },
-            "$.data.items[*].nombre": {
+            "$.data.items[*].name": {
               "combine": "AND",
               "matchers": [
                 {

@@ -1,6 +1,6 @@
-using Catalog.Domain.Repository.Alimento;
-using Catalog.Domain.Repository.PlanAlimentario;
-using Catalog.Domain.Repository.Receta;
+using Catalog.Domain.Repository.Food;
+using Catalog.Domain.Repository.MealPlan;
+using Catalog.Domain.Repository.Recipe;
 using Catalog.Infrastructure.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +13,9 @@ namespace Catalog.Tests.IntegrationTest.Setup
     {
         public static void ReplaceInfrastructureWithInMemory(this IServiceCollection services, string dbName)
         {
-            services.ReplaceWithInMemoryFake<IAlimentoRepository, InMemoryAlimentoRepository>();
-            services.ReplaceWithInMemoryFake<IRecetaRepository, InMemoryRecetaRepository>();
-            services.ReplaceWithInMemoryFake<IPlanAlimentarioRepository, InMemoryPlanAlimentarioRepository>();
+            services.ReplaceWithInMemoryFake<IFoodRepository, InMemoryFoodRepository>();
+            services.ReplaceWithInMemoryFake<IRecipeRepository, InMemoryRecipeRepository>();
+            services.ReplaceWithInMemoryFake<IMealPlanRepository, InMemoryMealPlanRepository>();
             services.ReplaceWithInMemoryFake<IUnitOfWork, InMemoryUnitOfWork>();
 
             services.RemoveAll<DbContextOptions<ReadDbContext>>();

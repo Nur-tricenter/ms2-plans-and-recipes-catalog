@@ -21,8 +21,8 @@ namespace Catalog.Tests.ContractTest.Consumer
     /// </summary>
     public class CatalogApiConsumerTests
     {
-        private static readonly Guid AlimentoId = Guid.Parse("3f2504e0-4f89-41d3-9a0c-0305e82c3301");
-        private static readonly Guid RecetaId = Guid.Parse("6f9619ff-8b86-d011-b42d-00c04fc964ff");
+        private static readonly Guid FoodId = Guid.Parse("3f2504e0-4f89-41d3-9a0c-0305e82c3301");
+        private static readonly Guid RecipeId = Guid.Parse("6f9619ff-8b86-d011-b42d-00c04fc964ff");
 
         private readonly IPactBuilderV4 _pactBuilder;
 
@@ -42,22 +42,22 @@ namespace Catalog.Tests.ContractTest.Consumer
         }
 
         [Fact]
-        public async Task CreateAlimento_ReturnsCreatedId()
+        public async Task CreateFood_ReturnsCreatedId()
         {
             //Arrange
             _pactBuilder
-                .UponReceiving("a request to create an alimento")
-                .WithRequest(HttpMethod.Post, "/api/v1/alimentos")
+                .UponReceiving("a request to create a food")
+                .WithRequest(HttpMethod.Post, "/api/v1/foods")
                 .WithJsonBody(new
                 {
-                    nombre = "Manzana",
-                    categoria = "Frutas",
-                    unidadMedida = 1,
-                    cantidad = 100m,
-                    calorias = 52m,
-                    proteinas = 0.3m,
-                    carbohidratos = 14m,
-                    grasas = 0.2m
+                    name = "Manzana",
+                    category = "Frutas",
+                    unitOfMeasure = 1,
+                    quantity = 100m,
+                    calories = 52m,
+                    protein = 0.3m,
+                    carbs = 14m,
+                    fat = 0.2m
                 })
                 .WillRespond()
                 .WithStatus(HttpStatusCode.OK)
@@ -65,8 +65,8 @@ namespace Catalog.Tests.ContractTest.Consumer
                 .WithJsonBody(new
                 {
                     success = Match.Type(true),
-                    message = Match.Type("Alimento creado exitosamente"),
-                    data = Match.Type(AlimentoId)
+                    message = Match.Type("Food created successfully"),
+                    data = Match.Type(FoodId)
                 });
 
             //Act / Assert
@@ -74,7 +74,7 @@ namespace Catalog.Tests.ContractTest.Consumer
             {
                 var client = new CatalogApiClient(ctx.MockServerUri);
 
-                var result = await client.CreateAlimentoAsync(new AlimentoRequest(
+                var result = await client.CreateFoodAsync(new FoodRequest(
                     "Manzana", "Frutas", 1, 100m, 52m, 0.3m, 14m, 0.2m));
 
                 Assert.True(result.Success);
@@ -83,13 +83,13 @@ namespace Catalog.Tests.ContractTest.Consumer
         }
 
         [Fact]
-        public async Task GetAlimentos_ReturnsPagedList()
+        public async Task GetFoods_ReturnsPagedList()
         {
             //Arrange
             _pactBuilder
-                .UponReceiving("a request to list alimentos")
+                .UponReceiving("a request to list foods")
                 .Given("existen alimentos registrados")
-                .WithRequest(HttpMethod.Get, "/api/v1/alimentos")
+                .WithRequest(HttpMethod.Get, "/api/v1/foods")
                 .WithQuery("page", "1")
                 .WithQuery("pageSize", "10")
                 .WillRespond()
@@ -98,20 +98,20 @@ namespace Catalog.Tests.ContractTest.Consumer
                 .WithJsonBody(new
                 {
                     success = Match.Type(true),
-                    message = Match.Type("Listado de alimentos obtenido exitosamente"),
+                    message = Match.Type("Food list retrieved successfully"),
                     data = new
                     {
                         items = Match.MinType(new
                         {
-                            id = Match.Type(AlimentoId),
-                            nombre = Match.Type("Manzana"),
-                            categoria = Match.Type("Frutas"),
-                            unidadMedida = Match.Type("Gramos"),
-                            cantidad = Match.Number(100m),
-                            calorias = Match.Number(52m),
-                            proteinas = Match.Number(0.3m),
-                            carbohidratos = Match.Number(14m),
-                            grasas = Match.Number(0.2m)
+                            id = Match.Type(FoodId),
+                            name = Match.Type("Manzana"),
+                            category = Match.Type("Frutas"),
+                            unitOfMeasure = Match.Type("Gram"),
+                            quantity = Match.Number(100m),
+                            calories = Match.Number(52m),
+                            protein = Match.Number(0.3m),
+                            carbs = Match.Number(14m),
+                            fat = Match.Number(0.2m)
                         }, 1),
                         page = Match.Integer(1),
                         pageSize = Match.Integer(10),
@@ -126,7 +126,7 @@ namespace Catalog.Tests.ContractTest.Consumer
             {
                 var client = new CatalogApiClient(ctx.MockServerUri);
 
-                var result = await client.GetAlimentosAsync(1, 10);
+                var result = await client.GetFoodsAsync(1, 10);
 
                 Assert.True(result.Success);
                 Assert.NotNull(result.Data);
@@ -136,16 +136,16 @@ namespace Catalog.Tests.ContractTest.Consumer
         }
 
         [Fact]
-        public async Task CreateReceta_ReturnsCreatedId()
+        public async Task CreateRecipe_ReturnsCreatedId()
         {
             //Arrange
             _pactBuilder
-                .UponReceiving("a request to create a receta")
-                .WithRequest(HttpMethod.Post, "/api/v1/recetas")
+                .UponReceiving("a request to create a recipe")
+                .WithRequest(HttpMethod.Post, "/api/v1/recipes")
                 .WithJsonBody(new
                 {
-                    nombre = "Salmon al horno",
-                    instrucciones = "Hornear 25 minutos"
+                    name = "Salmon al horno",
+                    instructions = "Hornear 25 minutos"
                 })
                 .WillRespond()
                 .WithStatus(HttpStatusCode.OK)
@@ -153,8 +153,8 @@ namespace Catalog.Tests.ContractTest.Consumer
                 .WithJsonBody(new
                 {
                     success = Match.Type(true),
-                    message = Match.Type("Receta creada exitosamente"),
-                    data = Match.Type(RecetaId)
+                    message = Match.Type("Recipe created successfully"),
+                    data = Match.Type(RecipeId)
                 });
 
             //Act / Assert
@@ -162,7 +162,7 @@ namespace Catalog.Tests.ContractTest.Consumer
             {
                 var client = new CatalogApiClient(ctx.MockServerUri);
 
-                var result = await client.CreateRecetaAsync(new RecetaRequest("Salmon al horno", "Hornear 25 minutos"));
+                var result = await client.CreateRecipeAsync(new RecipeRequest("Salmon al horno", "Hornear 25 minutos"));
 
                 Assert.True(result.Success);
                 Assert.NotEqual(Guid.Empty, result.Data);
@@ -170,13 +170,13 @@ namespace Catalog.Tests.ContractTest.Consumer
         }
 
         [Fact]
-        public async Task GetRecetas_ReturnsPagedList()
+        public async Task GetRecipes_ReturnsPagedList()
         {
             //Arrange
             _pactBuilder
-                .UponReceiving("a request to list recetas")
+                .UponReceiving("a request to list recipes")
                 .Given("existen recetas registradas")
-                .WithRequest(HttpMethod.Get, "/api/v1/recetas")
+                .WithRequest(HttpMethod.Get, "/api/v1/recipes")
                 .WithQuery("page", "1")
                 .WithQuery("pageSize", "10")
                 .WillRespond()
@@ -185,18 +185,18 @@ namespace Catalog.Tests.ContractTest.Consumer
                 .WithJsonBody(new
                 {
                     success = Match.Type(true),
-                    message = Match.Type("Listado de recetas obtenido exitosamente"),
+                    message = Match.Type("Recipe list retrieved successfully"),
                     data = new
                     {
                         items = Match.MinType(new
                         {
-                            id = Match.Type(RecetaId),
-                            nombre = Match.Type("Salmon al horno"),
-                            instrucciones = Match.Type("Hornear 25 minutos"),
-                            ingredientes = Match.MinType(new
+                            id = Match.Type(RecipeId),
+                            name = Match.Type("Salmon al horno"),
+                            instructions = Match.Type("Hornear 25 minutos"),
+                            ingredients = Match.MinType(new
                             {
-                                alimentoId = Match.Type(AlimentoId),
-                                cantidad = Match.Number(150m)
+                                foodId = Match.Type(FoodId),
+                                quantity = Match.Number(150m)
                             }, 1)
                         }, 1),
                         page = Match.Integer(1),
@@ -212,7 +212,7 @@ namespace Catalog.Tests.ContractTest.Consumer
             {
                 var client = new CatalogApiClient(ctx.MockServerUri);
 
-                var result = await client.GetRecetasAsync(1, 10);
+                var result = await client.GetRecipesAsync(1, 10);
 
                 Assert.True(result.Success);
                 Assert.NotNull(result.Data);

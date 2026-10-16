@@ -7,92 +7,92 @@ namespace Catalog.Tests.IntegrationTest.Setup
         public List<string>? Errors { get; set; }
     }
 
-    public class AlimentoCreateResponse : Envelope
+    public class FoodCreateResponse : Envelope
     {
         public Guid Data { get; set; }
     }
 
-    public class AlimentoData
+    public class FoodData
     {
         public Guid Id { get; set; }
-        public string Nombre { get; set; } = null!;
-        public string Categoria { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Category { get; set; } = null!;
     }
 
-    public class AlimentoGetResponse : Envelope
+    public class FoodGetResponse : Envelope
     {
-        public AlimentoData? Data { get; set; }
+        public FoodData? Data { get; set; }
     }
 
-    public class AlimentoPage
+    public class FoodPage
     {
-        public List<AlimentoData> Items { get; set; } = new();
+        public List<FoodData> Items { get; set; } = new();
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
     }
 
-    public class AlimentoListResponse : Envelope
+    public class FoodListResponse : Envelope
     {
-        public AlimentoPage? Data { get; set; }
+        public FoodPage? Data { get; set; }
     }
 
-    public class RecetaCreateResponse : Envelope
+    public class RecipeCreateResponse : Envelope
     {
         public Guid Data { get; set; }
     }
 
-    public class RecetaData
+    public class RecipeData
     {
         public Guid Id { get; set; }
-        public string Nombre { get; set; } = null!;
+        public string Name { get; set; } = null!;
     }
 
-    public class RecetaGetResponse : Envelope
+    public class RecipeGetResponse : Envelope
     {
-        public RecetaData? Data { get; set; }
+        public RecipeData? Data { get; set; }
     }
 
-    public class RecetaPage
+    public class RecipePage
     {
-        public List<RecetaData> Items { get; set; } = new();
+        public List<RecipeData> Items { get; set; } = new();
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
     }
 
-    public class RecetaListResponse : Envelope
+    public class RecipeListResponse : Envelope
     {
-        public RecetaPage? Data { get; set; }
+        public RecipePage? Data { get; set; }
     }
 
-    public class PlanCreateResponse : Envelope
+    public class MealPlanCreateResponse : Envelope
     {
         public Guid Data { get; set; }
     }
 
-    public class PlanData
+    public class MealPlanData
     {
         public Guid Id { get; set; }
-        public string Nombre { get; set; } = null!;
+        public string Name { get; set; } = null!;
     }
 
-    public class PlanListResponse : Envelope
+    public class MealPlanListResponse : Envelope
     {
-        public List<PlanData>? Data { get; set; }
+        public List<MealPlanData>? Data { get; set; }
     }
 
-    public class InfoNutricionalData
+    public class NutritionalInfoData
     {
-        public decimal Cantidad { get; set; }
-        public decimal Calorias { get; set; }
-        public decimal Proteinas { get; set; }
-        public decimal Carbohidratos { get; set; }
-        public decimal Grasas { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal Calories { get; set; }
+        public decimal Protein { get; set; }
+        public decimal Carbs { get; set; }
+        public decimal Fat { get; set; }
     }
 
-    public class InfoNutricionalResponse : Envelope
+    public class NutritionalInfoResponse : Envelope
     {
-        public InfoNutricionalData? Data { get; set; }
+        public NutritionalInfoData? Data { get; set; }
     }
 }

@@ -27,11 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Application\Catalog.Application.csproj" />
-    <ProjectReference Include="..\src\Domain\Catalog.Domain.csproj" />
-    <ProjectReference Include="..\src\Shared\Shared.csproj" />
-    <ProjectReference Include="..\src\WebApi\WebApi.csproj" />
-    <ProjectReference Include="..\src\Infrastructure\Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="..\src\Catalog.Application\Catalog.Application.csproj" />
+    <ProjectReference Include="..\src\Catalog.Domain\Catalog.Domain.csproj" />
+    <ProjectReference Include="..\src\Catalog.Shared\Catalog.Shared.csproj" />
+    <ProjectReference Include="..\src\Catalog.WebApi\Catalog.WebApi.csproj" />
+    <ProjectReference Include="..\src\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

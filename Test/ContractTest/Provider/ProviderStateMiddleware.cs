@@ -1,6 +1,6 @@
 using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Alimento;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Receta;
+using Catalog.Infrastructure.EntityFramework.ReadModel.Food;
+using Catalog.Infrastructure.EntityFramework.ReadModel.Recipe;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,8 +20,8 @@ namespace Catalog.Tests.ContractTest.Provider
     public class ProviderStateMiddleware
     {
         /// <summary>Fixed ids shared with the consumer examples (see Consumer/CatalogApiConsumerTests.cs).</summary>
-        private static readonly Guid AlimentoId = Guid.Parse("3f2504e0-4f89-41d3-9a0c-0305e82c3301");
-        private static readonly Guid RecetaId = Guid.Parse("6f9619ff-8b86-d011-b42d-00c04fc964ff");
+        private static readonly Guid FoodId = Guid.Parse("3f2504e0-4f89-41d3-9a0c-0305e82c3301");
+        private static readonly Guid RecipeId = Guid.Parse("6f9619ff-8b86-d011-b42d-00c04fc964ff");
 
         private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -56,19 +56,19 @@ namespace Catalog.Tests.ContractTest.Provider
             switch (state)
             {
                 case "existen alimentos registrados":
-                    if (!await db.Alimento.AnyAsync(a => a.Id == AlimentoId))
+                    if (!await db.Foods.AnyAsync(a => a.Id == FoodId))
                     {
-                        db.Alimento.Add(new AlimentoReadModel
+                        db.Foods.Add(new FoodReadModel
                         {
-                            Id = AlimentoId,
-                            Nombre = "Manzana",
-                            Categoria = "Frutas",
-                            UnidadMedida = 1,
-                            Cantidad = 100m,
-                            Calorias = 52m,
-                            Proteinas = 0.3m,
-                            Carbohidratos = 14m,
-                            Grasas = 0.2m,
+                            Id = FoodId,
+                            Name = "Manzana",
+                            Category = "Frutas",
+                            UnitOfMeasure = 1,
+                            Quantity = 100m,
+                            Calories = 52m,
+                            Protein = 0.3m,
+                            Carbs = 14m,
+                            Fat = 0.2m,
                             CreatedAt = DateTime.UtcNow,
                             IsDeleted = false
                         });
@@ -76,24 +76,24 @@ namespace Catalog.Tests.ContractTest.Provider
                     break;
 
                 case "existen recetas registradas":
-                    if (!await db.Receta.AnyAsync(r => r.Id == RecetaId))
+                    if (!await db.Recipes.AnyAsync(r => r.Id == RecipeId))
                     {
-                        var receta = new RecetaReadModel
+                        var recipe = new RecipeReadModel
                         {
-                            Id = RecetaId,
-                            Nombre = "Salmon al horno",
-                            Instrucciones = "Hornear 25 minutos",
+                            Id = RecipeId,
+                            Name = "Salmon al horno",
+                            Instructions = "Hornear 25 minutos",
                             CreatedAt = DateTime.UtcNow,
                             IsDeleted = false
                         };
-                        receta.Ingredientes.Add(new IngredienteRecetaReadModel
+                        recipe.Ingredients.Add(new IngredientReadModel
                         {
                             Id = Guid.NewGuid(),
-                            RecetaId = RecetaId,
-                            AlimentoId = AlimentoId,
-                            PorcionCantidad = 150m
+                            RecipeId = RecipeId,
+                            FoodId = FoodId,
+                            PortionQuantity = 150m
                         });
-                        db.Receta.Add(receta);
+                        db.Recipes.Add(recipe);
                     }
                     break;
             }

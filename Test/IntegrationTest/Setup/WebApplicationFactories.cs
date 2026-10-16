@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 namespace Catalog.Tests.IntegrationTest.Setup
 {
-    public class AlimentoControllerWebApplicationFactory : WebApplicationFactory<Program>
+    public class FoodControllerWebApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly string _dbName = $"IntTests_{Guid.NewGuid()}";
 
@@ -18,7 +18,7 @@ namespace Catalog.Tests.IntegrationTest.Setup
         }
     }
 
-    public class RecetaControllerWebApplicationFactory : WebApplicationFactory<Program>
+    public class RecipeControllerWebApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly string _dbName = $"IntTests_{Guid.NewGuid()}";
 
@@ -31,7 +31,7 @@ namespace Catalog.Tests.IntegrationTest.Setup
         }
     }
 
-    public class PlanAlimentarioControllerWebApplicationFactory : WebApplicationFactory<Program>
+    public class MealPlanControllerWebApplicationFactory : WebApplicationFactory<Program>
     {
         private readonly string _dbName = $"IntTests_{Guid.NewGuid()}";
 

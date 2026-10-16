@@ -1,9 +1,9 @@
-using Catalog.Domain.Model.Alimentos;
-using Catalog.Domain.Model.PlanesAlimentarios;
-using Catalog.Domain.Model.Recetas;
-using Catalog.Domain.Repository.Alimento;
-using Catalog.Domain.Repository.PlanAlimentario;
-using Catalog.Domain.Repository.Receta;
+using Catalog.Domain.Model.Foods;
+using Catalog.Domain.Model.MealPlans;
+using Catalog.Domain.Model.Recipes;
+using Catalog.Domain.Repository.Food;
+using Catalog.Domain.Repository.MealPlan;
+using Catalog.Domain.Repository.Recipe;
 using Shared.Core;
 using System.Collections.Concurrent;
 
@@ -14,78 +14,78 @@ namespace Catalog.Tests.IntegrationTest.Setup
         public Task Commit() => Task.CompletedTask;
     }
 
-    public class InMemoryAlimentoRepository : IAlimentoRepository
+    public class InMemoryFoodRepository : IFoodRepository
     {
-        private readonly ConcurrentDictionary<Guid, Alimento> _items = new();
+        private readonly ConcurrentDictionary<Guid, Food> _items = new();
 
-        public Task<Alimento?> FindByIdAsync(Guid id) =>
-            Task.FromResult<Alimento?>(_items.TryGetValue(id, out var item) ? item : null);
+        public Task<Food?> FindByIdAsync(Guid id) =>
+            Task.FromResult<Food?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(Alimento obj)
+        public Task CreateAsync(Food obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;
         }
 
-        public Task UpdateAsync(Alimento alimento)
+        public Task UpdateAsync(Food food)
         {
-            _items[alimento.Id] = alimento;
+            _items[food.Id] = food;
             return Task.CompletedTask;
         }
 
-        public Task RemoveAsync(Alimento alimento)
+        public Task RemoveAsync(Food food)
         {
-            _items.TryRemove(alimento.Id, out _);
+            _items.TryRemove(food.Id, out _);
             return Task.CompletedTask;
         }
     }
 
-    public class InMemoryRecetaRepository : IRecetaRepository
+    public class InMemoryRecipeRepository : IRecipeRepository
     {
-        private readonly ConcurrentDictionary<Guid, Receta> _items = new();
+        private readonly ConcurrentDictionary<Guid, Recipe> _items = new();
 
-        public Task<Receta?> FindByIdAsync(Guid id) =>
-            Task.FromResult<Receta?>(_items.TryGetValue(id, out var item) ? item : null);
+        public Task<Recipe?> FindByIdAsync(Guid id) =>
+            Task.FromResult<Recipe?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(Receta obj)
+        public Task CreateAsync(Recipe obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;
         }
 
-        public Task UpdateAsync(Receta receta)
+        public Task UpdateAsync(Recipe recipe)
         {
-            _items[receta.Id] = receta;
+            _items[recipe.Id] = recipe;
             return Task.CompletedTask;
         }
 
-        public Task RemoveAsync(Receta receta)
+        public Task RemoveAsync(Recipe recipe)
         {
-            _items.TryRemove(receta.Id, out _);
+            _items.TryRemove(recipe.Id, out _);
             return Task.CompletedTask;
         }
     }
 
-    public class InMemoryPlanAlimentarioRepository : IPlanAlimentarioRepository
+    public class InMemoryMealPlanRepository : IMealPlanRepository
     {
-        private readonly ConcurrentDictionary<Guid, PlanAlimentario> _items = new();
+        private readonly ConcurrentDictionary<Guid, MealPlan> _items = new();
 
-        public Task<PlanAlimentario?> FindByIdAsync(Guid id) =>
-            Task.FromResult<PlanAlimentario?>(_items.TryGetValue(id, out var item) ? item : null);
+        public Task<MealPlan?> FindByIdAsync(Guid id) =>
+            Task.FromResult<MealPlan?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(PlanAlimentario obj)
+        public Task CreateAsync(MealPlan obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;
         }
 
-        public Task UpdateAsync(PlanAlimentario plan)
+        public Task UpdateAsync(MealPlan plan)
         {
             _items[plan.Id] = plan;
             return Task.CompletedTask;
         }
 
-        public Task RemoveAsync(PlanAlimentario plan)
+        public Task RemoveAsync(MealPlan plan)
         {
             _items.TryRemove(plan.Id, out _);
             return Task.CompletedTask;

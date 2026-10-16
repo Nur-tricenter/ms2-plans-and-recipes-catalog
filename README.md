@@ -120,7 +120,7 @@ Requiere un servidor PostgreSQL disponible (por ejemplo, el del `docker compose`
 
 ```bash
 dotnet restore
-dotnet run --project WebApi/WebApi.csproj
+dotnet run --project src/Catalog.WebApi/Catalog.WebApi.csproj
 ```
 
 Al arrancar, la aplicación aplica las migraciones pendientes automáticamente. Swagger queda disponible en `http://localhost:5000/swagger` (o el puerto definido en `launchSettings.json`).

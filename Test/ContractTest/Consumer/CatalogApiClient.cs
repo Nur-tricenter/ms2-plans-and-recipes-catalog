@@ -8,38 +8,38 @@ namespace Catalog.Tests.ContractTest.Consumer
     /// These records simulate what a real consumer - the web/mobile client or another
     /// microservice - sends and receives.
     /// </summary>
-    public record AlimentoRequest(
-        string Nombre,
-        string Categoria,
-        int UnidadMedida,
-        decimal Cantidad,
-        decimal Calorias,
-        decimal Proteinas,
-        decimal Carbohidratos,
-        decimal Grasas);
+    public record FoodRequest(
+        string Name,
+        string Category,
+        int UnitOfMeasure,
+        decimal Quantity,
+        decimal Calories,
+        decimal Protein,
+        decimal Carbs,
+        decimal Fat);
 
-    public record RecetaRequest(string Nombre, string Instrucciones);
+    public record RecipeRequest(string Name, string Instructions);
 
-    public record AlimentoItem(
+    public record FoodItem(
         Guid Id,
-        string Nombre,
-        string Categoria,
-        string UnidadMedida,
-        decimal Cantidad,
-        decimal Calorias,
-        decimal Proteinas,
-        decimal Carbohidratos,
-        decimal Grasas);
+        string Name,
+        string Category,
+        string UnitOfMeasure,
+        decimal Quantity,
+        decimal Calories,
+        decimal Protein,
+        decimal Carbs,
+        decimal Fat);
 
-    public record IngredienteItem(Guid AlimentoId, decimal Cantidad);
+    public record IngredientItem(Guid FoodId, decimal Quantity);
 
-    public record RecetaItem(Guid Id, string Nombre, string Instrucciones, List<IngredienteItem> Ingredientes);
+    public record RecipeItem(Guid Id, string Name, string Instructions, List<IngredientItem> Ingredients);
 
     public record PagedItems<T>(List<T> Items, int Page, int PageSize, int TotalCount, bool HasNextPage, bool HasPreviousPage);
 
-    public record AlimentoListResponse(bool Success, string? Message, PagedItems<AlimentoItem>? Data);
+    public record FoodListResponse(bool Success, string? Message, PagedItems<FoodItem>? Data);
 
-    public record RecetaListResponse(bool Success, string? Message, PagedItems<RecetaItem>? Data);
+    public record RecipeListResponse(bool Success, string? Message, PagedItems<RecipeItem>? Data);
 
     public record GuidResponse(bool Success, string? Message, Guid Data);
 
@@ -62,32 +62,32 @@ namespace Catalog.Tests.ContractTest.Consumer
             _httpClient = new HttpClient { BaseAddress = baseAddress };
         }
 
-        public async Task<GuidResponse> CreateAlimentoAsync(AlimentoRequest request)
+        public async Task<GuidResponse> CreateFoodAsync(FoodRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/v1/alimentos", request);
+            var response = await _httpClient.PostAsJsonAsync("/api/v1/foods", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<GuidResponse>(JsonOptions) ?? throw new InvalidOperationException("Respuesta vacía");
+            return await response.Content.ReadFromJsonAsync<GuidResponse>(JsonOptions) ?? throw new InvalidOperationException("Empty response");
         }
 
-        public async Task<AlimentoListResponse> GetAlimentosAsync(int page = 1, int pageSize = 10)
+        public async Task<FoodListResponse> GetFoodsAsync(int page = 1, int pageSize = 10)
         {
-            var response = await _httpClient.GetAsync($"/api/v1/alimentos?page={page}&pageSize={pageSize}");
+            var response = await _httpClient.GetAsync($"/api/v1/foods?page={page}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<AlimentoListResponse>(JsonOptions) ?? throw new InvalidOperationException("Respuesta vacía");
+            return await response.Content.ReadFromJsonAsync<FoodListResponse>(JsonOptions) ?? throw new InvalidOperationException("Empty response");
         }
 
-        public async Task<GuidResponse> CreateRecetaAsync(RecetaRequest request)
+        public async Task<GuidResponse> CreateRecipeAsync(RecipeRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/v1/recetas", request);
+            var response = await _httpClient.PostAsJsonAsync("/api/v1/recipes", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<GuidResponse>(JsonOptions) ?? throw new InvalidOperationException("Respuesta vacía");
+            return await response.Content.ReadFromJsonAsync<GuidResponse>(JsonOptions) ?? throw new InvalidOperationException("Empty response");
         }
 
-        public async Task<RecetaListResponse> GetRecetasAsync(int page = 1, int pageSize = 10)
+        public async Task<RecipeListResponse> GetRecipesAsync(int page = 1, int pageSize = 10)
         {
-            var response = await _httpClient.GetAsync($"/api/v1/recetas?page={page}&pageSize={pageSize}");
+            var response = await _httpClient.GetAsync($"/api/v1/recipes?page={page}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<RecetaListResponse>(JsonOptions) ?? throw new InvalidOperationException("Respuesta vacía");
+            return await response.Content.ReadFromJsonAsync<RecipeListResponse>(JsonOptions) ?? throw new InvalidOperationException("Empty response");
         }
     }
 }
