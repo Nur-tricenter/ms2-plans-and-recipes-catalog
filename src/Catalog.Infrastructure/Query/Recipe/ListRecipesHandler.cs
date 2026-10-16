@@ -1,7 +1,7 @@
 using Catalog.Application.Dto;
 using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Query.Recipe;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,10 +10,10 @@ namespace Catalog.Infrastructure.Query.Recipe
 {
     public class ListRecipesHandler : IRequestHandler<ListRecipesQuery, Result<PagedList<RecipeDto>>>
     {
-        private readonly ReadDbContext _dbContext;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<ListRecipesHandler> _logger;
 
-        public ListRecipesHandler(ReadDbContext dbContext, ILogger<ListRecipesHandler> logger)
+        public ListRecipesHandler(StoredDbContext dbContext, ILogger<ListRecipesHandler> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

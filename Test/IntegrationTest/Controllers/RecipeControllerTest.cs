@@ -1,6 +1,6 @@
 using Catalog.Domain.Repository.Recipe;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Recipe;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe;
 using Catalog.Tests.IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -318,8 +318,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.Recipes.Add(new RecipeReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Recipes.Add(new RecipeModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "Sopa de verduras",

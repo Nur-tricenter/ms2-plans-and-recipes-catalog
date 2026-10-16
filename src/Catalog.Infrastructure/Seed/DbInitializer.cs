@@ -7,7 +7,7 @@ using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
 using Catalog.Domain.ValueObjects;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.DomainModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Joseco.DDD.Core.Abstractions;
@@ -16,7 +16,7 @@ namespace Catalog.Infrastructure.Seed
 {
     public class DbInitializer : IDbInitializer
     {
-        private readonly WriteDbContext _context;
+        private readonly DomainDbContext _context;
         private readonly IFoodFactory _foodFactory;
         private readonly IRecipeFactory _recipeFactory;
         private readonly IMealPlanFactory _mealPlanFactory;
@@ -27,7 +27,7 @@ namespace Catalog.Infrastructure.Seed
         private readonly ILogger<DbInitializer> _logger;
 
         public DbInitializer(
-            WriteDbContext context,
+            DomainDbContext context,
             IFoodFactory foodFactory,
             IRecipeFactory recipeFactory,
             IMealPlanFactory mealPlanFactory,

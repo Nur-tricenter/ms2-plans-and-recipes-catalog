@@ -1,6 +1,6 @@
 using Catalog.Domain.Repository.Food;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Food;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.Food;
 using Catalog.Tests.IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -121,8 +121,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.Foods.Add(new FoodReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "MANZANA",
@@ -158,8 +158,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.Foods.Add(new FoodReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "BANANA",

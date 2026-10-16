@@ -7,7 +7,7 @@ namespace Catalog.Application.Abstractions
     {
     }
 
-    public interface ICommand : IRequest<Result>
+    public interface ICommand : ICommand<Result>
     {
     }
 

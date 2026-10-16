@@ -20,6 +20,7 @@ namespace Catalog.Application
                 cfg.RegisterServicesFromAssembly(typeof(Extensions).Assembly);
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(MetricsBehavior<,>));
             });
 
             return services;

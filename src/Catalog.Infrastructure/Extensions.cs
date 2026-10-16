@@ -3,11 +3,12 @@ using Joseco.DDD.Core.Abstractions;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
-using Catalog.Infrastructure.EntityFramework;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.Repository.Food;
-using Catalog.Infrastructure.EntityFramework.Repository.MealPlan;
-using Catalog.Infrastructure.EntityFramework.Repository.Recipe;
+using Catalog.Infrastructure.Persistence;
+using Catalog.Infrastructure.Persistence.DomainModel;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.Repositories.Food;
+using Catalog.Infrastructure.Persistence.Repositories.MealPlan;
+using Catalog.Infrastructure.Persistence.Repositories.Recipe;
 using Catalog.Infrastructure.Seed;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -25,9 +26,9 @@ namespace Catalog.Infrastructure
 
             var connectionString = configuration.GetConnectionString("CatalogDbConnectionString");
 
-            services.AddDbContext<ReadDbContext>(context =>
+            services.AddDbContext<StoredDbContext>(context =>
                 context.UseNpgsql(connectionString));
-            services.AddDbContext<WriteDbContext>(context =>
+            services.AddDbContext<DomainDbContext>(context =>
                 context.UseNpgsql(connectionString));
 
             services.AddScoped<IMealPlanRepository, MealPlanRepository>();

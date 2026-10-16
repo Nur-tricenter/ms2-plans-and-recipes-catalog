@@ -1,7 +1,8 @@
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.DomainModel;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,11 +19,11 @@ namespace Catalog.Tests.IntegrationTest.Setup
             services.ReplaceWithInMemoryFake<IMealPlanRepository, InMemoryMealPlanRepository>();
             services.ReplaceWithInMemoryFake<IUnitOfWork, InMemoryUnitOfWork>();
 
-            services.RemoveAll<DbContextOptions<ReadDbContext>>();
-            services.AddSingleton(new DbContextOptionsBuilder<ReadDbContext>().UseInMemoryDatabase(dbName).Options);
+            services.RemoveAll<DbContextOptions<StoredDbContext>>();
+            services.AddSingleton(new DbContextOptionsBuilder<StoredDbContext>().UseInMemoryDatabase(dbName).Options);
 
-            services.RemoveAll<DbContextOptions<WriteDbContext>>();
-            services.AddSingleton(new DbContextOptionsBuilder<WriteDbContext>().UseInMemoryDatabase(dbName).Options);
+            services.RemoveAll<DbContextOptions<DomainDbContext>>();
+            services.AddSingleton(new DbContextOptionsBuilder<DomainDbContext>().UseInMemoryDatabase(dbName).Options);
         }
 
         private static void ReplaceWithInMemoryFake<TService, TFake>(this IServiceCollection services)

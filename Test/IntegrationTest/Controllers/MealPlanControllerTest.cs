@@ -1,6 +1,6 @@
 using Catalog.Domain.Repository.MealPlan;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.MealPlan;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan;
 using Catalog.Tests.IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -310,8 +310,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.MealPlans.Add(new MealPlanReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.MealPlans.Add(new MealPlanModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "Plan deportista",

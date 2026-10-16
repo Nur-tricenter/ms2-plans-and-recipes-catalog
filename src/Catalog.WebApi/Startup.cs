@@ -1,5 +1,5 @@
 using Catalog.Infrastructure;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using Catalog.Infrastructure.Seed;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +45,7 @@ namespace Catalog.WebApi
 
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                var readContext = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
+                var readContext = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
                 if (readContext.Database.IsRelational())
                 {
                     readContext.Database.Migrate();

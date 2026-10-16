@@ -1,6 +1,6 @@
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Food;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Recipe;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.Food;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +38,7 @@ namespace Catalog.Tests.ContractTest.Provider
             {
                 var request = await JsonSerializer.DeserializeAsync<ProviderStateRequest>(context.Request.Body, JsonOptions);
 
-                var dbContext = context.RequestServices.GetService<ReadDbContext>();
+                var dbContext = context.RequestServices.GetService<StoredDbContext>();
                 if (dbContext is not null)
                 {
                     await ApplyStateAsync(dbContext, request?.State);
@@ -51,14 +51,14 @@ namespace Catalog.Tests.ContractTest.Provider
             await _next(context);
         }
 
-        private static async Task ApplyStateAsync(ReadDbContext db, string? state)
+        private static async Task ApplyStateAsync(StoredDbContext db, string? state)
         {
             switch (state)
             {
                 case "existen alimentos registrados":
                     if (!await db.Foods.AnyAsync(a => a.Id == FoodId))
                     {
-                        db.Foods.Add(new FoodReadModel
+                        db.Foods.Add(new FoodModel
                         {
                             Id = FoodId,
                             Name = "Manzana",
@@ -78,7 +78,7 @@ namespace Catalog.Tests.ContractTest.Provider
                 case "existen recetas registradas":
                     if (!await db.Recipes.AnyAsync(r => r.Id == RecipeId))
                     {
-                        var recipe = new RecipeReadModel
+                        var recipe = new RecipeModel
                         {
                             Id = RecipeId,
                             Name = "Salmon al horno",
@@ -86,7 +86,7 @@ namespace Catalog.Tests.ContractTest.Provider
                             CreatedAt = DateTime.UtcNow,
                             IsDeleted = false
                         };
-                        recipe.Ingredients.Add(new IngredientReadModel
+                        recipe.Ingredients.Add(new IngredientModel
                         {
                             Id = Guid.NewGuid(),
                             RecipeId = RecipeId,
