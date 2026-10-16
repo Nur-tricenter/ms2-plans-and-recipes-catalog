@@ -26,7 +26,7 @@ namespace Catalog.Domain.Model.Recipes
             Instructions = instructions;
             _ingredients = new List<RecipeIngredient>();
 
-            AddDomainEvent(new RecipeCreated(Id, Name));
+            AddDomainEvent(new RecipeCreated(Id, Name, Instructions));
         }
 
         public void Update(string instructions)

@@ -9,14 +9,21 @@ namespace Catalog.Domain.Event.Food
         public string Name { get; }
         public string Category { get; }
         public NutritionalInfo NutritionalInfo { get; }
+        public UnitOfMeasure UnitOfMeasure { get; }
 
-        public FoodCreated(Guid foodId, string name, string category, NutritionalInfo nutritionalInfo)
+        public FoodCreated()
+            : this(Guid.Empty, string.Empty, string.Empty, default!, ValueObjects.UnitOfMeasure.Gram)
+        {
+        }
+
+        public FoodCreated(Guid foodId, string name, string category, NutritionalInfo nutritionalInfo, UnitOfMeasure unitOfMeasure)
         {
             OccuredOn = DateTime.UtcNow;
             FoodId = foodId;
             Name = name;
             Category = category;
             NutritionalInfo = nutritionalInfo;
+            UnitOfMeasure = unitOfMeasure;
         }
     }
 }

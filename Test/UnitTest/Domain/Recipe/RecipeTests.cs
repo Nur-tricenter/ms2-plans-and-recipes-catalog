@@ -28,6 +28,20 @@ namespace Catalog.Tests.Domain
             Assert.Equal(recipe.Id, evt.RecipeId);
         }
 
+        [Fact]
+        public void Constructor_ValidData_RaisesRecipeCreatedWithTheInstructions()
+        {
+            // Arrange
+            var nombre = new RecipeName("Ensalada");
+
+            // Act
+            var recipe = new Recipe(nombre, "Mezclar todos los ingredientes");
+
+            // Assert
+            var evt = Assert.IsType<RecipeCreated>(Assert.Single(recipe.DomainEvents));
+            Assert.Equal("Mezclar todos los ingredientes", evt.Instructions);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]

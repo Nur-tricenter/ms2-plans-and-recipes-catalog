@@ -22,7 +22,7 @@ namespace Catalog.Domain.Model.Foods
             UnitOfMeasure = unitOfMeasure;
             BaseNutritionalInfo = baseNutritionalInfo;
 
-            AddDomainEvent(new FoodCreated(Id, Name, Category, BaseNutritionalInfo));
+            AddDomainEvent(new FoodCreated(Id, Name, Category, BaseNutritionalInfo, UnitOfMeasure));
         }
 
         public void UpdateNutritionalInfo(NutritionalInfo info)
