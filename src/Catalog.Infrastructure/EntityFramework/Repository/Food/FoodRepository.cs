@@ -14,14 +14,18 @@ namespace Catalog.Infrastructure.EntityFramework.Repository.Food
             _context = context;
         }
 
-        public async Task CreateAsync(DomainFood food)
+        public async Task AddAsync(DomainFood food)
         {
             await _context.Foods.AddAsync(food);
         }
 
-        public async Task<DomainFood?> FindByIdAsync(Guid id)
+        public async Task<DomainFood?> GetByIdAsync(Guid id, bool readOnly = false)
         {
-            return await _context.Foods.SingleOrDefaultAsync(x => x.Id == id);
+            var query = readOnly
+                ? _context.Foods.AsNoTracking()
+                : _context.Foods.AsQueryable();
+
+            return await query.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public Task UpdateAsync(DomainFood food)

@@ -1,7 +1,7 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Event.MealPlan;
-using Shared.IntegrationEvents;
+using Catalog.Application.IntegrationEvents;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Application.UseCase.DomainEventHandler

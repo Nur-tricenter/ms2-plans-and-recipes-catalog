@@ -4,7 +4,7 @@ using Catalog.Application.UseCase.Command.Food.CreateFood;
 using Catalog.Application.UseCase.Command.Food.UpdateFood;
 using Catalog.Application.UseCase.Query.Food;
 using Catalog.WebApi.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

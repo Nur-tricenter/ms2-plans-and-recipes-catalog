@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Repository.Recipe;
 using Microsoft.Extensions.Logging;
@@ -26,13 +26,13 @@ namespace Catalog.Application.UseCase.Command.Recipe.RemoveIngredient
         {
             try
             {
-                var recipe = await _recipeRepository.FindByIdAsync(request.RecipeId);
+                var recipe = await _recipeRepository.GetByIdAsync(request.RecipeId);
                 if (recipe == null)
                     return Result.Fail("Recipe not found");
 
                 recipe.RemoveIngredient(request.FoodId);
 
-                await _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync(cancellationToken);
                 return Result.Ok("Ingredient removed successfully");
             }
             catch (Exception ex)

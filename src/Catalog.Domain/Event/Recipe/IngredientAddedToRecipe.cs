@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Domain.Event.Recipe
 {
@@ -9,8 +9,8 @@ namespace Catalog.Domain.Event.Recipe
         public decimal PortionQuantity { get; }
 
         public IngredientAddedToRecipe(Guid recipeId, Guid foodId, decimal portionQuantity)
-            : base(DateTime.UtcNow)
         {
+            OccuredOn = DateTime.UtcNow;
             RecipeId = recipeId;
             FoodId = foodId;
             PortionQuantity = portionQuantity;

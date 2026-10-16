@@ -1,5 +1,6 @@
 using Catalog.Domain.ValueObjects;
-using Shared.Core;
+using Catalog.Domain.Primitives;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Domain

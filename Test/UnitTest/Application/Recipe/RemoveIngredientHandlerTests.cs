@@ -4,7 +4,7 @@ using Catalog.Domain.Repository.Recipe;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -31,7 +31,7 @@ namespace Catalog.Tests.Application
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
             var foodId = Guid.NewGuid();
             recipe.AddIngredient(foodId, new Portion(2));
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
             var command = new RemoveIngredientCommand { RecipeId = recipe.Id, FoodId = foodId };
 
             // Act
@@ -41,15 +41,15 @@ namespace Catalog.Tests.Application
             Assert.True(result.IsSuccess);
             Assert.Equal("Ingredient removed successfully", result.Message);
             Assert.Empty(recipe.Ingredients);
-            _recipeRepoMock.Verify(r => r.FindByIdAsync(It.Is<Guid>(id => id == command.RecipeId)), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _recipeRepoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.RecipeId)), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task Handle_RecipeNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Recipe?)null);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Recipe?)null);
             var command = new RemoveIngredientCommand { RecipeId = Guid.NewGuid(), FoodId = Guid.NewGuid() };
 
             // Act
@@ -58,7 +58,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Recipe not found", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
             var command = new RemoveIngredientCommand { RecipeId = recipe.Id, FoodId = Guid.NewGuid() };
 
             // Act
@@ -75,7 +75,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains("does not exist in the recipe", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

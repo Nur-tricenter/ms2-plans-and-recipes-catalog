@@ -6,7 +6,7 @@ using Catalog.Domain.Repository.Recipe;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -35,9 +35,9 @@ namespace Catalog.Tests.Application
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
             var apple = new Food(new FoodName("Manzana"), new CategoryName("Fruta"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
             var chicken = new Food(new FoodName("Pollo"), new CategoryName("Proteina"), UnitOfMeasure.Gram, new NutritionalInfo(100, 165, 31m, 0m, 3.6m));
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
-            _foodRepoMock.Setup(a => a.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(apple);
-            _foodRepoMock.Setup(a => a.FindByIdAsync(It.Is<Guid>(id => id == chicken.Id))).ReturnsAsync(chicken);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _foodRepoMock.Setup(a => a.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(apple);
+            _foodRepoMock.Setup(a => a.GetByIdAsync(It.Is<Guid>(id => id == chicken.Id))).ReturnsAsync(chicken);
 
             var command = new AddIngredientCommand
             {
@@ -56,16 +56,16 @@ namespace Catalog.Tests.Application
             Assert.True(result.IsSuccess);
             Assert.Equal("2 ingredient(s) added successfully", result.Message);
             Assert.Equal(2, recipe.Ingredients.Count());
-            _recipeRepoMock.Verify(r => r.FindByIdAsync(It.Is<Guid>(id => id == command.RecipeId)), Times.Once);
-            _foodRepoMock.Verify(a => a.FindByIdAsync(It.IsAny<Guid>()), Times.Exactly(2));
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _recipeRepoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.RecipeId)), Times.Once);
+            _foodRepoMock.Verify(a => a.GetByIdAsync(It.IsAny<Guid>()), Times.Exactly(2));
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task Handle_RecipeNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Recipe?)null);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Recipe?)null);
             var command = new AddIngredientCommand
             {
                 RecipeId = Guid.NewGuid(),
@@ -78,8 +78,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Recipe not found", result.Message);
-            _foodRepoMock.Verify(a => a.FindByIdAsync(It.IsAny<Guid>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _foodRepoMock.Verify(a => a.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -87,8 +87,8 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
-            _foodRepoMock.Setup(a => a.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Food?)null);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _foodRepoMock.Setup(a => a.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Food?)null);
             var foodId = Guid.NewGuid();
             var command = new AddIngredientCommand
             {
@@ -102,7 +102,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains($"Food with Id {foodId} does not exist", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -113,8 +113,8 @@ namespace Catalog.Tests.Application
             // Arrange
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
             var food = new Food(new FoodName("Manzana"), new CategoryName("Fruta"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
-            _foodRepoMock.Setup(a => a.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _foodRepoMock.Setup(a => a.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
             var command = new AddIngredientCommand
             {
                 RecipeId = recipe.Id,
@@ -127,7 +127,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Portion quantity must be greater than zero", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -137,8 +137,8 @@ namespace Catalog.Tests.Application
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
             var food = new Food(new FoodName("Manzana"), new CategoryName("Fruta"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
             recipe.AddIngredient(food.Id, new Portion(100));
-            _recipeRepoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
-            _foodRepoMock.Setup(a => a.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _foodRepoMock.Setup(a => a.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
             var command = new AddIngredientCommand
             {
                 RecipeId = recipe.Id,
@@ -151,7 +151,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains("is already added", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

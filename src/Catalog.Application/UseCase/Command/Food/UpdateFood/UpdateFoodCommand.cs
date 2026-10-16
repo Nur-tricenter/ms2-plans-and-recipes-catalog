@@ -1,10 +1,11 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 
 namespace Catalog.Application.UseCase.Command.Food.UpdateFood
 {
-    public class UpdateFoodCommand : IRequest<Result>
+    public class UpdateFoodCommand : ICommand
     {
         public Guid FoodId { get; set; }
         public string Name { get; set; } = null!;

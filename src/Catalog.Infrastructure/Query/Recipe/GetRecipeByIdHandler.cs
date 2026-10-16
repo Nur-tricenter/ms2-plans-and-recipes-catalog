@@ -3,7 +3,7 @@ using Catalog.Application.UseCase.Query.Recipe;
 using Catalog.Application.Utils;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.Recipe;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +29,7 @@ namespace Catalog.Infrastructure.Query.Recipe
         {
             try
             {
-                var recipe = await _repository.FindByIdAsync(request.Id);
+                var recipe = await _repository.GetByIdAsync(request.Id);
                 if (recipe == null)
                     return Result.Fail<RecipeDto>("Recipe not found");
 
@@ -42,7 +42,7 @@ namespace Catalog.Infrastructure.Query.Recipe
 
                 foreach (var ing in recipe.Ingredients)
                 {
-                    var food = await _foodRepository.FindByIdAsync(ing.FoodId);
+                    var food = await _foodRepository.GetByIdAsync(ing.FoodId);
                     dto.Ingredients.Add(new IngredientDto
                     {
                         FoodId = ing.FoodId,

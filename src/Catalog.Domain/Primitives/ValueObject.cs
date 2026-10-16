@@ -1,4 +1,4 @@
-namespace Shared.Core
+namespace Catalog.Domain.Primitives
 {
     public abstract record ValueObject
     {

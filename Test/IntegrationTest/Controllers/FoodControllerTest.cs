@@ -48,7 +48,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
-            var food = await repository.FindByIdAsync(body.Data);
+            var food = await repository.GetByIdAsync(body.Data);
             Assert.NotNull(food);
             Assert.Equal("MANZANA", food!.Name.Name);
             Assert.Equal(52m, food.BaseNutritionalInfo.Calories);
@@ -219,7 +219,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
-            var food = await repository.FindByIdAsync(created.Data);
+            var food = await repository.GetByIdAsync(created.Data);
             Assert.NotNull(food);
             Assert.Equal("PERA", food!.Name.Name);
             Assert.Equal(60m, food.BaseNutritionalInfo.Calories);

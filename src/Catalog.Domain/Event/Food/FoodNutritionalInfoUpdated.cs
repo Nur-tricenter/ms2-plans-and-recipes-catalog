@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Catalog.Domain.ValueObjects;
 
 namespace Catalog.Domain.Event.Food
@@ -10,8 +10,8 @@ namespace Catalog.Domain.Event.Food
         public NutritionalInfo NewNutritionalInfo { get; }
 
         public FoodNutritionalInfoUpdated(Guid foodId, NutritionalInfo previousNutritionalInfo, NutritionalInfo newNutritionalInfo)
-            : base(DateTime.UtcNow)
         {
+            OccuredOn = DateTime.UtcNow;
             FoodId = foodId;
             PreviousNutritionalInfo = previousNutritionalInfo;
             NewNutritionalInfo = newNutritionalInfo;

@@ -2,7 +2,7 @@ using Catalog.Application.Dto;
 using Catalog.Application.UseCase.Query.Food;
 using Catalog.Application.Utils;
 using Catalog.Domain.Repository.Food;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +23,7 @@ namespace Catalog.Infrastructure.Query.Food
         {
             try
             {
-                var food = await _repository.FindByIdAsync(request.Id);
+                var food = await _repository.GetByIdAsync(request.Id);
                 if (food == null)
                     return Result.Fail<FoodDto>("Food not found");
 

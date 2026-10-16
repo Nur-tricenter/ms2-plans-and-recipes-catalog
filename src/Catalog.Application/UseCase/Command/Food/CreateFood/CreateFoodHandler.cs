@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Factory.Food;
 using Catalog.Domain.Repository.Food;
@@ -47,8 +47,8 @@ namespace Catalog.Application.UseCase.Command.Food.CreateFood
 
                 var food = _factory.Create(name, category, unitOfMeasure, info);
 
-                await _repository.CreateAsync(food);
-                await _unitOfWork.Commit();
+                await _repository.AddAsync(food);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 return Result<Guid>.Ok(food.Id, "Food created successfully");
             }

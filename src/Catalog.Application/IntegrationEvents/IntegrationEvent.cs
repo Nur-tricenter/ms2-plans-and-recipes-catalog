@@ -1,4 +1,4 @@
-namespace Shared.Core
+namespace Catalog.Application.IntegrationEvents
 {
     public abstract record IntegrationEvent
     {

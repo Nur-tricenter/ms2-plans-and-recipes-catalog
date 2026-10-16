@@ -6,7 +6,7 @@ using Catalog.Application.UseCase.Command.MealPlan.AssignRecipeToMealTime;
 using Catalog.Application.UseCase.Command.MealPlan.RemoveRecipeFromMealTime;
 using Catalog.Application.UseCase.Query.MealPlan;
 using Catalog.WebApi.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Catalog.Domain.ValueObjects;
 
 namespace Catalog.Domain.Event.Food
@@ -11,8 +11,8 @@ namespace Catalog.Domain.Event.Food
         public NutritionalInfo NutritionalInfo { get; }
 
         public FoodCreated(Guid foodId, string name, string category, NutritionalInfo nutritionalInfo)
-            : base(DateTime.UtcNow)
         {
+            OccuredOn = DateTime.UtcNow;
             FoodId = foodId;
             Name = name;
             Category = category;

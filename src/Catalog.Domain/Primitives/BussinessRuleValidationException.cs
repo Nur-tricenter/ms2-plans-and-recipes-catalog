@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Shared.Core
+namespace Catalog.Domain.Primitives
 {
     [Serializable]
     public class BussinessRuleValidationException : Exception

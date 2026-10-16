@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Catalog.Infrastructure.EntityFramework.Context;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,26 +16,19 @@ namespace Catalog.Infrastructure.EntityFramework
             _mediator = mediator;
         }
 
-        public async Task Commit()
+        public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            var domainEvents = _context.ChangeTracker.Entries<Entity<object>>()
+            var domainEvents = _context.ChangeTracker.Entries<Entity>()
                 .Select(x => x.Entity.DomainEvents)
                 .SelectMany(x => x)
                 .ToArray();
 
             foreach (var @event in domainEvents)
             {
-                await _mediator.Publish(@event);
+                await _mediator.Publish(@event, cancellationToken);
             }
 
-            // 🔍 DEBUG TEMPORAL — borrar después
-            _context.ChangeTracker.DetectChanges();
-            foreach (var entry in _context.ChangeTracker.Entries())
-            {
-                Console.WriteLine($"[TRACKED] {entry.Entity.GetType().Name} | State={entry.State} | PK={string.Join(",", entry.Properties.Where(p => p.Metadata.IsPrimaryKey()).Select(p => p.CurrentValue))}");
-            }
-
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

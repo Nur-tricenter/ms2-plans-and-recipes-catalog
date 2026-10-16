@@ -5,7 +5,8 @@ using Catalog.Infrastructure.EntityFramework.Config.WriteConfig.Foods;
 using Catalog.Infrastructure.EntityFramework.Config.WriteConfig.MealPlans;
 using Catalog.Infrastructure.EntityFramework.Config.WriteConfig.Recipes;
 using Microsoft.EntityFrameworkCore;
-using Shared.Core;
+using Catalog.Domain.Primitives;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Infrastructure.EntityFramework.Context
 {

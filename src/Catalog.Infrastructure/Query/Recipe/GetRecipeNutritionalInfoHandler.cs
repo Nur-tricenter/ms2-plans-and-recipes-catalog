@@ -3,7 +3,7 @@ using Catalog.Application.UseCase.Query.Recipe;
 using Catalog.Application.Utils;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.Recipe;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -29,13 +29,13 @@ namespace Catalog.Infrastructure.Query.Recipe
         {
             try
             {
-                var recipe = await _recipeRepository.FindByIdAsync(request.RecipeId);
+                var recipe = await _recipeRepository.GetByIdAsync(request.RecipeId);
                 if (recipe == null)
                     return Result.Fail<NutritionalInfoDto>("Recipe not found");
 
                 var info = recipe.CalculateTotalNutritionalInfo(id =>
                 {
-                    var task = _foodRepository.FindByIdAsync(id);
+                    var task = _foodRepository.GetByIdAsync(id);
                     task.Wait();
                     return task.Result!;
                 });

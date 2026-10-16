@@ -1,11 +1,12 @@
 using Catalog.Application.Dto;
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 
 namespace Catalog.Application.UseCase.Query.Food
 {
-    public class SearchFoodsByCategoryQuery : IRequest<Result<PagedList<FoodDto>>>
+    public class SearchFoodsByCategoryQuery : IQuery<Result<PagedList<FoodDto>>>
     {
         public string Category { get; set; } = null!;
         public int Page { get; set; } = 1;

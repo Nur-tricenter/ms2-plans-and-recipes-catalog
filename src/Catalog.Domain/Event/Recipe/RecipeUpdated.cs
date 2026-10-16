@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Domain.Event.Recipe
 {
@@ -9,8 +9,8 @@ namespace Catalog.Domain.Event.Recipe
         public string Instructions { get; }
 
         public RecipeUpdated(Guid recipeId, string name, string instructions)
-            : base(DateTime.UtcNow)
         {
+            OccuredOn = DateTime.UtcNow;
             RecipeId = recipeId;
             Name = name;
             Instructions = instructions;

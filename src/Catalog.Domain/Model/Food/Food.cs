@@ -1,10 +1,11 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 using Catalog.Domain.Event.Food;
 
 namespace Catalog.Domain.Model.Foods
 {
-    public class Food : AggregateRoot<Guid>
+    public class Food : AuditableAggregateRoot
     {
         public FoodName Name { get; private set; }
         public CategoryName Category { get; private set; }

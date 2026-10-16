@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.ValueObjects;
@@ -27,7 +27,7 @@ namespace Catalog.Application.UseCase.Command.MealPlan.AddMealTime
         {
             try
             {
-                var mealPlan = await _repository.FindByIdAsync(request.MealPlanId);
+                var mealPlan = await _repository.GetByIdAsync(request.MealPlanId);
                 if (mealPlan == null)
                     return Result.Fail("Meal plan not found");
 
@@ -50,7 +50,7 @@ namespace Catalog.Application.UseCase.Command.MealPlan.AddMealTime
 
                 mealPlan.AddMealTimeToDay(request.DayNumber, type);
 
-                await _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync(cancellationToken);
                 return Result.Ok("Meal time added successfully");
             }
             catch (Exception ex)

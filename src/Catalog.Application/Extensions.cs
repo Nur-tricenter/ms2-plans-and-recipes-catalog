@@ -1,3 +1,4 @@
+using Catalog.Application.Behaviors;
 using Catalog.Domain.Factory.Food;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Factory.Recipe;
@@ -14,7 +15,12 @@ namespace Catalog.Application
             services.AddTransient<IRecipeFactory, RecipeFactory>();
             services.AddTransient<IFoodFactory, FoodFactory>();
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Extensions).Assembly));
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(typeof(Extensions).Assembly);
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            });
 
             return services;
         }

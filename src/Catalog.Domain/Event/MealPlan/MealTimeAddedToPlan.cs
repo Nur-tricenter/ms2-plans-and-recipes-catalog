@@ -1,4 +1,4 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Domain.Event.MealPlan
 {
@@ -11,8 +11,8 @@ namespace Catalog.Domain.Event.MealPlan
         public int Order { get; }
 
         public MealTimeAddedToPlan(Guid planId, int dayNumber, Guid mealTimeId, string mealTimeType, int order)
-            : base(DateTime.UtcNow)
         {
+            OccuredOn = DateTime.UtcNow;
             PlanId = planId;
             DayNumber = dayNumber;
             MealTimeId = mealTimeId;

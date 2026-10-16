@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.Recipe;
@@ -31,13 +31,13 @@ namespace Catalog.Application.UseCase.Command.Recipe.AddIngredient
         {
             try
             {
-                var recipe = await _recipeRepository.FindByIdAsync(request.RecipeId);
+                var recipe = await _recipeRepository.GetByIdAsync(request.RecipeId);
                 if (recipe == null)
                     return Result.Fail("Recipe not found");
 
                 foreach (var item in request.Ingredients)
                 {
-                    var food = await _foodRepository.FindByIdAsync(item.FoodId);
+                    var food = await _foodRepository.GetByIdAsync(item.FoodId);
                     if (food == null)
                         return Result.Fail($"Food with Id {item.FoodId} does not exist");
 
@@ -47,7 +47,7 @@ namespace Catalog.Application.UseCase.Command.Recipe.AddIngredient
                     );
                 }
 
-                await _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync(cancellationToken);
                 return Result.Ok($"{request.Ingredients.Count} ingredient(s) added successfully");
             }
             catch (Exception ex)

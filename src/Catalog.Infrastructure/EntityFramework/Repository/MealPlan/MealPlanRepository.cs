@@ -14,16 +14,18 @@ namespace Catalog.Infrastructure.EntityFramework.Repository.MealPlan
             _context = context;
         }
 
-        public async Task CreateAsync(DomainMealPlan mealPlan)
+        public async Task AddAsync(DomainMealPlan mealPlan)
         {
             await _context.MealPlans.AddAsync(mealPlan);
         }
 
-        public async Task<DomainMealPlan?> FindByIdAsync(Guid id)
+        public async Task<DomainMealPlan?> GetByIdAsync(Guid id, bool readOnly = false)
         {
-            return await _context.MealPlans
-                .Include("_planDays._mealTimes")
-                .SingleOrDefaultAsync(x => x.Id == id);
+            var query = readOnly
+                ? _context.MealPlans.AsNoTracking().Include("_planDays._mealTimes")
+                : _context.MealPlans.Include("_planDays._mealTimes");
+
+            return await query.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public Task UpdateAsync(DomainMealPlan mealPlan)

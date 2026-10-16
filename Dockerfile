@@ -2,7 +2,6 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 
-COPY src/Catalog.Shared/Catalog.Shared.csproj src/Catalog.Shared/
 COPY src/Catalog.Domain/Catalog.Domain.csproj src/Catalog.Domain/
 COPY src/Catalog.Application/Catalog.Application.csproj src/Catalog.Application/
 COPY src/Catalog.Infrastructure/Catalog.Infrastructure.csproj src/Catalog.Infrastructure/

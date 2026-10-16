@@ -1,4 +1,5 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 
 namespace Catalog.Domain.Model.Recipes

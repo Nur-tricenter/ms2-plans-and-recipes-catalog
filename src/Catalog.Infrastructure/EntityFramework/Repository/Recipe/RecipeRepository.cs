@@ -14,16 +14,18 @@ namespace Catalog.Infrastructure.EntityFramework.Repository.Recipe
             _context = context;
         }
 
-        public async Task CreateAsync(DomainRecipe recipe)
+        public async Task AddAsync(DomainRecipe recipe)
         {
             await _context.Recipes.AddAsync(recipe);
         }
 
-        public async Task<DomainRecipe?> FindByIdAsync(Guid id)
+        public async Task<DomainRecipe?> GetByIdAsync(Guid id, bool readOnly = false)
         {
-            return await _context.Recipes
-                .Include("_ingredients")
-                .SingleOrDefaultAsync(x => x.Id == id);
+            var query = readOnly
+                ? _context.Recipes.AsNoTracking().Include("_ingredients")
+                : _context.Recipes.Include("_ingredients");
+
+            return await query.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public Task UpdateAsync(DomainRecipe recipe)

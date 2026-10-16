@@ -1,11 +1,12 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
 namespace Catalog.Application.UseCase.Command.Recipe.AddIngredient
 {
-    public class AddIngredientCommand : IRequest<Result>
+    public class AddIngredientCommand : ICommand
     {
         public Guid RecipeId { get; set; }
 

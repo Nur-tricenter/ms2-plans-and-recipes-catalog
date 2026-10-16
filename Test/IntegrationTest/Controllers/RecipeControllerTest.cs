@@ -42,7 +42,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
-            var recipe = await repository.FindByIdAsync(body.Data);
+            var recipe = await repository.GetByIdAsync(body.Data);
             Assert.NotNull(recipe);
             Assert.Equal("Salmon al horno", recipe!.Name.Name);
             Assert.Empty(recipe.Ingredients);
@@ -142,7 +142,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
-            var recipe = await repository.FindByIdAsync(recipeCreated.Data);
+            var recipe = await repository.GetByIdAsync(recipeCreated.Data);
             Assert.NotNull(recipe);
             Assert.Contains(recipe!.Ingredients, i => i.FoodId == foodCreated.Data);
         }
@@ -247,7 +247,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
-            var recipe = await repository.FindByIdAsync(recipeCreated.Data);
+            var recipe = await repository.GetByIdAsync(recipeCreated.Data);
             Assert.NotNull(recipe);
             Assert.DoesNotContain(recipe!.Ingredients, i => i.FoodId == foodCreated.Data);
         }

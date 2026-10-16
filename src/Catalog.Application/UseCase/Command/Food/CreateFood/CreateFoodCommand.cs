@@ -1,10 +1,11 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 
 namespace Catalog.Application.UseCase.Command.Food.CreateFood
 {
-    public class CreateFoodCommand : IRequest<Result<Guid>>
+    public class CreateFoodCommand : ICommand<Result<Guid>>
     {
         public string Name { get; set; } = null!;
         public string Category { get; set; } = null!;

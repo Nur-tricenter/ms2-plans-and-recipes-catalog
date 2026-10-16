@@ -6,7 +6,7 @@ using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -39,7 +39,7 @@ namespace Catalog.Tests.Application
             // Arrange
             var plan = CreatePlanWithMealTime();
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
             var recipeId = Guid.NewGuid();
             var command = new AssignRecipeToMealTimeCommand
             {
@@ -56,15 +56,15 @@ namespace Catalog.Tests.Application
             Assert.Equal("1 recipe(s) assigned successfully", result.Message);
             var assignment = Assert.Single(mealTime.AssignedRecipes);
             Assert.Equal(recipeId, assignment.RecipeId);
-            _repoMock.Verify(r => r.FindByIdAsync(It.Is<Guid>(id => id == command.MealPlanId)), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.MealPlanId)), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task Handle_PlanNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((MealPlan?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((MealPlan?)null);
             var command = new AssignRecipeToMealTimeCommand
             {
                 MealPlanId = Guid.NewGuid(),
@@ -78,7 +78,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Meal plan not found", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var plan = CreatePlanWithMealTime();
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
             var command = new AssignRecipeToMealTimeCommand
             {
                 MealPlanId = plan.Id,
@@ -100,7 +100,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains("does not exist in the plan", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -111,7 +111,7 @@ namespace Catalog.Tests.Application
             // Arrange
             var plan = CreatePlanWithMealTime();
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
             var command = new AssignRecipeToMealTimeCommand
             {
                 MealPlanId = plan.Id,
@@ -125,7 +125,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Ration must be greater than zero", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -136,7 +136,7 @@ namespace Catalog.Tests.Application
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
             plan.AssignRecipeToMealTime(mealTime.Id, recipeId, new Ration(1));
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
             var command = new AssignRecipeToMealTimeCommand
             {
                 MealPlanId = plan.Id,
@@ -150,7 +150,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains("is already assigned", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

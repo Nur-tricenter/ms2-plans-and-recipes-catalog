@@ -1,9 +1,10 @@
 using Catalog.Domain.ValueObjects;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 
 namespace Catalog.Domain.Model.MealPlans
 {
-    public class PlanDay : Entity<Guid>
+    public class PlanDay : AuditableEntity
     {
         public int DayNumber { get; private set; }
         private readonly ICollection<MealTime> _mealTimes = new List<MealTime>();

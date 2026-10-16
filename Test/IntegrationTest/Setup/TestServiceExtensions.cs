@@ -5,7 +5,7 @@ using Catalog.Infrastructure.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Tests.IntegrationTest.Setup
 {

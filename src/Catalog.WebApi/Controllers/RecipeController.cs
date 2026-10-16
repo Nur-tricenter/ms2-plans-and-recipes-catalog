@@ -5,7 +5,7 @@ using Catalog.Application.UseCase.Command.Recipe.AddIngredient;
 using Catalog.Application.UseCase.Command.Recipe.RemoveIngredient;
 using Catalog.Application.UseCase.Query.Recipe;
 using Catalog.WebApi.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

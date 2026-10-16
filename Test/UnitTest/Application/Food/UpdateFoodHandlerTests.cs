@@ -4,7 +4,7 @@ using Catalog.Domain.Repository.Food;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -43,7 +43,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
 
             // Act
@@ -55,15 +55,15 @@ namespace Catalog.Tests.Application
             Assert.Equal("MANZANA ROJA", food.Name.Name);
             Assert.Equal(UnitOfMeasure.Kilogram, food.UnitOfMeasure);
             Assert.Equal(60m, food.BaseNutritionalInfo.Calories);
-            _repoMock.Verify(r => r.FindByIdAsync(It.Is<Guid>(id => id == food.Id)), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == food.Id)), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task Handle_FoodNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Food?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Food?)null);
             var command = CreateValidCommand(Guid.NewGuid());
 
             // Act
@@ -72,7 +72,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Food not found", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -82,7 +82,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
             command.UnitOfMeasure = unitOfMeasure;
 
@@ -92,7 +92,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Contains("Invalid unit of measure", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -102,7 +102,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.FindByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
             command.Quantity = quantity;
 
@@ -112,7 +112,7 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("NutritionalInfo quantity must be greater than zero", result.Message);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

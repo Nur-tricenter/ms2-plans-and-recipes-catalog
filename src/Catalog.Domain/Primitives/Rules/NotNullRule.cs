@@ -1,6 +1,4 @@
-using Shared.Core;
-
-namespace Shared.Rules
+namespace Catalog.Domain.Primitives
 {
     public class NotNullRule : IBussinessRule
     {

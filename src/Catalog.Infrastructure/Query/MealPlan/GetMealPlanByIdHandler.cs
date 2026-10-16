@@ -3,7 +3,7 @@ using Catalog.Application.UseCase.Query.MealPlan;
 using Catalog.Application.Utils;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +26,7 @@ namespace Catalog.Infrastructure.Query.MealPlan
         {
             try
             {
-                var mealPlan = await _repository.FindByIdAsync(request.Id);
+                var mealPlan = await _repository.GetByIdAsync(request.Id);
                 if (mealPlan == null)
                     return Result.Fail<MealPlanDto>("Meal plan not found");
 
@@ -51,7 +51,7 @@ namespace Catalog.Infrastructure.Query.MealPlan
                         };
                         foreach (var asig in mealTime.AssignedRecipes)
                         {
-                            var recipe = await _recipeRepository.FindByIdAsync(asig.RecipeId);
+                            var recipe = await _recipeRepository.GetByIdAsync(asig.RecipeId);
                             mtDto.Recipes.Add(new AssignedRecipeDto
                             {
                                 RecipeId = asig.RecipeId,

@@ -1,10 +1,11 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 
 namespace Catalog.Application.UseCase.Query.MealPlan
 {
-    public class GetMealPlanCompositionQuery : IRequest<Result<MealPlanCompositionDto>>
+    public class GetMealPlanCompositionQuery : IQuery<Result<MealPlanCompositionDto>>
     {
         public Guid MealPlanId { get; set; }
         public GetMealPlanCompositionQuery() { }

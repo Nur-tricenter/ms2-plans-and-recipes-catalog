@@ -1,8 +1,9 @@
 using Catalog.Domain.Event.Recipe;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Model.Foods;
 using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.ValueObjects;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Domain

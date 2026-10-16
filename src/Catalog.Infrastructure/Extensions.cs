@@ -1,5 +1,5 @@
 using Catalog.Application;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;

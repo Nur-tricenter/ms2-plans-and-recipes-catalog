@@ -1,6 +1,4 @@
-using Shared.Core;
-
-namespace Shared.IntegrationEvents
+namespace Catalog.Application.IntegrationEvents
 {
     public record CatalogoV1PlanPublicado : IntegrationEvent
     {
