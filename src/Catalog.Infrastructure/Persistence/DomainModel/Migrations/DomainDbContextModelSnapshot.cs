@@ -115,7 +115,8 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
             modelBuilder.Entity("Catalog.Domain.Model.MealPlans.MealTime", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -141,8 +142,9 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("order");
 
-                    b.Property<Guid?>("PlanDayId")
-                        .HasColumnType("uuid");
+                    b.Property<Guid>("PlanDayId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("planDayId");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -158,7 +160,8 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
             modelBuilder.Entity("Catalog.Domain.Model.MealPlans.PlanDay", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -178,8 +181,9 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("isDeleted");
 
-                    b.Property<Guid?>("MealPlanId")
-                        .HasColumnType("uuid");
+                    b.Property<Guid>("MealPlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mealPlanId");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -326,16 +330,20 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 {
                     b.HasOne("Catalog.Domain.Model.MealPlans.PlanDay", null)
                         .WithMany("_mealTimes")
-                        .HasForeignKey("PlanDayId");
+                        .HasForeignKey("PlanDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsMany("Catalog.Domain.Model.MealPlans.RecipeAssignment", "_assignedRecipes", b1 =>
                         {
                             b1.Property<Guid>("MealTimeId")
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("mealTimeId");
 
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
 
                             b1.Property<Guid>("RecipeId")
                                 .HasColumnType("uuid")
@@ -379,7 +387,9 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 {
                     b.HasOne("Catalog.Domain.Model.MealPlans.MealPlan", null)
                         .WithMany("_planDays")
-                        .HasForeignKey("MealPlanId");
+                        .HasForeignKey("MealPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Catalog.Domain.Model.Recipes.Recipe", b =>
@@ -387,11 +397,13 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     b.OwnsMany("Catalog.Domain.Model.Recipes.RecipeIngredient", "_ingredients", b1 =>
                         {
                             b1.Property<Guid>("RecipeId")
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("recipeId");
 
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
 
                             b1.Property<Guid>("FoodId")
                                 .HasColumnType("uuid")

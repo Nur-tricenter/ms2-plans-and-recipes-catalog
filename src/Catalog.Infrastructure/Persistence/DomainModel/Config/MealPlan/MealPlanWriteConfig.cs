@@ -49,7 +49,18 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
             builder.Property(x => x.IsDeleted).HasColumnName("isDeleted").HasDefaultValue(false);
             builder.HasQueryFilter(x => !x.IsDeleted);
 
-            builder.HasMany(typeof(PlanDay), "_planDays");
+            // PlanDay has no MealPlanId property, so EF discovers a shadow foreign key and
+            // names both the CLR property and the column "MealPlanId". Every other column in
+            // this schema is camelCase by explicit HasColumnName, and EF defaults a shadow
+            // foreign key to nullable. Both defaults are wrong here: a PlanDay always belongs
+            // to a MealPlan (_planDays is non-nullable), and the read side already declares
+            // read.PlanDay.mealPlanId as required. Declared explicitly so the write schema
+            // and the read schema describe the same relationship the same way.
+            builder.HasMany(typeof(PlanDay), "_planDays")
+                .WithOne()
+                .HasForeignKey("MealPlanId")
+                .IsRequired();
+
             builder.Ignore(x => x.DomainEvents);
             builder.Ignore(x => x.PlanDays);
         }
@@ -58,14 +69,23 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
         {
             builder.ToTable("PlanDay", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Id).ValueGeneratedNever().HasColumnName("id");
             builder.Property(x => x.DayNumber).HasColumnName("dayNumber");
+
+            // Same reason as the PlanDay -> MealPlan key on the MealPlan side: this is the
+            // shadow foreign key EF created for the _mealTimes collection.
+            builder.Property<Guid>("MealPlanId")
+                .HasColumnName("mealPlanId")
+                .IsRequired();
             builder.Property(x => x.CreatedAt).HasColumnName("createdAt");
             builder.Property(x => x.UpdatedAt).HasColumnName("updatedAt");
             builder.Property(x => x.DeletedAt).HasColumnName("deletedAt");
             builder.Property(x => x.IsDeleted).HasColumnName("isDeleted").HasDefaultValue(false);
             builder.HasQueryFilter(x => !x.IsDeleted);
-            builder.HasMany(typeof(MealTime), "_mealTimes");
+            builder.HasMany(typeof(MealTime), "_mealTimes")
+                .WithOne()
+                .HasForeignKey("PlanDayId")
+                .IsRequired();
             builder.Ignore(x => x.DomainEvents);
             builder.Ignore(x => x.MealTimes);
         }
@@ -74,9 +94,16 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
         {
             builder.ToTable("MealTime", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Id).ValueGeneratedNever().HasColumnName("id");
             builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(200);
             builder.Property(x => x.Order).HasColumnName("order");
+
+            // A MealTime always belongs to a PlanDay (_mealTimes is non-nullable), so this
+            // shadow foreign key is required. The read side agrees: read.MealTime.planDayId.
+            // It lives on MealTime, not PlanDay: EF puts the foreign key on the dependent.
+            builder.Property<Guid>("PlanDayId")
+                .HasColumnName("planDayId")
+                .IsRequired();
             builder.Property(x => x.CreatedAt).HasColumnName("createdAt");
             builder.Property(x => x.UpdatedAt).HasColumnName("updatedAt");
             builder.Property(x => x.DeletedAt).HasColumnName("deletedAt");
@@ -89,7 +116,15 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
             {
                 asig.ToTable("RecipeAssignment", DatabaseSchemas.Write);
 
-                asig.Property<Guid>("Id").ValueGeneratedOnAdd();
+                asig.Property<Guid>("Id")
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
+
+                // The OwnsMany owner key is a shadow property too. It was already required
+                // (Guid, not Guid?), but its column kept the PascalCase default while
+                // recipeId and rationQuantity right below it are explicit camelCase.
+                asig.Property<Guid>("MealTimeId")
+                    .HasColumnName("mealTimeId");
 
                 asig.Property(x => x.RecipeId)
                     .HasColumnName("recipeId");

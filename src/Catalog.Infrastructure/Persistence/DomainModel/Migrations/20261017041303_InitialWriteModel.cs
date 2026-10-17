@@ -103,9 +103,9 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 schema: "write",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     dayNumber = table.Column<int>(type: "integer", nullable: false),
-                    MealPlanId = table.Column<Guid>(type: "uuid", nullable: true),
+                    mealPlanId = table.Column<Guid>(type: "uuid", nullable: false),
                     createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -113,13 +113,14 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlanDay", x => x.Id);
+                    table.PrimaryKey("PK_PlanDay", x => x.id);
                     table.ForeignKey(
-                        name: "FK_PlanDay_MealPlan_MealPlanId",
-                        column: x => x.MealPlanId,
+                        name: "FK_PlanDay_MealPlan_mealPlanId",
+                        column: x => x.mealPlanId,
                         principalSchema: "write",
                         principalTable: "MealPlan",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -127,17 +128,17 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 schema: "write",
                 columns: table => new
                 {
-                    RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    recipeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     foodId = table.Column<Guid>(type: "uuid", nullable: false),
                     portionQuantity = table.Column<decimal>(type: "numeric(12,4)", precision: 12, scale: 4, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecipeIngredient", x => new { x.RecipeId, x.Id });
+                    table.PrimaryKey("PK_RecipeIngredient", x => new { x.recipeId, x.id });
                     table.ForeignKey(
-                        name: "FK_RecipeIngredient_Recipe_RecipeId",
-                        column: x => x.RecipeId,
+                        name: "FK_RecipeIngredient_Recipe_recipeId",
+                        column: x => x.recipeId,
                         principalSchema: "write",
                         principalTable: "Recipe",
                         principalColumn: "id",
@@ -149,10 +150,10 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 schema: "write",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     order = table.Column<int>(type: "integer", nullable: false),
-                    PlanDayId = table.Column<Guid>(type: "uuid", nullable: true),
+                    planDayId = table.Column<Guid>(type: "uuid", nullable: false),
                     createdAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     deletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -160,13 +161,14 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MealTime", x => x.Id);
+                    table.PrimaryKey("PK_MealTime", x => x.id);
                     table.ForeignKey(
-                        name: "FK_MealTime_PlanDay_PlanDayId",
-                        column: x => x.PlanDayId,
+                        name: "FK_MealTime_PlanDay_planDayId",
+                        column: x => x.planDayId,
                         principalSchema: "write",
                         principalTable: "PlanDay",
-                        principalColumn: "Id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,34 +176,34 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 schema: "write",
                 columns: table => new
                 {
-                    MealTimeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    mealTimeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
                     recipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     rationQuantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecipeAssignment", x => new { x.MealTimeId, x.Id });
+                    table.PrimaryKey("PK_RecipeAssignment", x => new { x.mealTimeId, x.id });
                     table.ForeignKey(
-                        name: "FK_RecipeAssignment_MealTime_MealTimeId",
-                        column: x => x.MealTimeId,
+                        name: "FK_RecipeAssignment_MealTime_mealTimeId",
+                        column: x => x.mealTimeId,
                         principalSchema: "write",
                         principalTable: "MealTime",
-                        principalColumn: "Id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MealTime_PlanDayId",
+                name: "IX_MealTime_planDayId",
                 schema: "write",
                 table: "MealTime",
-                column: "PlanDayId");
+                column: "planDayId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlanDay_MealPlanId",
+                name: "IX_PlanDay_mealPlanId",
                 schema: "write",
                 table: "PlanDay",
-                column: "MealPlanId");
+                column: "mealPlanId");
         }
 
         /// <inheritdoc />

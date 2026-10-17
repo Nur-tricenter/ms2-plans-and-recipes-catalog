@@ -46,7 +46,15 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.Recipe
             {
                 ing.ToTable("RecipeIngredient", DatabaseSchemas.Write);
 
-                ing.Property<Guid>("Id").ValueGeneratedOnAdd();
+                ing.Property<Guid>("Id")
+                    .HasColumnName("id")
+                    .ValueGeneratedOnAdd();
+
+                // RecipeAssignment configures its own RecipeId as "recipeId"; this one was
+                // left on the PascalCase default, so the two owned child tables of the
+                // aggregate disagreed with each other as well as with everything else.
+                ing.Property<Guid>("RecipeId")
+                    .HasColumnName("recipeId");
 
                 ing.Property(x => x.FoodId)
                     .HasColumnName("foodId");
