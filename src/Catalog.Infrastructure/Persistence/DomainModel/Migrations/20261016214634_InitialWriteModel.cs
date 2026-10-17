@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,13 +6,20 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDomainModel : Migration
+    public partial class InitialWriteModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "write");
+
+            migrationBuilder.EnsureSchema(
+                name: "outbox");
+
             migrationBuilder.CreateTable(
                 name: "Food",
+                schema: "write",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -36,6 +43,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MealPlan",
+                schema: "write",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -53,7 +61,28 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "outboxMessage",
+                schema: "outbox",
+                columns: table => new
+                {
+                    outboxId = table.Column<Guid>(type: "uuid", nullable: false),
+                    content = table.Column<string>(type: "text", nullable: true),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    processed = table.Column<bool>(type: "boolean", nullable: false),
+                    processedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    correlationId = table.Column<string>(type: "text", nullable: true),
+                    traceId = table.Column<string>(type: "text", nullable: true),
+                    spanId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_outboxMessage", x => x.outboxId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Recipe",
+                schema: "write",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -71,6 +100,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PlanDay",
+                schema: "write",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -87,12 +117,14 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     table.ForeignKey(
                         name: "FK_PlanDay_MealPlan_MealPlanId",
                         column: x => x.MealPlanId,
+                        principalSchema: "write",
                         principalTable: "MealPlan",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "RecipeIngredient",
+                schema: "write",
                 columns: table => new
                 {
                     RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -106,6 +138,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     table.ForeignKey(
                         name: "FK_RecipeIngredient_Recipe_RecipeId",
                         column: x => x.RecipeId,
+                        principalSchema: "write",
                         principalTable: "Recipe",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -113,6 +146,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MealTime",
+                schema: "write",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -130,12 +164,14 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     table.ForeignKey(
                         name: "FK_MealTime_PlanDay_PlanDayId",
                         column: x => x.PlanDayId,
+                        principalSchema: "write",
                         principalTable: "PlanDay",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "RecipeAssignment",
+                schema: "write",
                 columns: table => new
                 {
                     MealTimeId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -149,6 +185,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     table.ForeignKey(
                         name: "FK_RecipeAssignment_MealTime_MealTimeId",
                         column: x => x.MealTimeId,
+                        principalSchema: "write",
                         principalTable: "MealTime",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -156,11 +193,13 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealTime_PlanDayId",
+                schema: "write",
                 table: "MealTime",
                 column: "PlanDayId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlanDay_MealPlanId",
+                schema: "write",
                 table: "PlanDay",
                 column: "MealPlanId");
         }
@@ -169,25 +208,36 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Food");
+                name: "Food",
+                schema: "write");
 
             migrationBuilder.DropTable(
-                name: "RecipeAssignment");
+                name: "outboxMessage",
+                schema: "outbox");
 
             migrationBuilder.DropTable(
-                name: "RecipeIngredient");
+                name: "RecipeAssignment",
+                schema: "write");
 
             migrationBuilder.DropTable(
-                name: "MealTime");
+                name: "RecipeIngredient",
+                schema: "write");
 
             migrationBuilder.DropTable(
-                name: "Recipe");
+                name: "MealTime",
+                schema: "write");
 
             migrationBuilder.DropTable(
-                name: "PlanDay");
+                name: "Recipe",
+                schema: "write");
 
             migrationBuilder.DropTable(
-                name: "MealPlan");
+                name: "PlanDay",
+                schema: "write");
+
+            migrationBuilder.DropTable(
+                name: "MealPlan",
+                schema: "write");
         }
     }
 }

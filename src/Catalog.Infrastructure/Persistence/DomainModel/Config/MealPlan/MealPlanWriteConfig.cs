@@ -1,6 +1,7 @@
 using Catalog.Domain;
 using Catalog.Domain.Model.MealPlans;
 using Catalog.Domain.ValueObjects;
+using Catalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -14,7 +15,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
     {
         public void Configure(EntityTypeBuilder<DomainMealPlan> builder)
         {
-            builder.ToTable("MealPlan");
+            builder.ToTable("MealPlan", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
 
             var mealPlanNameConverter = new ValueConverter<MealPlanName, string>(
@@ -55,7 +56,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
 
         public void Configure(EntityTypeBuilder<PlanDay> builder)
         {
-            builder.ToTable("PlanDay");
+            builder.ToTable("PlanDay", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedNever();
             builder.Property(x => x.DayNumber).HasColumnName("dayNumber");
@@ -71,7 +72,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
 
         public void Configure(EntityTypeBuilder<MealTime> builder)
         {
-            builder.ToTable("MealTime");
+            builder.ToTable("MealTime", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedNever();
             builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(200);
@@ -86,6 +87,8 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
 
             builder.OwnsMany<RecipeAssignment>("_assignedRecipes", asig =>
             {
+                asig.ToTable("RecipeAssignment", DatabaseSchemas.Write);
+
                 asig.Property<Guid>("Id").ValueGeneratedOnAdd();
 
                 asig.Property(x => x.RecipeId)

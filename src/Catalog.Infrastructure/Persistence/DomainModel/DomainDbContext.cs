@@ -27,6 +27,10 @@ namespace Catalog.Infrastructure.Persistence.DomainModel
         {
             base.OnModelCreating(modelBuilder);
 
+            // Anything a configuration forgets to place explicitly still lands in the write
+            // schema, never in `public` where the read side would collide with it.
+            modelBuilder.HasDefaultSchema(DatabaseSchemas.Write);
+
             var mealPlanConfig = new MealPlanWriteConfig();
             modelBuilder.ApplyConfiguration<MealPlan>(mealPlanConfig);
             modelBuilder.ApplyConfiguration<PlanDay>(mealPlanConfig);

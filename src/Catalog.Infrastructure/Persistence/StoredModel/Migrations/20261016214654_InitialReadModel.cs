@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,13 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialStoredModel : Migration
+    public partial class InitialReadModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "read");
+
             migrationBuilder.CreateTable(
                 name: "Food",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -36,6 +40,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MealPlan",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -54,6 +59,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Recipe",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -71,6 +77,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PlanDay",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -87,6 +94,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     table.ForeignKey(
                         name: "FK_PlanDay_MealPlan_mealPlanId",
                         column: x => x.mealPlanId,
+                        principalSchema: "read",
                         principalTable: "MealPlan",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -94,6 +102,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "RecipeIngredient",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -107,6 +116,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     table.ForeignKey(
                         name: "FK_RecipeIngredient_Recipe_recipeId",
                         column: x => x.recipeId,
+                        principalSchema: "read",
                         principalTable: "Recipe",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -114,6 +124,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MealTime",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -131,6 +142,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     table.ForeignKey(
                         name: "FK_MealTime_PlanDay_planDayId",
                         column: x => x.planDayId,
+                        principalSchema: "read",
                         principalTable: "PlanDay",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -138,6 +150,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AssignedRecipe",
+                schema: "read",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -151,6 +164,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     table.ForeignKey(
                         name: "FK_AssignedRecipe_MealTime_mealTimeId",
                         column: x => x.mealTimeId,
+                        principalSchema: "read",
                         principalTable: "MealTime",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -158,21 +172,25 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssignedRecipe_mealTimeId",
+                schema: "read",
                 table: "AssignedRecipe",
                 column: "mealTimeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealTime_planDayId",
+                schema: "read",
                 table: "MealTime",
                 column: "planDayId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlanDay_mealPlanId",
+                schema: "read",
                 table: "PlanDay",
                 column: "mealPlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecipeIngredient_recipeId",
+                schema: "read",
                 table: "RecipeIngredient",
                 column: "recipeId");
         }
@@ -181,25 +199,32 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AssignedRecipe");
+                name: "AssignedRecipe",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "Food");
+                name: "Food",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "RecipeIngredient");
+                name: "RecipeIngredient",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "MealTime");
+                name: "MealTime",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "Recipe");
+                name: "Recipe",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "PlanDay");
+                name: "PlanDay",
+                schema: "read");
 
             migrationBuilder.DropTable(
-                name: "MealPlan");
+                name: "MealPlan",
+                schema: "read");
         }
     }
 }

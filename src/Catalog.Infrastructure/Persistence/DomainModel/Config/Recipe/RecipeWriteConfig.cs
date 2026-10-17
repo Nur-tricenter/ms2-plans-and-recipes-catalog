@@ -1,5 +1,6 @@
 using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.ValueObjects;
+using Catalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -11,7 +12,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.Recipe
     {
         public void Configure(EntityTypeBuilder<DomainRecipe> builder)
         {
-            builder.ToTable("Recipe");
+            builder.ToTable("Recipe", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
 
             var recipeNameConverter = new ValueConverter<RecipeName, string>(
@@ -43,6 +44,8 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.Recipe
 
             builder.OwnsMany<RecipeIngredient>("_ingredients", ing =>
             {
+                ing.ToTable("RecipeIngredient", DatabaseSchemas.Write);
+
                 ing.Property<Guid>("Id").ValueGeneratedOnAdd();
 
                 ing.Property(x => x.FoodId)

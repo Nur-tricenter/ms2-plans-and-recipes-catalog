@@ -1,3 +1,4 @@
+using Catalog.Infrastructure.Persistence;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,7 +12,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
     {
         public void Configure(EntityTypeBuilder<MealPlanModel> builder)
         {
-            builder.ToTable("MealPlan");
+            builder.ToTable("MealPlan", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
@@ -31,7 +32,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
 
         public void Configure(EntityTypeBuilder<PlanDayModel> builder)
         {
-            builder.ToTable("PlanDay");
+            builder.ToTable("PlanDay", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
@@ -50,7 +51,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
 
         public void Configure(EntityTypeBuilder<MealTimeModel> builder)
         {
-            builder.ToTable("MealTime");
+            builder.ToTable("MealTime", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
@@ -70,7 +71,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
 
         public void Configure(EntityTypeBuilder<AssignedRecipeModel> builder)
         {
-            builder.ToTable("AssignedRecipe");
+            builder.ToTable("AssignedRecipe", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();

@@ -1,3 +1,4 @@
+using Catalog.Infrastructure.Persistence;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,7 +10,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.Recipe
     {
         public void Configure(EntityTypeBuilder<RecipeModel> builder)
         {
-            builder.ToTable("Recipe");
+            builder.ToTable("Recipe", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
@@ -28,7 +29,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.Recipe
 
         public void Configure(EntityTypeBuilder<IngredientModel> builder)
         {
-            builder.ToTable("RecipeIngredient");
+            builder.ToTable("RecipeIngredient", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();

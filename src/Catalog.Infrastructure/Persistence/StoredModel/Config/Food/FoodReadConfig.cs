@@ -1,3 +1,4 @@
+using Catalog.Infrastructure.Persistence;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.Food;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,7 +9,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.Food
     {
         public void Configure(EntityTypeBuilder<FoodModel> builder)
         {
-            builder.ToTable("Food");
+            builder.ToTable("Food", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();

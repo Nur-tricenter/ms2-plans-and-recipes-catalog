@@ -23,6 +23,10 @@ namespace Catalog.Infrastructure.Persistence.StoredModel
         {
             base.OnModelCreating(modelBuilder);
 
+            // Anything a configuration forgets to place explicitly still lands in the read
+            // schema, never in `public` where the write side would collide with it.
+            modelBuilder.HasDefaultSchema(DatabaseSchemas.Read);
+
             var mealPlanConfig = new MealPlanReadConfig();
             modelBuilder.ApplyConfiguration<MealPlanModel>(mealPlanConfig);
             modelBuilder.ApplyConfiguration<PlanDayModel>(mealPlanConfig);

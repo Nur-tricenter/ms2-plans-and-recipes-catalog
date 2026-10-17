@@ -1,4 +1,5 @@
 using Catalog.Domain.ValueObjects;
+using Catalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -10,7 +11,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.Food
     {
         public void Configure(EntityTypeBuilder<DomainFood> builder)
         {
-            builder.ToTable("Food");
+            builder.ToTable("Food", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
 
             var foodNameConverter = new ValueConverter<FoodName, string>(

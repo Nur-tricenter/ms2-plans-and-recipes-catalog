@@ -17,6 +17,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("write")
                 .HasAnnotation("ProductVersion", "10.0.0-preview.2.25163.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -64,7 +65,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Food", (string)null);
+                    b.ToTable("Food", "write");
                 });
 
             modelBuilder.Entity("Catalog.Domain.Model.MealPlans.MealPlan", b =>
@@ -108,7 +109,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MealPlan", (string)null);
+                    b.ToTable("MealPlan", "write");
                 });
 
             modelBuilder.Entity("Catalog.Domain.Model.MealPlans.MealTime", b =>
@@ -151,7 +152,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                     b.HasIndex("PlanDayId");
 
-                    b.ToTable("MealTime", (string)null);
+                    b.ToTable("MealTime", "write");
                 });
 
             modelBuilder.Entity("Catalog.Domain.Model.MealPlans.PlanDay", b =>
@@ -188,7 +189,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                     b.HasIndex("MealPlanId");
 
-                    b.ToTable("PlanDay", (string)null);
+                    b.ToTable("PlanDay", "write");
                 });
 
             modelBuilder.Entity("Catalog.Domain.Model.Recipes.Recipe", b =>
@@ -229,7 +230,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Recipe", (string)null);
+                    b.ToTable("Recipe", "write");
                 });
 
             modelBuilder.Entity("Joseco.Outbox.Contracts.Model.OutboxMessage<Joseco.DDD.Core.Abstractions.DomainEvent>", b =>
@@ -311,7 +312,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                             b1.HasKey("FoodId");
 
-                            b1.ToTable("Food");
+                            b1.ToTable("Food", "write");
 
                             b1.WithOwner()
                                 .HasForeignKey("FoodId");
@@ -342,7 +343,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                             b1.HasKey("MealTimeId", "Id");
 
-                            b1.ToTable("RecipeAssignment");
+                            b1.ToTable("RecipeAssignment", "write");
 
                             b1.WithOwner()
                                 .HasForeignKey("MealTimeId");
@@ -361,7 +362,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                                     b2.HasKey("RecipeAssignmentMealTimeId", "RecipeAssignmentId");
 
-                                    b2.ToTable("RecipeAssignment");
+                                    b2.ToTable("RecipeAssignment", "write");
 
                                     b2.WithOwner()
                                         .HasForeignKey("RecipeAssignmentMealTimeId", "RecipeAssignmentId");
@@ -398,7 +399,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                             b1.HasKey("RecipeId", "Id");
 
-                            b1.ToTable("RecipeIngredient");
+                            b1.ToTable("RecipeIngredient", "write");
 
                             b1.WithOwner()
                                 .HasForeignKey("RecipeId");
@@ -418,7 +419,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 
                                     b2.HasKey("RecipeIngredientRecipeId", "RecipeIngredientId");
 
-                                    b2.ToTable("RecipeIngredient");
+                                    b2.ToTable("RecipeIngredient", "write");
 
                                     b2.WithOwner()
                                         .HasForeignKey("RecipeIngredientRecipeId", "RecipeIngredientId");
