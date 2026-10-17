@@ -7,7 +7,7 @@ namespace Catalog.Tests.Application
 {
     public class MetricsBehaviorTests
     {
-        private const string MeterName = "Catalog.Application";
+        private const string MeterName = "Store.Catalog";
         private const string DurationInstrument = "catalog.application.request.duration";
         private const string CountInstrument = "catalog.application.request.count";
 
@@ -90,6 +90,30 @@ namespace Catalog.Tests.Application
             Assert.Equal("ms", instrument.Unit);
         }
 
+        [Fact]
+        public async Task Handle_AnyRequest_PublishesOnAMeterTheCollectorWillMatch()
+        {
+            // Arrange
+            var published = new List<Instrument>();
+            using var listener = StartListener(published.Add);
+            var sut = new MetricsBehavior<CollectedMeterRequest, string>();
+
+            // Act
+            await sut.Handle(new CollectedMeterRequest(), _ => Task.FromResult("ok"), CancellationToken.None);
+
+            // Assert
+            // Reads the meter name off the instruments the behavior really published, so this
+            // does not merely restate the constant above. The meter provider collects
+            // ["Joseco.Communication.RabbitMQ", "Joseco.Outbox", "Npgsql", "Store.*"], so a meter
+            // named after this assembly fires correctly and is collected nowhere: not an error on
+            // a dashboard, just numbers that never arrive. This is the assertion that fails if
+            // someone renames the meter back to something assembly-shaped.
+            var meterNames = published.Select(i => i.Meter.Name).Distinct().ToArray();
+            Assert.NotEmpty(meterNames);
+            Assert.All(meterNames, name =>
+                Assert.StartsWith("Store.", name, StringComparison.Ordinal));
+        }
+
         private static MeterListener StartListener(Action<Instrument> onPublished)
         {
             var listener = new MeterListener();
@@ -122,6 +146,10 @@ namespace Catalog.Tests.Application
         }
 
         private sealed class DurationUnitRequest : IRequest<string>
+        {
+        }
+
+        private sealed class CollectedMeterRequest : IRequest<string>
         {
         }
     }

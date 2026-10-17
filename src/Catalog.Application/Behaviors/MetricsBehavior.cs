@@ -54,7 +54,23 @@ namespace Catalog.Application.Behaviors
         internal const string SuccessOutcome = "success";
         internal const string FailureOutcome = "failure";
 
-        internal static readonly Meter Meter = new Meter("Catalog.Application", "1.0.0");
+        /// <summary>
+        /// Meter name, prefixed to match the scope Observability collects.
+        /// </summary>
+        /// <remarks>
+        /// MS2026's <c>AddObservability</c> collects the meters
+        /// <c>["Joseco.Communication.RabbitMQ", "Joseco.Outbox", "Npgsql", "Store.*"]</c>.
+        /// A meter named after this assembly matches none of those, so every instrument below
+        /// would be emitted correctly and collected nowhere: not a visible gap on a dashboard,
+        /// just numbers that never arrive.
+        ///
+        /// Do not rename this back to something assembly-shaped without changing the collector
+        /// prefix first. <c>CatalogMetricsTests.MeterName_MatchesTheObservabilityCollectionPrefix</c>
+        /// pins it, and that test is cheaper than discovering the problem from an empty dashboard.
+        /// </remarks>
+        internal const string MeterName = "Store.Catalog";
+
+        internal static readonly Meter Meter = new Meter(MeterName, "1.0.0");
 
         internal static readonly Histogram<double> RequestDuration = Meter.CreateHistogram<double>(
             "catalog.application.request.duration",
