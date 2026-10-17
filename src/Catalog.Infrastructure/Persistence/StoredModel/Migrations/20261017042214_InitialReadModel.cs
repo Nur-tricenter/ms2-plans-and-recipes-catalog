@@ -149,7 +149,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AssignedRecipe",
+                name: "RecipeAssignment",
                 schema: "read",
                 columns: table => new
                 {
@@ -160,21 +160,15 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AssignedRecipe", x => x.id);
+                    table.PrimaryKey("PK_RecipeAssignment", x => x.id);
                     table.ForeignKey(
-                        name: "FK_AssignedRecipe_MealTime_mealTimeId",
+                        name: "FK_RecipeAssignment_MealTime_mealTimeId",
                         column: x => x.mealTimeId,
                         principalSchema: "read",
                         principalTable: "MealTime",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AssignedRecipe_mealTimeId",
-                schema: "read",
-                table: "AssignedRecipe",
-                column: "mealTimeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealTime_planDayId",
@@ -189,6 +183,12 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                 column: "mealPlanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RecipeAssignment_mealTimeId",
+                schema: "read",
+                table: "RecipeAssignment",
+                column: "mealTimeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RecipeIngredient_recipeId",
                 schema: "read",
                 table: "RecipeIngredient",
@@ -199,11 +199,11 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AssignedRecipe",
+                name: "Food",
                 schema: "read");
 
             migrationBuilder.DropTable(
-                name: "Food",
+                name: "RecipeAssignment",
                 schema: "read");
 
             migrationBuilder.DropTable(

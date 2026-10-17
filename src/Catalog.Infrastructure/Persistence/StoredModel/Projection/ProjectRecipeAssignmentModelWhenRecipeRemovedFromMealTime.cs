@@ -7,18 +7,18 @@ using Microsoft.Extensions.Logging;
 namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
 {
     /// <summary>
-    /// Removes the stored assigned recipe row identified by the event's natural key (meal time, recipe).
+    /// Removes the stored recipe assignment row identified by the event's natural key (meal time, recipe).
     /// A replay finds nothing to remove and returns without failing the outbox batch.
     /// </summary>
-    public class ProjectAssignedRecipeModelWhenRecipeRemovedFromMealTime
+    public class ProjectRecipeAssignmentModelWhenRecipeRemovedFromMealTime
         : INotificationHandler<OutboxMessage<RecipeRemovedFromMealTime>>
     {
         private readonly StoredDbContext _dbContext;
-        private readonly ILogger<ProjectAssignedRecipeModelWhenRecipeRemovedFromMealTime> _logger;
+        private readonly ILogger<ProjectRecipeAssignmentModelWhenRecipeRemovedFromMealTime> _logger;
 
-        public ProjectAssignedRecipeModelWhenRecipeRemovedFromMealTime(
+        public ProjectRecipeAssignmentModelWhenRecipeRemovedFromMealTime(
             StoredDbContext dbContext,
-            ILogger<ProjectAssignedRecipeModelWhenRecipeRemovedFromMealTime> logger)
+            ILogger<ProjectRecipeAssignmentModelWhenRecipeRemovedFromMealTime> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

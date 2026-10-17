@@ -31,7 +31,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel
             modelBuilder.ApplyConfiguration<MealPlanModel>(mealPlanConfig);
             modelBuilder.ApplyConfiguration<PlanDayModel>(mealPlanConfig);
             modelBuilder.ApplyConfiguration<MealTimeModel>(mealPlanConfig);
-            modelBuilder.ApplyConfiguration<AssignedRecipeModel>(mealPlanConfig);
+            modelBuilder.ApplyConfiguration<RecipeAssignmentModel>(mealPlanConfig);
 
             var recipeConfig = new RecipeReadConfig();
             modelBuilder.ApplyConfiguration<RecipeModel>(recipeConfig);

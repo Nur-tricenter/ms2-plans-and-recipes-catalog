@@ -10,13 +10,13 @@ using Xunit;
 
 namespace Catalog.Tests.Infrastructure.Projection
 {
-    public class ProjectAssignedRecipeModelWhenRecipeAssignedToMealTimeTests
+    public class ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTimeTests
     {
-        private readonly Mock<ILogger<ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime>> _loggerMock;
+        private readonly Mock<ILogger<ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime>> _loggerMock;
 
-        public ProjectAssignedRecipeModelWhenRecipeAssignedToMealTimeTests()
+        public ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTimeTests()
         {
-            _loggerMock = new Mock<ILogger<ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime>>();
+            _loggerMock = new Mock<ILogger<ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime>>();
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             var mealTimeId = Guid.NewGuid();
             var recipeId = Guid.NewGuid();
             await SeedMealTimeAsync(dbContext, mealTimeId);
-            var _sut = new ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
+            var _sut = new ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
 
             // Act
             await _sut.Handle(new OutboxMessage<RecipeAssignedToMealTime>(
@@ -46,7 +46,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             await using var dbContext = StoredDbContextFactory.Create();
             var mealTimeId = Guid.NewGuid();
             await SeedMealTimeAsync(dbContext, mealTimeId);
-            var _sut = new ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
+            var _sut = new ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
             var recipeAssigned = new RecipeAssignedToMealTime(Guid.NewGuid(), 1, mealTimeId, Guid.NewGuid(), 2);
 
             // Act
@@ -65,7 +65,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             var mealTimeId = Guid.NewGuid();
             var recipeId = Guid.NewGuid();
             await SeedMealTimeAsync(dbContext, mealTimeId);
-            var _sut = new ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
+            var _sut = new ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
             await _sut.Handle(new OutboxMessage<RecipeAssignedToMealTime>(
                 new RecipeAssignedToMealTime(Guid.NewGuid(), 1, mealTimeId, recipeId, 2)));
 
@@ -86,7 +86,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             var firstRecipeId = Guid.NewGuid();
             var secondRecipeId = Guid.NewGuid();
             await SeedMealTimeAsync(dbContext, mealTimeId);
-            var _sut = new ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
+            var _sut = new ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
             await _sut.Handle(new OutboxMessage<RecipeAssignedToMealTime>(
                 new RecipeAssignedToMealTime(Guid.NewGuid(), 1, mealTimeId, firstRecipeId, 1)));
 
@@ -103,7 +103,7 @@ namespace Catalog.Tests.Infrastructure.Projection
         {
             // Arrange
             await using var dbContext = StoredDbContextFactory.Create();
-            var _sut = new ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
+            var _sut = new ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(dbContext, _loggerMock.Object);
 
             // Act
             var act = () => _sut.Handle(new OutboxMessage<RecipeAssignedToMealTime>(
@@ -113,7 +113,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             await act();
         }
 
-        private static Task<List<AssignedRecipeModel>> AssignmentsAsync(StoredDbContext dbContext, Guid mealTimeId)
+        private static Task<List<RecipeAssignmentModel>> AssignmentsAsync(StoredDbContext dbContext, Guid mealTimeId)
         {
             return dbContext.MealPlans
                 .Include(x => x.PlanDays)

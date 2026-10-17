@@ -93,32 +93,6 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     b.ToTable("Food", "read");
                 });
 
-            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.AssignedRecipeModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("MealTimeId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("mealTimeId");
-
-                    b.Property<int>("RationQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("rationQuantity");
-
-                    b.Property<Guid>("RecipeId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("recipeId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MealTimeId");
-
-                    b.ToTable("AssignedRecipe", "read");
-                });
-
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.MealPlanModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -247,6 +221,32 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     b.ToTable("PlanDay", "read");
                 });
 
+            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.RecipeAssignmentModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("MealTimeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mealTimeId");
+
+                    b.Property<int>("RationQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("rationQuantity");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipeId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealTimeId");
+
+                    b.ToTable("RecipeAssignment", "read");
+                });
+
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe.IngredientModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -315,17 +315,6 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     b.ToTable("Recipe", "read");
                 });
 
-            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.AssignedRecipeModel", b =>
-                {
-                    b.HasOne("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.MealTimeModel", "MealTime")
-                        .WithMany("AssignedRecipes")
-                        .HasForeignKey("MealTimeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MealTime");
-                });
-
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.MealTimeModel", b =>
                 {
                     b.HasOne("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.PlanDayModel", "PlanDay")
@@ -346,6 +335,17 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                         .IsRequired();
 
                     b.Navigation("MealPlan");
+                });
+
+            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.RecipeAssignmentModel", b =>
+                {
+                    b.HasOne("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.MealTimeModel", "MealTime")
+                        .WithMany("AssignedRecipes")
+                        .HasForeignKey("MealTimeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MealTime");
                 });
 
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe.IngredientModel", b =>

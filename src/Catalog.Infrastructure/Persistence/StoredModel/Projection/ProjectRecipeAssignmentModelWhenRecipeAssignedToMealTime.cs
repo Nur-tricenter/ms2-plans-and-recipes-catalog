@@ -8,19 +8,19 @@ using Microsoft.Extensions.Logging;
 namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
 {
     /// <summary>
-    /// Projects <see cref="RecipeAssignedToMealTime"/> into the assigned recipe table.
+    /// Projects <see cref="RecipeAssignedToMealTime"/> into the recipe assignment table.
     /// The read model has a generated primary key, so the natural key (meal time, recipe) is used to
     /// upsert: a replay updates the ration quantity instead of inserting a duplicate row.
     /// </summary>
-    public class ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime
+    public class ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime
         : INotificationHandler<OutboxMessage<RecipeAssignedToMealTime>>
     {
         private readonly StoredDbContext _dbContext;
-        private readonly ILogger<ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime> _logger;
+        private readonly ILogger<ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime> _logger;
 
-        public ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime(
+        public ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime(
             StoredDbContext dbContext,
-            ILogger<ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime> logger)
+            ILogger<ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime> logger)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -45,7 +45,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
 
             if (assignment is null)
             {
-                mealTime.AssignedRecipes.Add(new AssignedRecipeModel
+                mealTime.AssignedRecipes.Add(new RecipeAssignmentModel
                 {
                     RecipeId = recipeAssigned.RecipeId,
                     RationQuantity = recipeAssigned.RationQuantity,

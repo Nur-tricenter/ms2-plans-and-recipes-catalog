@@ -51,8 +51,8 @@ namespace Catalog.Tests.Infrastructure.Projection
             Assert.Contains(planCreated, handler => handler is ProjectMealPlanModelWhenMealPlanCreated);
             Assert.Contains(planUpdated, handler => handler is ProjectMealPlanModelWhenMealPlanUpdated);
             Assert.Contains(mealTimeAdded, handler => handler is ProjectMealTimeModelWhenMealTimeAddedToPlan);
-            Assert.Contains(recipeAssigned, handler => handler is ProjectAssignedRecipeModelWhenRecipeAssignedToMealTime);
-            Assert.Contains(recipeRemoved, handler => handler is ProjectAssignedRecipeModelWhenRecipeRemovedFromMealTime);
+            Assert.Contains(recipeAssigned, handler => handler is ProjectRecipeAssignmentModelWhenRecipeAssignedToMealTime);
+            Assert.Contains(recipeRemoved, handler => handler is ProjectRecipeAssignmentModelWhenRecipeRemovedFromMealTime);
         }
 
         [Fact]

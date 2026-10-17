@@ -8,7 +8,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
     public class MealPlanReadConfig : IEntityTypeConfiguration<MealPlanModel>,
         IEntityTypeConfiguration<PlanDayModel>,
         IEntityTypeConfiguration<MealTimeModel>,
-        IEntityTypeConfiguration<AssignedRecipeModel>
+        IEntityTypeConfiguration<RecipeAssignmentModel>
     {
         public void Configure(EntityTypeBuilder<MealPlanModel> builder)
         {
@@ -65,13 +65,13 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
             builder.HasQueryFilter(x => !x.IsDeleted);
 
             builder.HasMany(x => x.AssignedRecipes)
-                .WithOne(ar => ar.MealTime)
+                .WithOne(assignment => assignment.MealTime)
                 .HasForeignKey(ar => ar.MealTimeId);
         }
 
-        public void Configure(EntityTypeBuilder<AssignedRecipeModel> builder)
+        public void Configure(EntityTypeBuilder<RecipeAssignmentModel> builder)
         {
-            builder.ToTable("AssignedRecipe", DatabaseSchemas.Read);
+            builder.ToTable("RecipeAssignment", DatabaseSchemas.Read);
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();

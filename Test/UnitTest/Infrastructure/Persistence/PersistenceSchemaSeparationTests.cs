@@ -190,6 +190,105 @@ namespace Catalog.Tests.Infrastructure.Persistence
         /// the fallback is applied here rather than left as an unqualified name that the two sides
         /// could both produce.
         /// </remarks>
+        [Theory]
+        [InlineData("PlanDay", "mealPlanId")]
+        [InlineData("MealTime", "planDayId")]
+        [InlineData("RecipeAssignment", "mealTimeId")]
+        public void ShadowForeignKey_IsMappedToANonNullableCamelCaseColumn(
+            string dependentTable,
+            string expectedColumn)
+        {
+            //Arrange
+            using var context = BuildWriteContext();
+
+            //Act
+            var table = context.Model
+                .GetRelationalModel()
+                .Tables
+                .Single(x => x.Name == dependentTable);
+            var column = Assert.Single(table.Columns, x => x.Name == expectedColumn);
+
+            //Assert
+            // These three foreign keys have no property on the domain entity, so EF discovers
+            // them as shadow properties. Left to its own conventions EF names the property and
+            // the column "MealPlanId" / "PlanDayId" / "MealTimeId" and leaves the first two
+            // nullable, which contradicted every explicitly camelCase column around them and
+            // disagreed with the read side, where the same three keys are required camelCase
+            // columns. A PlanDay always belongs to a MealPlan and a MealTime always belongs to
+            // a PlanDay, so NOT NULL is also the truthful modelling.
+            Assert.False(column.IsNullable);
+
+            // Asserted at the relational level on purpose: the entity type names for owned
+            // navigations do not match the CLR type name, so FindEntityType cannot be used to
+            // locate these and would fail for a reason unrelated to what is being asserted.
+        }
+
+        [Theory]
+        [InlineData("PlanDay", "MealPlanId")]
+        [InlineData("MealTime", "PlanDayId")]
+        [InlineData("RecipeAssignment", "MealTimeId")]
+        public void ShadowForeignKey_NoLongerLeaksThePascalCaseConventionIntoTheSchema(
+            string dependentTable,
+            string shadowPropertyName)
+        {
+            //Arrange
+            using var context = BuildWriteContext();
+
+            //Act
+            var table = context.Model
+                .GetRelationalModel()
+                .Tables
+                .Single(x => x.Name == dependentTable);
+            var columns = table.Columns.Select(x => x.Name).ToArray();
+
+            //Assert
+            Assert.DoesNotContain(shadowPropertyName, columns);
+        }
+
+        [Fact]
+        public void AssignmentChild_IsMappedUnderTheSameNameOnBothSides()
+        {
+            //Arrange
+            using var writeContext = BuildWriteContext();
+            using var readContext = BuildReadContext();
+
+            //Act
+            var writeRelations = QualifiedTableNames(writeContext);
+            var readRelations = QualifiedTableNames(readContext);
+
+            //Assert
+            // The domain calls this ValueObject RecipeAssignment and the write table agreed. The
+            // read side called the same concept AssignedRecipe, so searching for the domain name
+            // missed half the model — and in a CQRS codebase, following an event from the
+            // aggregate to its projection is the main maintenance task there is.
+            Assert.Contains($"{DatabaseSchemas.Write}.RecipeAssignment", writeRelations);
+            Assert.Contains($"{DatabaseSchemas.Read}.RecipeAssignment", readRelations);
+        }
+
+        [Fact]
+        public void NoColumnOnEitherSide_StartsWithAnUppercaseLetter()
+        {
+            //Arrange
+            using var writeContext = BuildWriteContext();
+            using var readContext = BuildReadContext();
+
+            //Act
+            var offending = ColumnNames(writeContext)
+                .Concat(ColumnNames(readContext))
+                .Where(x => x.Length > 0 && char.IsUpper(x[0]))
+                .OrderBy(x => x, StringComparer.Ordinal)
+                .ToArray();
+
+            //Assert
+            // camelCase is this project's column convention, and it is not a free choice: the
+            // outbox table belongs to Joseco.Outbox.EFCore, which hardcodes its own camelCase
+            // columns (outboxId, processedOn, correlationId, traceId, spanId), so the schema
+            // already contains camelCase this project does not own. Leaving three shadow
+            // foreign keys and two owned keys on the EF default meant one schema held two
+            // conventions side by side, and nothing in the suite could see it.
+            Assert.Empty(offending);
+        }
+
         private static string[] QualifiedTableNames(DbContext context)
         {
             var defaultSchema = context.Model.GetDefaultSchema();
@@ -198,6 +297,25 @@ namespace Catalog.Tests.Infrastructure.Persistence
                 .GetRelationalModel()
                 .Tables
                 .Select(table => $"{table.Schema ?? defaultSchema}.{table.Name}")
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Every column name the context maps, qualified as <c>schema.table.column</c>.
+        /// </summary>
+        /// <remarks>
+        /// Qualifying with the table is what makes a failure actionable: a bare column name is
+        /// ambiguous when the same name appears in both schemas, which is the normal case here.
+        /// </remarks>
+        private static string[] ColumnNames(DbContext context)
+        {
+            var defaultSchema = context.Model.GetDefaultSchema();
+
+            return context.Model
+                .GetRelationalModel()
+                .Tables
+                .SelectMany(table => table.Columns.Select(column =>
+                    $"{table.Schema ?? defaultSchema}.{table.Name}.{column.Name}"))
                 .ToArray();
         }
     }

@@ -33,14 +33,14 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan
         public int Order { get; set; }
         public Guid PlanDayId { get; set; }
         public PlanDayModel PlanDay { get; set; } = null!;
-        public List<AssignedRecipeModel> AssignedRecipes { get; set; } = new();
+        public List<RecipeAssignmentModel> AssignedRecipes { get; set; } = new();
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
         public bool IsDeleted { get; set; }
     }
 
-    public class AssignedRecipeModel
+    public class RecipeAssignmentModel
     {
         public Guid Id { get; set; }
         public Guid RecipeId { get; set; }
