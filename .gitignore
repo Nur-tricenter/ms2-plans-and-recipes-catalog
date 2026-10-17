@@ -153,3 +153,13 @@ Guia.ipynb
 ANALISIS-ARQUITECTURA-MS2026.md
 ROADMAP-MS2026.md
 .atl/
+
+###########################################################
+# Documentos de trabajo por feature (no versionar)
+###########################################################
+
+# Feature documents written by the ODD workflow: objective, problem, scope,
+# task checklist and verification evidence for a piece of work that is
+# already described by its commits. The commit message is the durable
+# record; this is the scratchpad that produced it.
+odd/
