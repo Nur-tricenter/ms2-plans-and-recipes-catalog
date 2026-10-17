@@ -40,7 +40,7 @@
       graph converges on it. Do NOT remove this pin unless the RabbitMQ package stops requesting
       OpenTelemetry.Api < 1.15.3.
     -->
-    <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.20.0" />
   </ItemGroup>
 
   <ItemGroup>

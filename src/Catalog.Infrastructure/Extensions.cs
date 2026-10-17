@@ -12,6 +12,7 @@ using Catalog.Infrastructure.Persistence.Repositories.MealPlan;
 using Catalog.Infrastructure.Persistence.Repositories.Recipe;
 using Catalog.Infrastructure.Seed;
 using Joseco.Outbox.EFCore.Persistence;
+using Scrutor;
 using Joseco.Outbox.EFCore.Procesor;
 using Joseco.Outbox.Contracts.Service;
 using MediatR;
@@ -103,6 +104,10 @@ namespace Catalog.Infrastructure
             services.AddScoped<IOutboxService<TEvent>>(sp => sp.GetRequiredService<EfCoreOutboxService<TEvent>>());
             services.AddScoped<IOutboxRepository<TEvent>>(sp => sp.GetRequiredService<EfCoreOutboxService<TEvent>>());
             services.AddScoped<OutboxProcessor<TEvent>>();
+
+            // Wraps the registration above so every staged outbox row inherits the ambient trace.
+            // Must run AFTER the AddScoped calls, or Scrutor decorates nothing.
+            services.Decorate<IOutboxService<TEvent>, Observability.OutboxTracingService<TEvent>>();
         }
     }
 }

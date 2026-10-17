@@ -1,5 +1,6 @@
 using Catalog.Infrastructure;
 using Catalog.Infrastructure.Configuration;
+using Catalog.Infrastructure.Observability;
 using Catalog.Infrastructure.Consul;
 using Catalog.WebApi.Configuration;
 using Catalog.WebApi.Utils;
@@ -27,6 +28,10 @@ namespace Catalog.WebApi
         public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration);
+
+            // Traces, metrics and the meter collection list. Registered after AddInfrastructure so the
+            // outbox decorator registered there resolves against the fully built provider.
+            services.AddObservability(ObservabilityOptions.ServiceName, Configuration);
 
             services.AddControllers();
 

@@ -1,4 +1,5 @@
 using Catalog.Infrastructure.Configuration;
+using Catalog.Infrastructure.Observability;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +36,10 @@ namespace Catalog.WebApi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                // Serilog with the ambient span stamped onto every event, so a log line can be joined
+                // to its trace without code of ours. Applied here rather than in Startup so it also
+                // covers the host's own lifecycle logs.
+                .UseCatalogLogging(ObservabilityOptions.ServiceName)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
