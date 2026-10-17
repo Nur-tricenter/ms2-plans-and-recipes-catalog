@@ -1,4 +1,5 @@
 using Catalog.Domain.Event.Recipe;
+using Catalog.Domain.Model.Foods;
 using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.ValueObjects;
 using Catalog.Infrastructure;
@@ -65,6 +66,43 @@ namespace Catalog.Tests.Infrastructure.Projection
 
             // Assert
             Assert.Single(await storedDbContext.Recipes.ToListAsync());
+        }
+
+        /// <summary>
+        /// The Food path is the one that carries a value object inside the event payload, so it is
+        /// the one that breaks when the outbox cannot rebuild the event. Before the domain events
+        /// lost their public parameterless constructors this row arrived with a null
+        /// <c>NutritionalInfo</c> and the projection threw a <c>NullReferenceException</c> before
+        /// issuing any INSERT. The recipe test above cannot see that class of bug because no recipe
+        /// payload carries a value object.
+        /// </summary>
+        [Fact]
+        public async Task Process_WithAStagedFoodCreated_WritesTheStoredFoodModelWithItsNutrition()
+        {
+            // Arrange
+            using var provider = BuildProvider();
+            using var scope = provider.CreateScope();
+            var storedDbContext = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+            var food = new Food(
+                new FoodName("Carne de res"),
+                new CategoryName("Carnes"),
+                UnitOfMeasure.Gram,
+                new NutritionalInfo(100m, 250m, 26m, 0m, 15m));
+            scope.ServiceProvider.GetRequiredService<DomainDbContext>().Foods.Add(food);
+            await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
+            var processor = scope.ServiceProvider.GetRequiredService<OutboxProcessor<DomainEvent>>();
+
+            // Act
+            await processor.Process(CancellationToken.None);
+
+            // Assert
+            var stored = Assert.Single(await storedDbContext.Foods.ToListAsync());
+            Assert.Equal(food.Id, stored.Id);
+            Assert.Equal("Carne de res", stored.Name);
+            Assert.Equal("Carnes", stored.Category);
+            Assert.Equal(250m, stored.Calories);
+            Assert.Equal(26m, stored.Protein);
+            Assert.Equal(15m, stored.Fat);
         }
 
         private static ServiceProvider BuildProvider()

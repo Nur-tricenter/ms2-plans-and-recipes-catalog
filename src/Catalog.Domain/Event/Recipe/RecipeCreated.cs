@@ -8,10 +8,13 @@ namespace Catalog.Domain.Event.Recipe
         public string Name { get; }
         public string Instructions { get; }
 
-        public RecipeCreated() : this(Guid.Empty, string.Empty, string.Empty)
-        {
-        }
-
+        /// <remarks>
+        /// This is the ONLY constructor on purpose. A public parameterless constructor would make
+        /// the outbox's Newtonsoft deserializer build the event through it and then skip every
+        /// get-only payload property, so the event would silently arrive empty. See
+        /// <c>FoodCreated</c> and
+        /// <c>Test/UnitTest/Domain/Events/DomainEventOutboxSerializationTests</c>.
+        /// </remarks>
         public RecipeCreated(Guid recipeId, string name, string instructions)
         {
             OccuredOn = DateTime.UtcNow;

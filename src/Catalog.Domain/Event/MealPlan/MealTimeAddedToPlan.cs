@@ -10,10 +10,13 @@ namespace Catalog.Domain.Event.MealPlan
         public string MealTimeType { get; }
         public int Order { get; }
 
-        public MealTimeAddedToPlan() : this(Guid.Empty, 0, Guid.Empty, string.Empty, 0)
-        {
-        }
-
+        /// <remarks>
+        /// This is the ONLY constructor on purpose. A public parameterless constructor would make
+        /// the outbox's Newtonsoft deserializer build the event through it and then skip every
+        /// get-only payload property, so the event would silently arrive empty. See
+        /// <c>FoodCreated</c> and
+        /// <c>Test/UnitTest/Domain/Events/DomainEventOutboxSerializationTests</c>.
+        /// </remarks>
         public MealTimeAddedToPlan(Guid planId, int dayNumber, Guid mealTimeId, string mealTimeType, int order)
         {
             OccuredOn = DateTime.UtcNow;
