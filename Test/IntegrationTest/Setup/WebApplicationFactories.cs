@@ -11,6 +11,8 @@ namespace Catalog.Tests.IntegrationTest.Setup
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.DisableServiceDiscovery();
+
             builder.ConfigureTestServices(services =>
             {
                 services.ReplaceInfrastructureWithInMemory(_dbName);
@@ -24,6 +26,8 @@ namespace Catalog.Tests.IntegrationTest.Setup
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.DisableServiceDiscovery();
+
             builder.ConfigureTestServices(services =>
             {
                 services.ReplaceInfrastructureWithInMemory(_dbName);
@@ -37,6 +41,8 @@ namespace Catalog.Tests.IntegrationTest.Setup
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.DisableServiceDiscovery();
+
             builder.ConfigureTestServices(services =>
             {
                 services.ReplaceInfrastructureWithInMemory(_dbName);

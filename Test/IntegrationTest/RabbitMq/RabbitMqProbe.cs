@@ -58,7 +58,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
         /// <summary>Reason reported by the skip attributes when <see cref="IsReachable"/> is false.</summary>
         public const string SkipReason =
             "Requires a live RabbitMQ broker on localhost:5672 (TCP connect or AMQP handshake failed). " +
-            "Start the project-level container 'nurtricenter-rabbitmq' to run these tests.";
+            "Start the project-level container 'nur-tricenter-rabbitmq' to run these tests.";
 
         private static bool Probe()
         {

@@ -5,7 +5,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// <summary>
     /// Builds the <see cref="RabbitMqSettings"/> the broker integration tests hand to the real
     /// <c>AddRabbitMQ</c> registration. The values match the project-level broker published by the
-    /// container <c>nurtricenter-rabbitmq</c>.
+    /// container <c>nur-tricenter-rabbitmq</c>.
     /// </summary>
     public static class RabbitMqTestSettings
     {

@@ -90,21 +90,126 @@ ms2-plans-and-recipes-catalog/
 | Docker Desktop | Última estable (recomendado) |
 | .NET SDK | 10.x (solo si quieres correrlo directamente) |
 
+## Configuración
+
+Todo comportamiento que dependía del **nombre del entorno** (`ASPNETCORE_ENVIRONMENT`) se decide
+ahora por **configuración explícita**, con valores por defecto que son siempre los seguros:
+
+| Sección | Clave | Default | Qué controla |
+|---------|-------|---------|--------------|
+| `Migrations` | `ApplyOnStartup` | `false` | Aplicar migraciones al arrancar el host |
+| `Migrations` | `TimeoutSeconds` | `120` | Presupuesto total de la corrida (ambos contextos) |
+| `Seed` | `Enabled` | `false` | Cargar los datos de ejemplo (30 alimentos / 25 recetas / 2 planes) |
+| `Swagger` | `Enabled` | `false` | Servir `/swagger` y `/swagger/v1/swagger.json` |
+| `HttpsRedirection` | `Enabled` | `false` | Agregar `UseHttpsRedirection()` |
+
+**No hay secretos en archivos versionados.** `src/Catalog.WebApi/appsettings.json` y
+`src/Catalog.WorkerService/appsettings.json` ya **no** contienen la cadena de conexión. Cada proyecto
+tiene un template versionado con los valores de desarrollo:
+
+```bash
+cp src/Catalog.WebApi/appsettings.Development.template.json         src/Catalog.WebApi/appsettings.Development.json
+cp src/Catalog.WorkerService/appsettings.Development.template.json  src/Catalog.WorkerService/appsettings.Development.json
+```
+
+Las copias se llaman `appsettings.Development.json` y **están en `.gitignore` (línea 107)**: nunca se
+versionan. En un despliegue usá variables de entorno, que tienen precedencia sobre los archivos:
+`ConnectionStrings__CatalogDbConnectionString`, `Migrations__ApplyOnStartup`,
+`Migrations__TimeoutSeconds`, `Seed__Enabled`, `Swagger__Enabled`, `HttpsRedirection__Enabled`.
+
+Un test (`Test/UnitTest/Infrastructure/Configuration/TrackedConfigurationTests.cs`) falla la
+compilación si vuelve a aparecer una sección `ConnectionStrings` o una contraseña en cualquiera de los
+dos `appsettings.json` versionados.
+
+> `HttpsRedirection:Enabled` está en `false` porque **el TLS termina aguas arriba** (ingress, gateway
+> o sidecar de la malla) y lo que llega a este proceso es HTTP plano. Encendelo solo cuando el
+> proceso sea realmente el borde TLS (Kestrel con certificado, típicamente desarrollo local).
+
+### Migraciones de base de datos
+
+El esquema se aplica con un **paso explícito**, no al arrancar el servicio:
+
+```bash
+dotnet run --project src/Catalog.WebApi/Catalog.WebApi.csproj -- --migrate
+# o, sobre el binario publicado:
+dotnet Catalog.WebApi.dll --migrate
+```
+
+Aplica las migraciones del **lado escritura** (`DomainDbContext`) y después las del **lado lectura**
+(`StoredDbContext`). Sale con código `0` si terminó bien y `1` si falló, así que un orquestador (Job
+de Kubernetes, servicio one-shot de compose, paso de CI) decide si la aplicación puede arrancar. Es
+idempotente: correrlo dos veces no aplica nada la segunda.
+
+Para desarrollo, `Migrations:ApplyOnStartup: true` en `appsettings.Development.json` deja el
+`dotnet run` sin ceremonia. **No lo pongas en un despliegue.**
+
+> ### ✅ Los dos lados viven en esquemas distintos
+>
+> `DomainDbContext` (escritura) usa el esquema **`write`** y `StoredDbContext` (lectura) el esquema
+> **`read`**. Los nombres de esquema están declarados en un solo lugar,
+> `Catalog.Infrastructure.Persistence.DatabaseSchemas`, y cada `ToTable` los referencia; ninguno
+> escribe a `public`. El esquema lo fija `HasDefaultSchema` en cada contexto, así que un mapeo que
+> olvide el `ToTable` explícito tampoco vuelve a colisionar.
+>
+> | Esquema | Tablas |
+> |---------|--------|
+> | `write` | `Food`, `Recipe`, `RecipeIngredient`, `MealPlan`, `PlanDay`, `MealTime`, `RecipeAssignment` |
+> | `read` | `Food`, `Recipe`, `RecipeIngredient`, `MealPlan`, `PlanDay`, `MealTime`, `AssignedRecipe` |
+> | `outbox` | `outboxMessage` |
+>
+> `outboxMessage` **no** es decisión de este proyecto: `Joseco.Outbox.EFCore` declara
+> `OutboxMessageConfig<T>` como `internal` y llama `ToTable("outboxMessage", "outbox")` sin punto de
+> extensión, así que el esquema `outbox` queda fijo para la librería. Verificado contra PostgreSQL 16:
+> con el esquema por defecto `write` en el contexto, la migración generada sigue emitiendo
+> `CreateTable(name: "outboxMessage", schema: "outbox")`.
+>
+> Verificado de punta a punta contra PostgreSQL 16 sobre una base vacía: `--migrate` aplica las dos
+> historias sin `42P07`, sale con código `0`, y la segunda corrida es un no-op. La tabla
+> `__EFMigrationsHistory` queda en `public` y es compartida: los ids de migración de los dos contextos
+> son disjuntos, así que cada historia aplica solo lo que no encuentra registrado.
+>
+> `Test/UnitTest/Infrastructure/Persistence/PersistenceSchemaSeparationTests.cs` falla si alguna vez
+> los dos contextos vuelven a mapear el mismo nombre de tabla en el mismo esquema. Ese test es
+> necesario porque EF Core InMemory **no puede** detectar esta clase de defecto: le da a cada
+> contexto su propio almacén, así que una suite entera en verde no dice absolutamente nada sobre
+> las colisiones de esquema.
+>
+> **Pendiente, ajeno a este cambio:** la proyección de `FoodCreated` a `read.Food` lanza un
+> `NullReferenceException` porque `NutritionalInfo` llega deserializado como `null` desde el
+> contenido del outbox (queda `null` solo en los eventos que llevan ese value object; `Portion` y
+> `Ration` deserializan bien). Ningún mapeo de EF participa: el fallo ocurre antes de la primera
+> sentencia `INSERT`.
+
 ## Cómo ejecutar el proyecto
 
 ### Opción 1 — Docker Compose (recomendada)
 
-Levanta la API y la base de datos PostgreSQL en un solo comando desde la raíz del proyecto:
+Levanta PostgreSQL, aplica el esquema con un paso one-shot y levanta la API:
 
 ```bash
+# 1. Configuración local, una sola vez (crea appsettings.Development.json, fuera de git)
+cp src/Catalog.WebApi/appsettings.Development.template.json src/Catalog.WebApi/appsettings.Development.json
+
+# 2. Levantar el stack (Postgres -> webapi-migrate -> webapi)
 docker compose up -d
+
+# O aplicar el esquema a mano, sin el servicio one-shot:
+docker compose run --rm webapi-migrate
 ```
 
-Al primer arranque se crea la base de datos, se aplican las migraciones automáticamente y se cargan los datos de ejemplo.
+El servicio `webapi-migrate` corre `dotnet Catalog.WebApi.dll --migrate`, y `webapi` espera a que
+termine con éxito (`service_completed_successfully`) antes de arrancar. `webapi` **no** migra ni
+sembra por su cuenta.
+
+> El paso de migración es seguro sobre una base vacía. Si tu volumen `catalog-db-data` ya existe
+> con un esquema viejo (tablas en `public`, nombres en español de una versión anterior), recrealo
+> con `docker compose down -v` antes de volver a intentarlo: las dos historias parten de cero y no
+> migran un esquema preexistente.
 
 | Recurso | URL |
 |---------|-----|
 | Documentación interactiva (Swagger) | http://localhost:8080/swagger |
+| Health | http://localhost:8080/health |
 | API | http://localhost:8080/api/v1/... |
 | PostgreSQL | localhost:5433 |
 
@@ -116,14 +221,29 @@ docker compose down
 
 ### Opción 2 — Ejecución directa con el SDK de .NET
 
-Requiere un servidor PostgreSQL disponible (por ejemplo, el del `docker compose`) y la cadena de conexión configurada en `WebApi/appsettings.json`:
+Requiere un PostgreSQL disponible (por ejemplo el de `docker compose`) y la configuración local:
 
 ```bash
+cp src/Catalog.WebApi/appsettings.Development.template.json src/Catalog.WebApi/appsettings.Development.json
+
 dotnet restore
 dotnet run --project src/Catalog.WebApi/Catalog.WebApi.csproj
 ```
 
-Al arrancar, la aplicación aplica las migraciones pendientes automáticamente. Swagger queda disponible en `http://localhost:5000/swagger` (o el puerto definido en `launchSettings.json`).
+Si preferís no tocar ningún archivo, exportá las variables de entorno equivalentes (los valores
+están en el template):
+
+```bash
+Migrations__ApplyOnStartup=true
+Seed__Enabled=true
+Swagger__Enabled=true
+ConnectionStrings__CatalogDbConnectionString=<la del template>
+```
+
+Con `Migrations:ApplyOnStartup: true` y `Seed__Enabled: true` el arranque aplica el esquema y carga
+los datos de ejemplo. Swagger queda en `http://localhost:63884/swagger` (o el puerto de
+`launchSettings.json`). Sin esos flags el host arranca igual, pero **no** migra, **no** siembra y
+**no** sirve Swagger.
 
 ## Pruebas
 

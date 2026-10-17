@@ -40,7 +40,7 @@ namespace Catalog.Tests.WorkerService
         }
 
         [Fact]
-        public void GetSection_BoundFromTheShippedWorkerServiceAppsettings_BindsEveryMember()
+        public void GetSection_BoundFromTheShippedWorkerServiceTemplate_BindsEveryMember()
         {
             // Arrange
             var configuration = BuildShippedAppsettingsConfiguration();
@@ -79,9 +79,14 @@ namespace Catalog.Tests.WorkerService
             var contentRoot = Path.GetFullPath(
                 Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
 
+            // The TEMPLATE, not appsettings.json. The shipped base file no longer carries the
+            // broker credential — a tracked file must not — and the template is the tracked artefact
+            // that documents the development values a local run is expected to copy. Everything this
+            // test actually asserts, that RabbitMqSettings binds Host, UserName, Password,
+            // VirtualHost and the retry policy out of a real file on disk, is still proven.
             return new ConfigurationBuilder()
                 .SetBasePath(contentRoot)
-                .AddJsonFile(Path.Combine("src", "Catalog.WorkerService", "appsettings.json"))
+                .AddJsonFile(Path.Combine("src", "Catalog.WorkerService", "appsettings.Development.template.json"))
                 .Build();
         }
     }
