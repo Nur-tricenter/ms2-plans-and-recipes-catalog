@@ -1,4 +1,4 @@
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Joseco.Communication.External.RabbitMQ.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

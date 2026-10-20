@@ -6,28 +6,29 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--
+    Joseco.DDD.Core is declared here, not left to arrive transitively from Catalog.Domain, even
+    though Domain references it. This layer uses DomainEvent, IUnitOfWork and Result<T> directly
+    in its own signatures, and a dependency you compile against is one you own: if Domain moves
+    that package to another version tomorrow, this project keeps building against the version it
+    declared instead of silently inheriting a different one.
+  -->
   <ItemGroup>
-    <PackageReference Include="Joseco.DDD.Core" Version="1.0.3" />
-    <PackageReference Include="Joseco.Outbox.Contracts" Version="1.0.2" />
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Scrutor" Version="6.0.1" />
+    <PackageReference Include="Joseco.DDD.Core" />
+    <PackageReference Include="Joseco.Outbox.Contracts" />
+    <!--
+      Declared because the five PublishIntegrationEventWhen* handlers take an IExternalPublisher
+      in their constructor and register it in DI. The interface is the publishing abstraction, not
+      a transport: the concrete broker arrives in the worker, so Application still has no
+      dependency on RabbitMQ.
+    -->
+    <PackageReference Include="Joseco.Communication.External.Contracts" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="Scrutor" />
   </ItemGroup>
 
   <ItemGroup>
-    <!--
-      The external integration contracts (FoodPublished, RecipePublished, RecipeUpdated,
-      FoodNutritionalInfoUpdated, MealPlanPublished) and the RabbitMQ exchange registry
-      (CatalogExchanges) now live in the shared kernel Nur.Tricenter.Integration instead of in
-      this project. Every microservice on the platform publishes to the SAME exchanges under the
-      SAME names, so a change to that topology has to land once, in one place, or the producers
-      and the consumers drift apart on a contract nothing compiles against.
-
-      The kernel depends only on Joseco.Communication.External.Contracts, so referencing it here
-      does NOT drag a broker into the Application layer: a service can publish a contract without
-      pulling in RabbitMQ. Joseco.Communication.External.Contracts is therefore no longer declared
-      above either: it arrives transitively, and the OutboxContracts/MediatR pins below stay.
-    -->
-    <ProjectReference Include="..\..\..\nur-tricenter-shared-kernels\nur-tricenter-integration\nur-tricenter-integration.csproj" />
+    <ProjectReference Include="..\..\contracts\Catalog.Contracts.csproj" />
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
   </ItemGroup>
 

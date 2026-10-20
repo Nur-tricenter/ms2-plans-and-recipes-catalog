@@ -3,7 +3,7 @@ using Joseco.DDD.Core.Abstractions;
 using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.MealPlan;
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Application.UseCase.DomainEventHandler

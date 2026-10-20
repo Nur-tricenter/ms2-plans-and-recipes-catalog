@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Catalog.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    This project holds what belongs to THIS microservice and nothing else: the permissions it
+    recognises and the routes it publishes.
+
+    Why it is separate from src/: a shared kernel may not know what a Food or a MealPlan is. If
+    the catalog's permissions lived in the kernel, the next service to arrive would have to fork
+    the kernel to add its own, and the two copies would diverge. Keeping the domain's content
+    here means the kernel stays generic and a new service publishes its own contracts without
+    touching anyone else's.
+
+    The gateway reads these to build its authorization table, so anything published here is
+    part of the service's public surface.
+  -->
+
+  <ItemGroup>
+    <!--
+      IntegrationMessage is the vendor base record every cross-service message extends. It has no
+      transport logic, so declaring it here does not drag a broker into a project that only
+      declares contracts.
+    -->
+    <PackageReference Include="Joseco.Communication.External.Contracts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      ScopeAccessRule is the type a rule is expressed in, and it lives in the kernel because every
+      service needs it and none of them own it.
+    -->
+    <ProjectReference Include="..\..\nur-tricenter-shared-kernels\nur-tricenter-access\nur-tricenter-access.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,28 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--
+    Dependency rule (reference architecture, section 8): the worker references Infrastructure
+    ONLY. Application arrives transitively through it, so a direct reference here would be a
+    second, redundant edge that the two projects can drift apart on.
+
+    It also owns no telemetry packages: they arrive through the observability shared kernel.
+    Declaring them again here is how two projects end up pinned to different versions of the
+    same OpenTelemetry package.
+  -->
   <ItemGroup>
-    <PackageReference Include="Joseco.Communication.External.RabbitMQ" Version="1.1.0" />
-    <!--
-      Pin: Joseco.Communication.External.RabbitMQ 1.1.0 drags OpenTelemetry.Api 1.12.0, which
-      carries advisory GHSA-g94r-2vxg-569j (NU1902). 1.15.3 is the lowest already-pinned
-      non-vulnerable version used by Catalog.Infrastructure, so the whole graph converges on it.
-      Do NOT remove this pin unless the RabbitMQ package stops requesting OpenTelemetry.Api < 1.15.3.
-    -->
-    <PackageReference Include="OpenTelemetry.Api" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Joseco.Communication.External.Contracts.Message;
 using Xunit;
 

@@ -1,0 +1,77 @@
+<Project>
+  <!--
+    Versions every project in this service shares.
+
+    Why this file exists: OpenTelemetry and Serilog were previously declared, and pinned, in
+    five csproj at once. That is how two projects end up on different versions of the same
+    package, which surfaces later as a runtime type mismatch rather than a build error. A new
+    microservice cloned from this repository inherits the pins here without repeating them.
+
+    Every project uses Central Package Management, so the version lives once and the
+    PackageReference stays bare.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Joseco">
+    <!--
+      The four vendor libraries this service is built on. They are generic infrastructure with
+      no domain logic: base DDD types, the transactional outbox, RabbitMQ transport, and the
+      integration-message base record.
+    -->
+    <PackageVersion Include="Joseco.DDD.Core" Version="1.0.3" />
+    <PackageVersion Include="Joseco.Outbox.Contracts" Version="1.0.2" />
+    <PackageVersion Include="Joseco.Outbox.EFCore" Version="1.1.0" />
+    <PackageVersion Include="Joseco.Communication.External.Contracts" Version="1.0.1" />
+    <PackageVersion Include="Joseco.Communication.External.RabbitMQ" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Entity Framework">
+    <!--
+      9.0.4 is the version the reference architecture pins. Do not move to 10.x without moving
+      the whole service: the shared kernels target net8.0 and were built against EF 9.
+    -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup Label="Extensions">
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="Application">
+    <PackageVersion Include="MediatR" Version="14.1.0" />
+    <PackageVersion Include="Scrutor" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Hosting">
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.22" />
+    <PackageVersion Include="Consul" Version="1.7.14.7" />
+  </ItemGroup>
+
+  <ItemGroup Label="OpenTelemetry (transitive from the observability kernel)">
+    <!--
+      The test project pins the API package because Joseco.Communication 1.1.0 asks for 1.12.0,
+      which carries GHSA-g94r-2vxg-569j (NU1902). Matches the observability kernel's 1.16.0.
+    -->
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.16.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="PactNet" Version="5.0.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+  </ItemGroup>
+
+</Project>

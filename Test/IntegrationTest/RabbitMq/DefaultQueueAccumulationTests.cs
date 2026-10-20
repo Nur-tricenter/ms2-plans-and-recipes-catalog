@@ -1,5 +1,5 @@
 using System.Text;
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Catalog.WorkerService;
 using Joseco.Communication.External.Contracts.Message;
 using Joseco.Communication.External.Contracts.Services;

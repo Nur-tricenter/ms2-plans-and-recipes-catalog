@@ -23,26 +23,26 @@
       HTTP endpoint, and a gateway cannot route to it. Registration is opt-in per host, never a
       side effect of AddInfrastructure.
     -->
-    <PackageReference Include="Consul" Version="1.7.14.7" />
-    <PackageReference Include="Joseco.DDD.Core" Version="1.0.3" />
-    <PackageReference Include="Joseco.Outbox.EFCore" Version="1.1.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Consul" />
+    <PackageReference Include="Joseco.DDD.Core" />
+    <PackageReference Include="Joseco.Outbox.EFCore" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <!--
       Declared explicitly because ServiceRegistration implements IHostedService. It already arrived
       transitively at 9.0.3, and this pin matches that exact version so the graph converges instead
       of shifting. Referencing a type from an undeclared transitive package is a build that breaks
       the next time an unrelated package moves.
     -->
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scrutor" Version="6.0.1" />
+    <PackageReference Include="Scrutor" />
     <!--
       OpenTelemetry.* and Serilog.* are NOT declared here any more: they arrive through
       Nur.Tricenter.Observability, which is where the AddObservability/UseLogging bodies and the

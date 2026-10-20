@@ -3,21 +3,21 @@ using Joseco.DDD.Core.Abstractions;
 using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.Food;
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Microsoft.Extensions.Logging;
 
 // The domain event (Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated) and the integration
-// contract (Nur.Tricenter.Integration.FoodNutritionalInfoUpdated) deliberately share
+// contract (Catalog.Contracts.Integration.FoodNutritionalInfoUpdated) deliberately share
 // this name, mirroring MS2026 where ProductCreated exists in both namespaces. The alias pins the
 // wire type; the bare name keeps meaning the domain event.
-using IntegrationContract = Nur.Tricenter.Integration.FoodNutritionalInfoUpdated;
+using IntegrationContract = Catalog.Contracts.Integration.FoodNutritionalInfoUpdated;
 
 namespace Catalog.Application.UseCase.DomainEventHandler
 {
     /// <summary>
     /// Translates the outbox message that carries the domain event
     /// <see cref="Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated"/> into the
-    /// <see cref="Nur.Tricenter.Integration.FoodNutritionalInfoUpdated"/> external contract
+    /// <see cref="Catalog.Contracts.Integration.FoodNutritionalInfoUpdated"/> external contract
     /// and publishes it to RabbitMQ.
     /// </summary>
     public class PublishIntegrationEventWhenFoodNutritionalInfoUpdated

@@ -1,4 +1,4 @@
-using Nur.Tricenter.Integration;
+using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.MealPlan;
 using Joseco.Communication.External.Contracts.Services;
@@ -9,9 +9,9 @@ using Moq;
 using Xunit;
 
 // The domain event (Catalog.Domain.Event.Recipe.RecipeUpdated) and the integration contract
-// (Nur.Tricenter.Integration.RecipeUpdated) deliberately share this name. The alias pins
+// (Catalog.Contracts.Integration.RecipeUpdated) deliberately share this name. The alias pins
 // the wire type under test; the bare name means the domain event.
-using IntegrationContract = Nur.Tricenter.Integration.RecipeUpdated;
+using IntegrationContract = Catalog.Contracts.Integration.RecipeUpdated;
 
 namespace Catalog.Tests.Application
 {
