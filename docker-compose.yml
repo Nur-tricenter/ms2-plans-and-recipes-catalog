@@ -24,7 +24,7 @@ services:
   # NOTE: RabbitMQ is intentionally NOT declared here.
   # The broker is provided project-level by the container `nur-tricenter-rabbitmq`
   # (image rabbitmq:3-management-alpine) attached to the `nur-tricenter-net` network, and it is
-  # published on the host at AMQP 5672 / management 15672 with catalogUser/catalogUserPassword
+  # published on the host at AMQP 5672 / management 15672 with guest/guest
   # on vhost "/". Declaring a second broker here would collide with that published port.
   #
   # Host port 5672 is a hard requirement, not a default:

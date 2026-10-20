@@ -19,8 +19,8 @@ namespace Catalog.Tests.WorkerService
             // Assert
             Assert.NotNull(settings);
             Assert.Equal("localhost", settings.Host);
-            Assert.Equal("catalogUser", settings.UserName);
-            Assert.Equal("catalogUserPassword", settings.Password);
+            Assert.Equal("guest", settings.UserName);
+            Assert.Equal("guest", settings.Password);
             Assert.Equal("/", settings.VirtualHost);
         }
 
@@ -51,8 +51,8 @@ namespace Catalog.Tests.WorkerService
             // Assert
             Assert.NotNull(settings);
             Assert.Equal("localhost", settings.Host);
-            Assert.Equal("catalogUser", settings.UserName);
-            Assert.Equal("catalogUserPassword", settings.Password);
+            Assert.Equal("guest", settings.UserName);
+            Assert.Equal("guest", settings.Password);
             Assert.Equal("/", settings.VirtualHost);
             Assert.Equal(3, settings.MaxRetryAttempts);
             Assert.Equal(500, settings.RetryBaseDelayMilliseconds);
@@ -64,8 +64,8 @@ namespace Catalog.Tests.WorkerService
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["RabbitMqSettings:Host"] = "localhost",
-                    ["RabbitMqSettings:UserName"] = "catalogUser",
-                    ["RabbitMqSettings:Password"] = "catalogUserPassword",
+                    ["RabbitMqSettings:UserName"] = "guest",
+                    ["RabbitMqSettings:Password"] = "guest",
                     ["RabbitMqSettings:VirtualHost"] = "/",
                     ["RabbitMqSettings:MaxRetryAttempts"] = "3",
                     ["RabbitMqSettings:RetryBaseDelayMilliseconds"] = "500"

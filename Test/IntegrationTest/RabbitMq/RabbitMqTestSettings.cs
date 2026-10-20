@@ -9,8 +9,8 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// </summary>
     public static class RabbitMqTestSettings
     {
-        public const string UserName = "catalogUser";
-        public const string Password = "catalogUserPassword";
+        public const string UserName = "guest";
+        public const string Password = "guest";
         public const string VirtualHost = "/";
 
         public static RabbitMqSettings Create(int maxRetryAttempts = 3, int retryBaseDelayMilliseconds = 300)

@@ -35,7 +35,7 @@ namespace Catalog.Tests.WorkerService
             // Assert
             var settings = provider.GetService<RabbitMqSettings>();
             Assert.NotNull(settings);
-            Assert.Equal("catalogUser", settings.UserName);
+            Assert.Equal("guest", settings.UserName);
             Assert.Same(settings, provider.GetService<RabbitMqSettings>());
         }
 
@@ -156,8 +156,8 @@ namespace Catalog.Tests.WorkerService
                 {
                     ["ConnectionStrings:CatalogDbConnectionString"] = "Host=localhost;Database=catalog;Username=test;Password=test",
                     ["RabbitMqSettings:Host"] = "localhost",
-                    ["RabbitMqSettings:UserName"] = "catalogUser",
-                    ["RabbitMqSettings:Password"] = "catalogUserPassword",
+                    ["RabbitMqSettings:UserName"] = "guest",
+                    ["RabbitMqSettings:Password"] = "guest",
                     ["RabbitMqSettings:VirtualHost"] = "/",
                     ["RabbitMqSettings:MaxRetryAttempts"] = "3",
                     ["RabbitMqSettings:RetryBaseDelayMilliseconds"] = "500"
