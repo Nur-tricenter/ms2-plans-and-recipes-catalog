@@ -2,317 +2,325 @@
 
 # ms2-plans-and-recipes-catalog
 
-Microservicio de **Catálogo de Alimentos, Recetas y Planes Alimentarios** para un sistema de nutrición y meal-planning.
+Microservice for a **food, recipe and meal-plan catalogue** in a nutrition and meal-planning
+system. DDD + Clean Architecture, CQRS with a transactional outbox, .NET 8.
 
-## Propósito
+## Purpose
 
-Gestionar y exponer un catálogo completo de alimentos con su información nutricional, recetas compuestas por dichos alimentos, y planes alimentarios que organizan recetas en días y tiempos de comida.
+Manage and expose a catalogue of foods with their nutritional information, recipes composed from
+those foods, and meal plans that organise recipes into days and meal times.
 
-## Funcionalidades
+## Features
 
-### Alimentos
-- CRUD de alimentos con información nutricional (calorías, proteínas, carbohidratos, grasas), unidad de medida y categoría.
-- Búsqueda de alimentos por categoría.
-- Publicación de evento de integración al actualizar datos nutricionales.
+### Foods
+- CRUD with nutritional information (calories, protein, carbs, fat), unit of measure and category.
+- Search by category.
+- Publishes an integration event when nutritional data changes.
 
-### Recetas
-- CRUD de recetas con nombre e instrucciones.
-- Agregar y remover ingredientes (alimento + porción).
-- Cálculo de información nutricional total de una receta basado en sus ingredientes.
+### Recipes
+- CRUD with name and instructions.
+- Add and remove ingredients (food + portion).
+- Computes total nutritional information from the ingredients.
 
-### Planes Alimentarios
-- CRUD de planes con duración (15 o 30 días) y número de comidas por día.
-- Generación automática de los días del plan al crearlo.
-- Gestión de tiempos de comida (desayuno, almuerzo, cena, etc.) por día.
-- Asignación de recetas con raciones a cada tiempo de comida.
-- Obtención de la composición completa del plan (plan > días > tiempos de comida > recetas > ingredientes).
-- Publicación de evento de integración al crear un plan.
+### Meal plans
+- CRUD with duration (15 or 30 days) and meals per day.
+- Plan days are generated when the plan is created.
+- Meal times (breakfast, lunch, dinner, …) per day.
+- Recipes with rations assigned to each meal time.
+- Full composition: plan → days → meal times → recipes → ingredients.
+- Publishes an integration event when a plan is created.
 
-## Stack Tecnológico
+## Stack
 
-| Componente | Tecnología |
-|------------|------------|
-| Framework | .NET (ASP.NET Core Web API) |
-| Arquitectura | DDD + Clean Architecture |
-| Patrón CQRS | MediatR |
-| ORM | Entity Framework Core |
-| Base de datos | PostgreSQL (Docker) |
-| Documentación API | Swagger / OpenAPI |
-| Patrones | Repository, Unit of Work, Factory, Result |
+| Component | Technology |
+|---|---|
+| Runtime | .NET 8 (`net8.0`) |
+| Architecture | DDD + Clean Architecture |
+| CQRS | MediatR 14 |
+| ORM | Entity Framework Core 9.0.3 |
+| Database | PostgreSQL via Npgsql 9.0.4 |
+| Messaging | RabbitMQ, via `Joseco.Communication` |
+| Outbox | `Joseco.Outbox.EFCore` |
+| Discovery | Consul |
+| Telemetry | OpenTelemetry via `Nur.Tricenter.Observability` |
+| API docs | Swagger / OpenAPI |
+| Patterns | Repository, Unit of Work, Factory, Result |
 
-## Estructura del Proyecto
+Package versions are declared once in `Directory.Packages.props`. There is no pipeline that
+publishes the image; see [Docker Hub](#docker-hub).
+
+## Project structure
 
 ```
 ms2-plans-and-recipes-catalog/
-├── Domain/          # Entidades, Value Objects, Eventos, Repositorios (interfaces)
-├── Application/     # Casos de uso (Commands/Queries), DTOs, Handlers
-├── Infrastructure/  # Persistencia (EF Core DbContexts), Repositorios (implementación)
-├── WebApi/          # Controladores REST, Middleware, Startup
-├── Shared/          # Tipos compartidos (Result, PagedList, etc.)
-└── Test/            # Pruebas unitarias e integración
+├── contracts/          # Catalog.Contracts: permissions, route table, integration messages
+├── src/
+│   ├── Catalog.Domain/         # Entities, value objects, domain events, repository interfaces
+│   ├── Catalog.Application/    # Commands, queries, DTOs, handlers, behaviours
+│   ├── Catalog.Infrastructure/ # DbContexts, repositories, projections, outbox, observability
+│   ├── Catalog.App/            # Controllers, Startup, health, Consul registration
+│   └── Catalog.WorkerService/  # Outbox processor, RabbitMQ publisher
+├── Test/                       # Unit, infrastructure, worker, integration and Pact contract tests
+├── Directory.Packages.props    # Every package version, declared once
+└── NuGet.config                # Feed that serves the platform kernels
 ```
 
-## API Endpoints
+### Dependency rule
 
-### Alimentos (`/api/v1/alimentos`)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/alimentos` | Crear alimento |
-| GET | `/alimentos/{id}` | Obtener alimento por ID |
-| GET | `/alimentos` | Listar alimentos (paginado) |
-| GET | `/alimentos/categoria/{categoria}` | Buscar por categoría (paginado) |
-| PUT | `/alimentos` | Actualizar alimento |
-
-### Recetas (`/api/v1/recetas`)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/recetas` | Crear receta |
-| POST | `/recetas/ingredientes` | Agregar ingredientes |
-| DELETE | `/recetas/{recetaId}/ingredientes/{alimentoId}` | Remover ingrediente |
-| GET | `/recetas/{id}` | Obtener receta por ID |
-| GET | `/recetas` | Listar recetas (paginado) |
-| GET | `/recetas/{recetaId}/info-nutricional` | Obtener info nutricional |
-
-### Planes Alimentarios (`/api/v1/planes`)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/planes` | Crear plan |
-| POST | `/planes/tiempos-comida` | Agregar tiempo de comida |
-| POST | `/planes/asignar-recetas` | Asignar recetas a tiempo de comida |
-| DELETE | `/planes/{planId}/tiempos-comida/{tiempoComidaId}/recetas/{recetaId}` | Remover receta de tiempo de comida |
-| GET | `/planes/{planId}` | Obtener composición del plan |
-| GET | `/planes` | Listar planes |
-
-## Requisitos
-
-| Herramienta | Versión |
-|-------------|---------|
-| Docker Desktop | Última estable (recomendado) |
-| .NET SDK | 10.x (solo si quieres correrlo directamente) |
-
-## Configuración
-
-Todo comportamiento que dependía del **nombre del entorno** (`ASPNETCORE_ENVIRONMENT`) se decide
-ahora por **configuración explícita**, con valores por defecto que son siempre los seguros:
-
-| Sección | Clave | Default | Qué controla |
-|---------|-------|---------|--------------|
-| `Migrations` | `ApplyOnStartup` | `false` | Aplicar migraciones al arrancar el host |
-| `Migrations` | `TimeoutSeconds` | `120` | Presupuesto total de la corrida (ambos contextos) |
-| `Seed` | `Enabled` | `false` | Cargar los datos de ejemplo (30 alimentos / 25 recetas / 2 planes) |
-| `Swagger` | `Enabled` | `false` | Servir `/swagger` y `/swagger/v1/swagger.json` |
-| `HttpsRedirection` | `Enabled` | `false` | Agregar `UseHttpsRedirection()` |
-
-**No hay secretos en archivos versionados.** `src/Catalog.App/appsettings.json` y
-`src/Catalog.WorkerService/appsettings.json` ya **no** contienen la cadena de conexión. Cada proyecto
-tiene un template versionado con los valores de desarrollo:
-
-```bash
-cp src/Catalog.App/appsettings.Development.template.json         src/Catalog.App/appsettings.Development.json
-cp src/Catalog.WorkerService/appsettings.Development.template.json  src/Catalog.WorkerService/appsettings.Development.json
+```
+Domain          →  (NuGet only)
+Application     →  Domain, Catalog.Contracts
+Infrastructure  →  Application
+Catalog.App     →  Infrastructure
+WorkerService   →  Infrastructure
 ```
 
-Las copias se llaman `appsettings.Development.json` y **están en `.gitignore` (línea 107)**: nunca se
-versionan. En un despliegue usá variables de entorno, que tienen precedencia sobre los archivos:
-`ConnectionStrings__CatalogDbConnectionString`, `Migrations__ApplyOnStartup`,
-`Migrations__TimeoutSeconds`, `Seed__Enabled`, `Swagger__Enabled`, `HttpsRedirection__Enabled`.
+The worker references Infrastructure only. `AddInfrastructure` already calls `AddApplication`,
+so a direct reference from the worker would be a second edge the two projects can drift apart on.
 
-Un test (`Test/UnitTest/Infrastructure/Configuration/TrackedConfigurationTests.cs`) falla la
-compilación si vuelve a aparecer una sección `ConnectionStrings` o una contraseña en cualquiera de los
-dos `appsettings.json` versionados.
+### Platform kernels
 
-> `HttpsRedirection:Enabled` está en `false` porque **el TLS termina aguas arriba** (ingress, gateway
-> o sidecar de la malla) y lo que llega a este proceso es HTTP plano. Encendelo solo cuando el
-> proceso sea realmente el borde TLS (Kestrel con certificado, típicamente desarrollo local).
+`Nur.Tricenter.Access` and `Nur.Tricenter.Observability` arrive as **NuGet packages** from the
+organization's GitHub Packages feed, not as project references to a sibling folder. Nothing here
+needs to know where `nur-tricenter-shared-kernels` lives on disk, which is what lets this
+repository build on its own.
 
-### Migraciones de base de datos
+## CQRS
 
-El esquema se aplica con un **paso explícito**, no al arrancar el servicio:
+Nine commands and nine queries, with separate marker types. **Every query is served from
+`StoredDbContext`**; no query handler injects a repository.
+
+| Handler | Reads |
+|---|---|
+| `ListFoodsHandler` | `StoredDbContext.Foods` |
+| `SearchFoodsByCategoryHandler` | `StoredDbContext.Foods` |
+| `GetFoodByIdHandler` | `StoredDbContext.Foods` |
+| `ListRecipesHandler` | `StoredDbContext.Recipes` |
+| `GetRecipeByIdHandler` | `StoredDbContext.Recipes` + `.Foods` |
+| `GetRecipeNutritionalInfoHandler` | `StoredDbContext.Recipes` + `.Foods` |
+| `ListMealPlansHandler` | `StoredDbContext.MealPlans` |
+| `GetMealPlanByIdHandler` | `StoredDbContext.MealPlans` + `.Recipes` |
+| `GetMealPlanCompositionHandler` | `StoredDbContext.MealPlans` + `.Recipes` + `.Foods` |
+
+### Persistence: one database, three schemas
+
+| Schema | Tables |
+|---|---|
+| `write` | `Food`, `Recipe`, `RecipeIngredient`, `MealPlan`, `PlanDay`, `MealTime`, `RecipeAssignment` |
+| `read` | the same seven, as projection models |
+| `outbox` | `outboxMessage` |
+
+Schema names live in one place, `Persistence/DatabaseSchemas.cs`, and every `ToTable` call
+references them. Each context also sets `HasDefaultSchema`, so a mapping that forgets the explicit
+`ToTable` still cannot collide.
+
+The `outbox` schema is not this project's choice: `Joseco.Outbox.EFCore` declares
+`OutboxMessageConfig<T>` as `internal` and calls `ToTable("outboxMessage", "outbox")` with no
+extension point, so the schema is fixed by the library.
+
+`PersistenceSchemaSeparationTests` fails if the two contexts ever map the same table name into the
+same schema. That test is load-bearing because EF Core InMemory **cannot** catch this class of
+defect — it gives each context its own store, so an entirely green suite says nothing about schema
+collisions.
+
+### The outbox chain
+
+```
+Command → DomainDbContext.SaveChanges()
+        → domain event → outbox.outboxMessage   (same transaction)
+        → WorkerService: OutboxProcessor<DomainEvent>
+        → Project* handlers → StoredDbContext.SaveChanges()
+        → PublishIntegrationEvent* → RabbitMQ
+```
+
+The chain has three links and no framework enforces them: MediatR discovers handlers by convention,
+so a missing link is neither a compile error nor a DI error. It has happened — `FoodUpdated` had a
+projection but no outbox handler, and the event was raised, drained, and dropped.
+
+`OutboxChainCoverageTests` asserts that every domain event has both a `SaveInOutbox` handler and a
+projection. The test is verified to fail when a handler is removed.
+
+## API endpoints
+
+### Foods (`api/v1/foods`)
+
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/api/v1/foods` | Create a food |
+| GET | `/api/v1/foods` | List foods, paged |
+| GET | `/api/v1/foods/{id:guid}` | Get one food |
+| GET | `/api/v1/foods/category/{category}` | Search by category |
+| PUT | `/api/v1/foods` | Update a food — **404** on failure, not 400 |
+
+### Recipes (`api/v1/recipes`)
+
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/api/v1/recipes` | Create a recipe |
+| GET | `/api/v1/recipes` | List recipes, paged |
+| GET | `/api/v1/recipes/{id:guid}` | Get one recipe with its ingredients |
+| POST | `/api/v1/recipes/ingredients` | Add an ingredient |
+| DELETE | `/api/v1/recipes/{recipeId:guid}/ingredients/{foodId:guid}` | Remove an ingredient |
+| GET | `/api/v1/recipes/{recipeId:guid}/nutritional-info` | Computed nutritional totals |
+
+### Meal plans (`api/v1/meal-plans`)
+
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/api/v1/meal-plans` | Create a plan |
+| GET | `/api/v1/meal-plans` | List plans |
+| GET | `/api/v1/meal-plans/{planId:guid}` | Full composition |
+| POST | `/api/v1/meal-plans/meal-times` | Add a meal time to a day |
+| POST | `/api/v1/meal-plans/assign-recipes` | Assign a recipe with a ration |
+| DELETE | `/api/v1/meal-plans/{planId}/meal-times/{mealTimeId}/recipes/{recipeId}` | Unassign |
+
+### Status codes
+
+- A command that fails a business rule or validation → **400**
+- A read that finds nothing → **404** (including `PUT /api/v1/foods`, which is 404 and not 400)
+- `[ApiController]` model validation → **400 `ProblemDetails`** before the handler runs
+- There is **no** global exception middleware: handlers catch and return `Result.Fail`; an
+  unhandled exception surfaces as a plain **500**
+
+## Migrations
+
+The schema is applied by an **explicit step**, never on boot:
 
 ```bash
 dotnet run --project src/Catalog.App/Catalog.App.csproj -- --migrate
-# o, sobre el binario publicado:
+# or against the published binary:
 dotnet Catalog.App.dll --migrate
 ```
 
-Aplica las migraciones del **lado escritura** (`DomainDbContext`) y después las del **lado lectura**
-(`StoredDbContext`). Sale con código `0` si terminó bien y `1` si falló, así que un orquestador (Job
-de Kubernetes, servicio one-shot de compose, paso de CI) decide si la aplicación puede arrancar. Es
-idempotente: correrlo dos veces no aplica nada la segunda.
+It applies the write-side migrations (`DomainDbContext`) then the read-side ones
+(`StoredDbContext`). It exits `0` on success and `1` on failure, so an orchestrator can gate on it.
+It is idempotent: a second run applies nothing.
 
-Para desarrollo, `Migrations:ApplyOnStartup: true` en `appsettings.Development.json` deja el
-`dotnet run` sin ceremonia. **No lo pongas en un despliegue.**
+For local development, `Migrations:ApplyOnStartup: true` in `appsettings.Development.json` removes
+the ceremony from `dotnet run`. **Do not set it in a deployment.**
 
-> ### ✅ Los dos lados viven en esquemas distintos
->
-> `DomainDbContext` (escritura) usa el esquema **`write`** y `StoredDbContext` (lectura) el esquema
-> **`read`**. Los nombres de esquema están declarados en un solo lugar,
-> `Catalog.Infrastructure.Persistence.DatabaseSchemas`, y cada `ToTable` los referencia; ninguno
-> escribe a `public`. El esquema lo fija `HasDefaultSchema` en cada contexto, así que un mapeo que
-> olvide el `ToTable` explícito tampoco vuelve a colisionar.
->
-> | Esquema | Tablas |
-> |---------|--------|
-> | `write` | `Food`, `Recipe`, `RecipeIngredient`, `MealPlan`, `PlanDay`, `MealTime`, `RecipeAssignment` |
-> | `read` | `Food`, `Recipe`, `RecipeIngredient`, `MealPlan`, `PlanDay`, `MealTime`, `AssignedRecipe` |
-> | `outbox` | `outboxMessage` |
->
-> `outboxMessage` **no** es decisión de este proyecto: `Joseco.Outbox.EFCore` declara
-> `OutboxMessageConfig<T>` como `internal` y llama `ToTable("outboxMessage", "outbox")` sin punto de
-> extensión, así que el esquema `outbox` queda fijo para la librería. Verificado contra PostgreSQL 16:
-> con el esquema por defecto `write` en el contexto, la migración generada sigue emitiendo
-> `CreateTable(name: "outboxMessage", schema: "outbox")`.
->
-> Verificado de punta a punta contra PostgreSQL 16 sobre una base vacía: `--migrate` aplica las dos
-> historias sin `42P07`, sale con código `0`, y la segunda corrida es un no-op. La tabla
-> `__EFMigrationsHistory` queda en `public` y es compartida: los ids de migración de los dos contextos
-> son disjuntos, así que cada historia aplica solo lo que no encuentra registrado.
->
-> `Test/UnitTest/Infrastructure/Persistence/PersistenceSchemaSeparationTests.cs` falla si alguna vez
-> los dos contextos vuelven a mapear el mismo nombre de tabla en el mismo esquema. Ese test es
-> necesario porque EF Core InMemory **no puede** detectar esta clase de defecto: le da a cada
-> contexto su propio almacén, así que una suite entera en verde no dice absolutamente nada sobre
-> las colisiones de esquema.
->
-> **Pendiente, ajeno a este cambio:** la proyección de `FoodCreated` a `read.Food` lanza un
-> `NullReferenceException` porque `NutritionalInfo` llega deserializado como `null` desde el
-> contenido del outbox (queda `null` solo en los eventos que llevan ese value object; `Portion` y
-> `Ration` deserializan bien). Ningún mapeo de EF participa: el fallo ocurre antes de la primera
-> sentencia `INSERT`.
+## Running locally
 
-## Cómo ejecutar el proyecto
+### Option 1 — the orchestrator (recommended)
 
-### Opción 1 — Docker Compose (recomendada)
-
-Levanta PostgreSQL, aplica el esquema con un paso one-shot y levanta la API:
+The orchestrator repository brings up the whole platform — infrastructure plus this service and
+the gateway — with per-service compose profiles:
 
 ```bash
-# 1. Configuración local, una sola vez (crea appsettings.Development.json, fuera de git)
+cd <folder containing nur-tricenter-orchestrator>
+./start-stack.sh          # or start-stack.ps1 on Windows
+```
+
+That is the intended workflow: bind-mounted local binaries, no image build required.
+
+### Option 2 — Docker Compose in this repository
+
+Brings up PostgreSQL, applies the schema in a one-shot step, and starts the API:
+
+```bash
+# 1. Local configuration, once (creates a git-ignored appsettings.Development.json)
 cp src/Catalog.App/appsettings.Development.template.json src/Catalog.App/appsettings.Development.json
 
-# 2. Levantar el stack (Postgres -> webapi-migrate -> webapi)
+# 2. Start the stack
 docker compose up -d
-
-# O aplicar el esquema a mano, sin el servicio one-shot:
-docker compose run --rm webapi-migrate
 ```
 
-El servicio `webapi-migrate` corre `dotnet Catalog.App.dll --migrate`, y `webapi` espera a que
-termine con éxito (`service_completed_successfully`) antes de arrancar. `webapi` **no** migra ni
-sembra por su cuenta.
+`webapi-migrate` runs `dotnet Catalog.App.dll --migrate`; `webapi` waits for it to succeed
+(`service_completed_successfully`) before starting. The API never migrates or seeds on its own.
 
-> El paso de migración es seguro sobre una base vacía. Si tu volumen `catalog-db-data` ya existe
-> con un esquema viejo (tablas en `public`, nombres en español de una versión anterior), recrealo
-> con `docker compose down -v` antes de volver a intentarlo: las dos historias parten de cero y no
-> migran un esquema preexistente.
+> The migration step is safe on an empty database. If the `catalog-db-data` volume already holds an
+> old schema, recreate it with `docker compose down -v` first: both histories start from zero and do
+> not migrate a pre-existing schema.
 
-### Docker Hub — construir y publicar la imagen
-
-El compose consume `robertperezlino/ms2-plans-and-recipes-catalog:latest`. **No hay pipeline que
-la publique**: la imagen hay que construirla y empujarla a mano, y `:latest` no garantiza que
-corresponda a tu working tree.
-
-El contexto de build es **la carpeta padre**, no este repositorio:
+### Option 3 — local run
 
 ```bash
-cd <carpeta que contiene ms2-plans-and-recipes-catalog Y nur-tricenter-shared-kernels>
-
-docker build \
-  -f ms2-plans-and-recipes-catalog/Dockerfile \
-  -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
-
-docker push robertperezlino/ms2-plans-and-recipes-catalog:latest
-```
-
-**Por qué la carpeta padre y no este repositorio:** `Catalog.Application` e
-`Catalog.Infrastructure` referencian `nur-tricenter-shared-kernels/*` por ruta relativa, y Docker
-no puede copiar archivos de fuera del contexto de build. Construir desde adentro de este repo
-falla en la primera copia de un `.csproj` de los kernels.
-
-> `.dockerignore` vive en la carpeta padre, que es el contexto real. Las reglas para
-> `nur-tricenter-api-gateway/` o `Docker Proyecto/` que estuviera dentro de este repo no
-> excluirían nada: esas carpetas no forman parte de su contexto.
-
-### Imagen para producción
-
-La imagen no declara `ASPNETCORE_ENVIRONMENT`: el compose la fija en `Production`. Para un
-despliegue propio hay que exportar las variables de configuración, sobre todo
-`ConnectionStrings__CatalogDbConnectionString`, y dejar `Migrations__ApplyOnStartup` en `false`:
-el esquema se aplica con el paso explícito `--migrate`, no al arrancar el proceso web.
-
-| Recurso | URL |
-|---------|-----|
-| Documentación interactiva (Swagger) | http://localhost:8080/swagger |
-| Health | http://localhost:8080/health |
-| API | http://localhost:8080/api/v1/... |
-| PostgreSQL | localhost:5433 |
-
-Para detener el stack:
-
-```bash
-docker compose down
-```
-
-### Opción 2 — Ejecución directa con el SDK de .NET
-
-Requiere un PostgreSQL disponible (por ejemplo el de `docker compose`) y la configuración local:
-
-```bash
-cp src/Catalog.App/appsettings.Development.template.json src/Catalog.App/appsettings.Development.json
-
-dotnet restore
+cp src/Catalog.WorkerService/appsettings.Development.template.json src/Catalog.WorkerService/appsettings.Development.json
 dotnet run --project src/Catalog.App/Catalog.App.csproj
 ```
 
-Si preferís no tocar ningún archivo, exportá las variables de entorno equivalentes (los valores
-están en el template):
+The worker needs a RabbitMQ broker. In this repository's compose there is none, so outbox rows
+accumulate without being published; the orchestrator provides one.
+
+## Docker Hub
+
+The compose consumes `robertperezlino/ms2-plans-and-recipes-catalog:latest`. **No pipeline
+publishes it** — build and push by hand. `:latest` is whatever was pushed last and does not
+guarantee it matches your working tree.
 
 ```bash
-Migrations__ApplyOnStartup=true
-Seed__Enabled=true
-Swagger__Enabled=true
-ConnectionStrings__CatalogDbConnectionString=<la del template>
+# 1. Credentials for the private feed, once. No byte-order mark: a BOM in NuGet.config
+#    makes NuGet ignore the whole file, including the credentials block.
+dotnet nuget add source https://nuget.pkg.github.com/Nur-tricenter/index.json \
+  --name Nur-tricenter --username YOUR_USER --password YOUR_TOKEN
+setx NUGET_USERNAME YOUR_USER
+setx NUGET_AUTH_TOKEN YOUR_TOKEN
+
+# 2. Build. The context is THIS repository: the kernels are packages, not a sibling folder.
+docker build --secret id=nuget_username,src=%TEMP%/nu_user.txt \
+             --secret id=nuget_token,src=%TEMP%/nu_tok.txt \
+             -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
+
+# 3. Push
+docker push robertperezlino/ms2-plans-and-recipes-catalog:latest
 ```
 
-Con `Migrations:ApplyOnStartup: true` y `Seed__Enabled: true` el arranque aplica el esquema y carga
-los datos de ejemplo. Swagger queda en `http://localhost:63884/swagger` (o el puerto de
-`launchSettings.json`). Sin esos flags el host arranca igual, pero **no** migra, **no** siembra y
-**no** sirve Swagger.
+Both secret files must be **UTF-8 without a BOM**; PowerShell's `Set-Content -Encoding UTF8` adds
+one, and a BOM in the username makes the Basic auth fail with a `401` that blames the token.
 
-## Pruebas
+The image declares no `ASPNETCORE_ENVIRONMENT`; the compose sets `Production`. For your own
+deployment, export the configuration variables — above all
+`ConnectionStrings__CatalogDbConnectionString` — and leave `Migrations__ApplyOnStartup` `false`:
+the schema belongs in the explicit `--migrate` step, not in a web process boot.
 
-El proyecto de tests vive en `Test/` (xUnit + Moq para unit tests, WebApplicationFactory para integration tests y PactNet para contract testing):
+## Configuration
 
-```
-Test/
-├── UnitTest/          # Unit tests: Domain (entidades, value objects, factories) y Application (handlers CQRS)
-├── IntegrationTest/   # Integration tests: flujos HTTP completos por controlador (WebApplicationFactory + EF InMemory)
-└── ContractTest/      # Contract testing con Pact: consumer + provider (pact committeado en pacts/)
-```
+| Key | Where | Meaning |
+|---|---|---|
+| `ConnectionStrings:CatalogDbConnectionString` | env var or local json | **Required.** One database serves both sides. |
+| `Migrations:ApplyOnStartup` | `appsettings.json`, default `false` | Runs the migration on boot. Local development only. |
+| `Seed:Enabled` | `appsettings.json`, default `false` | Sample catalogue data (30 foods, 25 recipes, 2 plans). |
+| `Swagger:Enabled` | `appsettings.json`, default `false` | Serves the OpenAPI document. |
+| `HttpsRedirection:Enabled` | `appsettings.json`, default `true` | Off when TLS terminates upstream. |
+| `RabbitMqSettings:*` | `RabbitMqSettings` | Host, credentials, virtual host, retry policy. |
+| `ServiceRegistration:ServiceDiscoveryAddress` | env var | Consul URL. **Enables registration and the database health check when set.** |
+| `Jwt` | — | Not used. Authentication is out of scope by decision. |
 
-Las reglas y skills usados para generar/verificar los tests están en [`ai/`](ai/): `ai/project/*.md` (reglas de unit, integration y pact) y `ai/skill/*` (skills generadoras y verificadoras).
+**No credentials belong in version-controlled files.** The connection string is absent from every
+tracked `appsettings.json` and arrives from an environment variable or from a local, git-ignored
+`appsettings.Development.json`. `TrackedConfigurationTests` fails if that changes.
 
-### Ejecutar la suite completa
+## Tests
+
+454 tests, all green.
 
 ```bash
-dotnet test
+dotnet test Test/Test.csproj                                     # everything
+dotnet test Test/Test.csproj --filter "FullyQualifiedName~Catalog.Tests.Domain"
+dotnet test Test/Test.csproj --filter "FullyQualifiedName~Catalog.Tests.Application"
+dotnet test Test/Test.csproj --filter "FullyQualifiedName~Catalog.Tests.IntegrationTest"
+dotnet test Test/Test.csproj --filter "FullyQualifiedName~Catalog.Tests.ContractTest"
+dotnet test Test/Test.csproj --collect:"XPlat Code Coverage" --results-directory ./coverage
 ```
 
-### Ejecutar con reporte de code coverage
+Three RabbitMQ tests skip themselves when no broker is reachable, which is the correct behaviour:
+they are the end-to-end proof that the outbox is published, and they need a broker.
 
-```bash
-dotnet test Test/Test.csproj --collect:"XPlat Code Coverage" --results-directory Test/coverage
+> The agent-facing documents under `ai/` predate the current codebase. See `ai/README.md` for the
+> full list of what changed and which statements no longer hold.
+
+## Resources
+
+| Resource | URL |
+|---|---|
+| Swagger | http://localhost:8082/swagger |
+| Health | http://localhost:8082/health |
+| API | http://localhost:8082/api/v1/… |
+| PostgreSQL | localhost:5433 |
+
+Through the gateway, the public entry point, routes are prefixed by service:
+
 ```
-
-El reporte `coverage.cobertura.xml` se genera dentro de `Test/coverage/` (carpeta excluida de git).
-
-### Ver el reporte de coverage en HTML
-
-```bash
-dotnet tool install --global dotnet-reportgenerator-globaltool   # una sola vez
-reportgenerator "-reports:Test\coverage\**\coverage.cobertura.xml" "-targetdir:Test\coverage\report" "-reporttypes:Html"
+POST http://localhost:15005/api/catalog/v1/foods
+GET  http://localhost:15005/api/catalog/v1/foods
 ```
-
-Luego abrir `Test/coverage/report/index.html` en el navegador.
-
-Cobertura objetivo (según `ai/project/unit-testing-rules.md`): Domain ≥ 90%, Application ≥ 80%, Value Objects ≥ 95%.

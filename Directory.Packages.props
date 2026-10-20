@@ -43,9 +43,9 @@
       9.0.4 is the version the reference architecture pins. Do not move to 10.x without moving
       the whole service: the shared kernels target net8.0 and were built against EF 9.
     -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 

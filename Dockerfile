@@ -34,10 +34,15 @@ COPY src/Catalog.Application/Catalog.Application.csproj src/Catalog.Application/
 COPY src/Catalog.Infrastructure/Catalog.Infrastructure.csproj src/Catalog.Infrastructure/
 COPY src/Catalog.App/Catalog.App.csproj src/Catalog.App/
 
+# The secret is mounted by id only; src comes from the docker build command line. Declaring src
+# in BOTH places fails with "both source and id can't be set".
+#
+# The credentials are exported rather than inlined: NuGet expands %NUGET_USERNAME% and
+# %NUGET_AUTH_TOKEN% from the environment when it reads NuGet.config.
 RUN --mount=type=secret,id=nuget_username \
     --mount=type=secret,id=nuget_token \
-    NUGET_USERNAME=$(cat /run/secrets/nuget_username) \
-    NUGET_AUTH_TOKEN=$(cat /run/secrets/nuget_token) \
+    export NUGET_USERNAME="$(cat /run/secrets/nuget_username)" && \
+    export NUGET_AUTH_TOKEN="$(cat /run/secrets/nuget_token)" && \
     dotnet restore src/Catalog.App/Catalog.App.csproj
 
 # --- Sources and publish ------------------------------------------------------
