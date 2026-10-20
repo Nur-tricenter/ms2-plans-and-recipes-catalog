@@ -2,55 +2,48 @@
 
 # Multi-stage: restore with the SDK, ship only the published output on the ASP.NET runtime.
 #
-# BUILD CONTEXT IS THE PARENT FOLDER, not this repository:
+# BUILD CONTEXT IS THIS REPOSITORY, not the parent folder:
 #
-#   cd <parent>
-#   docker build -f ms2-plans-and-recipes-catalog/Dockerfile -t <image> .
+#   docker build -t <image> .
 #
-# The reason is the shared kernels. Catalog.Application and Catalog.Infrastructure reference
-# ../nur-tricenter-shared-kernels/* by relative path, and Docker cannot COPY from outside the
-# build context — so the context has to be the folder that contains BOTH repositories. Every
-# path below is therefore prefixed with ms2-plans-and-recipes-catalog/.
+# The platform kernels used to be a sibling repository copied into this image. They are NuGet
+# packages now, published to GitHub Packages, so nothing outside this folder is needed: the
+# context is exactly the repository and every project reference resolves through restore.
 #
-# Two more things this file has to get right:
+# Two things this file has to get right, and both fail in ways that read like a different
+# problem than they are:
 #
 #  1. The SDK and runtime tags must match this service's TargetFramework (net8.0). An sdk:10.0
-#     tag building a net8.0 project restores fine and then fails at run time with a missing
-#     framework, which reads like a publish problem rather than a tag problem.
+#     tag building a net8.0 project restores fine and then dies at run time with a missing
+#     framework.
 #
-#  2. Every project reachable through a ProjectReference must be copied BEFORE restore, or NuGet
-#     cannot resolve it. That includes contracts/ and the shared kernels.
+#  2. NuGet.config carries the organization feed, and restore needs credentials for a private
+#     feed. They arrive as build secrets — never bake a token into an image layer.
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# --- Central package versions ---------------------------------------------------
-# Both repos manage versions centrally, and NuGet reads these before restore, so they must be
-# in place before any project manifest is restored.
-COPY nur-tricenter-shared-kernels/Directory.Packages.props nur-tricenter-shared-kernels/
-COPY ms2-plans-and-recipes-catalog/Directory.Packages.props ./
+# --- Restore layer ------------------------------------------------------------
+# Only the manifests first, so editing source does not invalidate the NuGet cache.
+# Directory.Packages.props comes first: central package management reads the versions from it,
+# so NuGet needs it before any manifest is restored.
+COPY Directory.Packages.props NuGet.config ./
+COPY contracts/Catalog.Contracts.csproj contracts/
+COPY src/Catalog.Domain/Catalog.Domain.csproj src/Catalog.Domain/
+COPY src/Catalog.Application/Catalog.Application.csproj src/Catalog.Application/
+COPY src/Catalog.Infrastructure/Catalog.Infrastructure.csproj src/Catalog.Infrastructure/
+COPY src/Catalog.App/Catalog.App.csproj src/Catalog.App/
 
-# --- Shared kernels (sibling repository, referenced by path) --------------------
-COPY nur-tricenter-shared-kernels/nur-tricenter-access nur-tricenter-shared-kernels/nur-tricenter-access
-COPY nur-tricenter-shared-kernels/nur-tricenter-integration nur-tricenter-shared-kernels/nur-tricenter-integration
-COPY nur-tricenter-shared-kernels/nur-tricenter-observability nur-tricenter-shared-kernels/nur-tricenter-observability
+RUN --mount=type=secret,id=nuget_username \
+    --mount=type=secret,id=nuget_token \
+    NUGET_USERNAME=$(cat /run/secrets/nuget_username) \
+    NUGET_AUTH_TOKEN=$(cat /run/secrets/nuget_token) \
+    dotnet restore src/Catalog.App/Catalog.App.csproj
 
-# --- Project manifests ---------------------------------------------------------
-COPY ms2-plans-and-recipes-catalog/contracts/Catalog.Contracts.csproj ms2-plans-and-recipes-catalog/contracts/
-COPY ms2-plans-and-recipes-catalog/src/Catalog.Domain/Catalog.Domain.csproj ms2-plans-and-recipes-catalog/src/Catalog.Domain/
-COPY ms2-plans-and-recipes-catalog/src/Catalog.Application/Catalog.Application.csproj ms2-plans-and-recipes-catalog/src/Catalog.Application/
-COPY ms2-plans-and-recipes-catalog/src/Catalog.Infrastructure/Catalog.Infrastructure.csproj ms2-plans-and-recipes-catalog/src/Catalog.Infrastructure/
-COPY ms2-plans-and-recipes-catalog/src/Catalog.App/Catalog.App.csproj ms2-plans-and-recipes-catalog/src/Catalog.App/
+# --- Sources and publish ------------------------------------------------------
+COPY . .
 
-RUN dotnet restore ms2-plans-and-recipes-catalog/src/Catalog.App/Catalog.App.csproj
-
-# --- Sources -------------------------------------------------------------------
-COPY ms2-plans-and-recipes-catalog/ ms2-plans-and-recipes-catalog/
-COPY nur-tricenter-shared-kernels/nur-tricenter-access/ nur-tricenter-shared-kernels/nur-tricenter-access/
-COPY nur-tricenter-shared-kernels/nur-tricenter-integration/ nur-tricenter-shared-kernels/nur-tricenter-integration/
-COPY nur-tricenter-shared-kernels/nur-tricenter-observability/ nur-tricenter-shared-kernels/nur-tricenter-observability/
-
-RUN dotnet publish ms2-plans-and-recipes-catalog/src/Catalog.App/Catalog.App.csproj \
+RUN dotnet publish src/Catalog.App/Catalog.App.csproj \
         -c Release \
         -o /app/publish \
         --no-restore
