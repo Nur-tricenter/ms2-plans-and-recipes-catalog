@@ -1,4 +1,4 @@
-using Catalog.Application.IntegrationEvents;
+using Nur.Tricenter.Integration;
 using Joseco.Communication.External.Contracts.Services;
 using Joseco.Communication.External.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;

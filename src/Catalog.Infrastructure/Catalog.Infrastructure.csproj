@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -12,12 +12,12 @@
       instance in the service registry on start and deregister it on stop.
 
       Why this package sits here rather than in Catalog.WebApi: ServiceRegistration.cs is a
-      generic-host IHostedService that has no ASP.NET dependency at all — its only web-specific
+      generic-host IHostedService that has no ASP.NET dependency at all â€” its only web-specific
       concern (reading the bound port) is declared as IServerPortResolver and answered by the web
       host. That makes Infrastructure the correct home for the class AND for its one dependency.
 
       What that costs Catalog.WorkerService, which references this project: nothing functional. The
-      Consul client is a plain HTTP/DNS library — it does not pull in the ASP.NET Core shared
+      Consul client is a plain HTTP/DNS library â€” it does not pull in the ASP.NET Core shared
       framework, so the console host keeps building and running as a console app. It simply never
       calls AddConsulServiceRegistration, and it must not: the worker publishes to RabbitMQ, has no
       HTTP endpoint, and a gateway cannot route to it. Registration is opt-in per host, never a
@@ -26,39 +26,34 @@
     <PackageReference Include="Consul" Version="1.7.14.7" />
     <PackageReference Include="Joseco.DDD.Core" Version="1.0.3" />
     <PackageReference Include="Joseco.Outbox.EFCore" Version="1.1.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <!--
       Declared explicitly because ServiceRegistration implements IHostedService. It already arrived
       transitively at 9.0.3, and this pin matches that exact version so the graph converges instead
       of shifting. Referencing a type from an undeclared transitive package is a build that breaks
       the next time an unrelated package moves.
     -->
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0-preview.2.25163.8">
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-preview.2.25163.8">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenTelemetry.Api" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.20.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.0" />
     <PackageReference Include="Scrutor" Version="6.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <!--
+      OpenTelemetry.* and Serilog.* are NOT declared here any more: they arrive through
+      Nur.Tricenter.Observability, which is where the AddObservability/UseLogging bodies and the
+      meter collection list now live. Declaring them again on this side is what let the two hosts
+      drift into collecting different meters; the kernel is the single place that decides.
+    -->
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\..\nur-tricenter-shared-kernels\nur-tricenter-observability\nur-tricenter-observability.csproj" />
   </ItemGroup>
 
 </Project>

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Nur.Tricenter.Observability.Tracing;
 
 namespace Catalog.WebApi
 {
@@ -29,9 +30,12 @@ namespace Catalog.WebApi
         {
             services.AddInfrastructure(Configuration);
 
-            // Traces, metrics and the meter collection list. Registered after AddInfrastructure so the
-            // outbox decorator registered there resolves against the fully built provider.
-            services.AddObservability(ObservabilityOptions.ServiceName, Configuration);
+            // Traces, metrics and the meter collection list, wired by the shared kernel. Registered
+            // after AddInfrastructure so the outbox decorator registered there resolves against the
+            // fully built provider. shouldIncludeHttpInstrumentation is left at its default (true):
+            // this host serves every HTTP request in, and the ASP.NET Core instrumentation is what
+            // creates the inbound Activity the outbox decorator later reads.
+            services.AddObservability(ObservabilityOptions.ServiceName);
 
             services.AddControllers();
 

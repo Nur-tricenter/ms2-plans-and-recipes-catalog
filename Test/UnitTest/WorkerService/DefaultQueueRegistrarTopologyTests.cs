@@ -19,7 +19,7 @@ namespace Catalog.Tests.WorkerService
             var bound = DefaultQueueRegistrar.BoundExchanges;
 
             // Assert
-            Assert.Equal(Catalog.Application.IntegrationEvents.CatalogExchanges.All, bound);
+            Assert.Equal(Nur.Tricenter.Integration.CatalogExchanges.All, bound);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Catalog.Tests.WorkerService
             var queueName = DefaultQueueRegistrar.QueueName;
 
             // Assert
-            Assert.Equal(Catalog.Application.IntegrationEvents.CatalogExchanges.DefaultQueue, queueName);
+            Assert.Equal(Nur.Tricenter.Integration.CatalogExchanges.DefaultQueue, queueName);
         }
     }
 }

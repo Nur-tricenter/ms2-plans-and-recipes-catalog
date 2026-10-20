@@ -1,4 +1,4 @@
-using Catalog.Application.IntegrationEvents;
+using Nur.Tricenter.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Xunit;
 

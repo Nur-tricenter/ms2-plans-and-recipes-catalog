@@ -1,13 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Joseco.Communication.External.Contracts" Version="1.0.1" />
     <PackageReference Include="Joseco.DDD.Core" Version="1.0.3" />
     <PackageReference Include="Joseco.Outbox.Contracts" Version="1.0.2" />
     <PackageReference Include="MediatR" Version="14.1.0" />
@@ -15,6 +14,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      The external integration contracts (FoodPublished, RecipePublished, RecipeUpdated,
+      FoodNutritionalInfoUpdated, MealPlanPublished) and the RabbitMQ exchange registry
+      (CatalogExchanges) now live in the shared kernel Nur.Tricenter.Integration instead of in
+      this project. Every microservice on the platform publishes to the SAME exchanges under the
+      SAME names, so a change to that topology has to land once, in one place, or the producers
+      and the consumers drift apart on a contract nothing compiles against.
+
+      The kernel depends only on Joseco.Communication.External.Contracts, so referencing it here
+      does NOT drag a broker into the Application layer: a service can publish a contract without
+      pulling in RabbitMQ. Joseco.Communication.External.Contracts is therefore no longer declared
+      above either: it arrives transitively, and the OutboxContracts/MediatR pins below stay.
+    -->
+    <ProjectReference Include="..\..\..\nur-tricenter-shared-kernels\nur-tricenter-integration\nur-tricenter-integration.csproj" />
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
   </ItemGroup>
 

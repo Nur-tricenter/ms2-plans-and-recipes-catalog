@@ -35,7 +35,7 @@ namespace Catalog.Tests.Application
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
             plan.AssignRecipeToMealTime(mealTime.Id, recipeId, new Ration(1));
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new RemoveRecipeFromMealTimeCommand { MealPlanId = plan.Id, MealTimeId = mealTime.Id, RecipeId = recipeId };
 
             // Act
@@ -45,7 +45,7 @@ namespace Catalog.Tests.Application
             Assert.True(result.IsSuccess);
             Assert.Equal("Recipe removed from meal time successfully", result.Message);
             Assert.Empty(mealTime.AssignedRecipes);
-            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.MealPlanId)), Times.Once);
+            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.MealPlanId), It.IsAny<bool>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -53,7 +53,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_PlanNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((MealPlan?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync((MealPlan?)null);
             var command = new RemoveRecipeFromMealTimeCommand { MealPlanId = Guid.NewGuid(), MealTimeId = Guid.NewGuid(), RecipeId = Guid.NewGuid() };
 
             // Act
@@ -70,7 +70,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new RemoveRecipeFromMealTimeCommand { MealPlanId = plan.Id, MealTimeId = Guid.NewGuid(), RecipeId = Guid.NewGuid() };
 
             // Act

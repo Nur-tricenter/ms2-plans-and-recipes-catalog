@@ -1,9 +1,11 @@
 using Catalog.Infrastructure.Configuration;
 using Catalog.Infrastructure.Observability;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nur.Tricenter.Observability.Tracing;
 
 namespace Catalog.WebApi
 {
@@ -39,7 +41,13 @@ namespace Catalog.WebApi
                 // Serilog with the ambient span stamped onto every event, so a log line can be joined
                 // to its trace without code of ours. Applied here rather than in Startup so it also
                 // covers the host's own lifecycle logs.
-                .UseCatalogLogging(ObservabilityOptions.ServiceName)
+                //
+                // UseLogging's IConfiguration parameter is satisfied with an EMPTY configuration on
+                // purpose: the kernel's own UseSerilog callback reads the HOST's configuration
+                // (context.Configuration), not this argument, so passing a second, separately built
+                // view of appsettings.json would be one more thing to keep in step with the host's
+                // own provider list, and nothing would read it.
+                .UseLogging(ObservabilityOptions.ServiceName, new ConfigurationBuilder().Build())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

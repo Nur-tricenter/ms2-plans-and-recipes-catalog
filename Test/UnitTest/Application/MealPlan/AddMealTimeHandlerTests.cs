@@ -34,7 +34,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var plan = CreatePlan();
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new AddMealTimeCommand { MealPlanId = plan.Id, DayNumber = 1, MealTimeType = (int)MealTimeType.Breakfast };
 
             // Act
@@ -45,7 +45,7 @@ namespace Catalog.Tests.Application
             Assert.Equal("Meal time added successfully", result.Message);
             var mealTime = Assert.Single(plan.PlanDays.First(d => d.DayNumber == 1).MealTimes);
             Assert.Equal("Breakfast", mealTime.Name);
-            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.MealPlanId)), Times.Once);
+            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.MealPlanId), It.IsAny<bool>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -53,7 +53,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_PlanNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((MealPlan?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync((MealPlan?)null);
             var command = new AddMealTimeCommand { MealPlanId = Guid.NewGuid(), DayNumber = 1, MealTimeType = (int)MealTimeType.Breakfast };
 
             // Act
@@ -72,7 +72,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var plan = CreatePlan();
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new AddMealTimeCommand { MealPlanId = plan.Id, DayNumber = 1, MealTimeType = type };
 
             // Act
@@ -89,7 +89,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var plan = CreatePlan();
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new AddMealTimeCommand { MealPlanId = plan.Id, DayNumber = 16, MealTimeType = (int)MealTimeType.Breakfast };
 
             // Act
@@ -107,7 +107,7 @@ namespace Catalog.Tests.Application
             // Arrange
             var plan = CreatePlan();
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(plan);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new AddMealTimeCommand { MealPlanId = plan.Id, DayNumber = 1, MealTimeType = (int)MealTimeType.Breakfast };
 
             // Act

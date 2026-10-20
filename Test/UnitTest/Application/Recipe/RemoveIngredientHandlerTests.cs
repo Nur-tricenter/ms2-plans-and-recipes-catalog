@@ -31,7 +31,7 @@ namespace Catalog.Tests.Application
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
             var foodId = Guid.NewGuid();
             recipe.AddIngredient(foodId, new Portion(2));
-            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(recipe);
             var command = new RemoveIngredientCommand { RecipeId = recipe.Id, FoodId = foodId };
 
             // Act
@@ -41,7 +41,7 @@ namespace Catalog.Tests.Application
             Assert.True(result.IsSuccess);
             Assert.Equal("Ingredient removed successfully", result.Message);
             Assert.Empty(recipe.Ingredients);
-            _recipeRepoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.RecipeId)), Times.Once);
+            _recipeRepoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == command.RecipeId), It.IsAny<bool>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -49,7 +49,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Recipe?)null);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync((Recipe?)null);
             var command = new RemoveIngredientCommand { RecipeId = Guid.NewGuid(), FoodId = Guid.NewGuid() };
 
             // Act
@@ -66,7 +66,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipe = new Recipe(new RecipeName("Ensalada"), "Mezclar");
-            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(recipe);
+            _recipeRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(recipe);
             var command = new RemoveIngredientCommand { RecipeId = recipe.Id, FoodId = Guid.NewGuid() };
 
             // Act

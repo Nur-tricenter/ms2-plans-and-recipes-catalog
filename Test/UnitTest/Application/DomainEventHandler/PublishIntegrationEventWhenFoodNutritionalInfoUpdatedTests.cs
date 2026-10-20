@@ -1,4 +1,4 @@
-using Catalog.Application.IntegrationEvents;
+using Nur.Tricenter.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
@@ -11,9 +11,9 @@ using Moq;
 using Xunit;
 
 // The domain event (Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated) and the integration
-// contract (Catalog.Application.IntegrationEvents.FoodNutritionalInfoUpdated) deliberately share
+// contract (Nur.Tricenter.Integration.FoodNutritionalInfoUpdated) deliberately share
 // this name. The alias pins the wire type under test; the bare name means the domain event.
-using IntegrationContract = Catalog.Application.IntegrationEvents.FoodNutritionalInfoUpdated;
+using IntegrationContract = Nur.Tricenter.Integration.FoodNutritionalInfoUpdated;
 
 namespace Catalog.Tests.Application
 {

@@ -43,7 +43,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
 
             // Act
@@ -55,7 +55,7 @@ namespace Catalog.Tests.Application
             Assert.Equal("MANZANA ROJA", food.Name.Name);
             Assert.Equal(UnitOfMeasure.Kilogram, food.UnitOfMeasure);
             Assert.Equal(60m, food.BaseNutritionalInfo.Calories);
-            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == food.Id)), Times.Once);
+            _repoMock.Verify(r => r.GetByIdAsync(It.Is<Guid>(id => id == food.Id), It.IsAny<bool>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -63,7 +63,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((Food?)null);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync((Food?)null);
             var command = CreateValidCommand(Guid.NewGuid());
 
             // Act
@@ -82,7 +82,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
             command.UnitOfMeasure = unitOfMeasure;
 
@@ -102,7 +102,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var food = new Food(new FoodName("MANZANA"), new CategoryName("FRUTA"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
-            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(food);
+            _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(food);
             var command = CreateValidCommand(food.Id);
             command.Quantity = quantity;
 
