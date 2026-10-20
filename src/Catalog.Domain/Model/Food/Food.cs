@@ -38,10 +38,9 @@ namespace Catalog.Domain.Model.Foods
             Name = name;
             Category = category;
             UnitOfMeasure = unitOfMeasure;
-            var previous = BaseNutritionalInfo;
             BaseNutritionalInfo = info;
 
-            AddDomainEvent(new FoodNutritionalInfoUpdated(Id, previous, info));
+            AddDomainEvent(new FoodUpdated(Id, name, category, unitOfMeasure, info));
         }
     }
 }

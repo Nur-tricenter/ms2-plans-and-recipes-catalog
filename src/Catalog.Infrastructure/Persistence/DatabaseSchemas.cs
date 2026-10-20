@@ -6,19 +6,19 @@ namespace Catalog.Infrastructure.Persistence
     /// <remarks>
     /// <para>
     /// The write side (<see cref="DomainModel.DomainDbContext"/>) and the read side
-    /// (<see cref="StoredModel.StoredDbContext"/>) share one database and, until this type
-    /// existed, one schema as well: both mapped <c>Food</c>, <c>Recipe</c>, <c>MealPlan</c>,
-    /// <c>PlanDay</c> and <c>MealTime</c> into <c>public</c>. Two migration histories then tried to
-    /// CREATE the same relations and the deploy step died with <c>42P07: relation "Food" already
-    /// exists</c>. EF Core InMemory could not catch it because each context gets its own store
-    /// there, so the whole unit and integration suite stayed green while a real boot crashed.
+    /// (<see cref="StoredModel.StoredDbContext"/>) share ONE database, separated by schema:
+    /// aggregates live in <see cref="Write"/>, projection models in <see cref="Read"/>, and the
+    /// transactional outbox in <see cref="Outbox"/>.
     /// </para>
     /// <para>
-    /// <b>Why separate schemas and not separate databases.</b> The projection handlers read the
-    /// write model and write the read model in the same unit of work, and the seed step exercises
-    /// both. Two databases would mean two connection strings, two credentials and cross-database
-    /// joins for anyone writing a report. Two schemas keep one database, one credential and one
-    /// transaction, while making the CQRS split physical instead of nominal.
+    /// <b>Why one database and separate schemas.</b> The reference architecture gives each
+    /// microservice exactly one database, and this service keeps that: one connection string, one
+    /// credential, one migration story. The CQRS split is physical at the schema level
+    /// (<c>write</c> vs <c>read</c>) and logical at the code level — every query is served from
+    /// <see cref="StoredModel.StoredDbContext"/> and never from the write model — which is what
+    /// actually isolates the two models. Two databases would buy a second connection string, a
+    /// second credential and cross-database joins for anyone writing a report, in exchange for a
+    /// split the code already enforces.
     /// </para>
     /// <para>
     /// <b>Why the names live here.</b> A schema name typed into eight configuration classes is

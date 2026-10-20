@@ -280,6 +280,36 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             createResponse.EnsureSuccessStatusCode();
             var created = await createResponse.Content.ReadFromJsonAsync<MealPlanCreateResponse>();
 
+            // Seed the read model so the query handler (which now reads from StoredDbContext) can find it
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
+                var mealPlan = await repository.GetByIdAsync(created!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                var model = new MealPlanModel
+                {
+                    Id = mealPlan!.Id,
+                    Name = mealPlan.Name.Name,
+                    DurationType = mealPlan.Duration.Type.ToString(),
+                    MealsPerDay = mealPlan.MealsPerDay,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                foreach (var day in mealPlan.PlanDays)
+                {
+                    model.PlanDays.Add(new PlanDayModel
+                    {
+                        Id = day.Id,
+                        DayNumber = day.DayNumber,
+                        MealPlanId = mealPlan.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        IsDeleted = false
+                    });
+                }
+                readDb.MealPlans.Add(model);
+                await readDb.SaveChangesAsync();
+            }
+
             //Act
             var response = await client.GetAsync($"/api/v1/meal-plans/{created!.Data}");
 

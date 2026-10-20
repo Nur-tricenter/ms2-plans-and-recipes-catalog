@@ -1,24 +1,22 @@
 using Catalog.Application.Dto;
 using Catalog.Application.UseCase.Query.MealPlan;
 using Catalog.Application.Utils;
-using Catalog.Domain.Repository.MealPlan;
-using Catalog.Domain.Repository.Recipe;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Infrastructure.Query.MealPlan
 {
     public class GetMealPlanByIdHandler : IRequestHandler<GetMealPlanByIdQuery, Result<MealPlanDto>>
     {
-        private readonly IMealPlanRepository _repository;
-        private readonly IRecipeRepository _recipeRepository;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<GetMealPlanByIdHandler> _logger;
 
-        public GetMealPlanByIdHandler(IMealPlanRepository repository, IRecipeRepository recipeRepository, ILogger<GetMealPlanByIdHandler> logger)
+        public GetMealPlanByIdHandler(StoredDbContext dbContext, ILogger<GetMealPlanByIdHandler> logger)
         {
-            _repository = repository;
-            _recipeRepository = recipeRepository;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
@@ -26,7 +24,12 @@ namespace Catalog.Infrastructure.Query.MealPlan
         {
             try
             {
-                var mealPlan = await _repository.GetByIdAsync(request.Id);
+                var mealPlan = await _dbContext.MealPlans
+                    .Include(p => p.PlanDays)
+                    .ThenInclude(d => d.MealTimes)
+                    .ThenInclude(m => m.AssignedRecipes)
+                    .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
+
                 if (mealPlan == null)
                     return Result.Fail<MealPlanDto>("Meal plan not found");
 
@@ -34,8 +37,8 @@ namespace Catalog.Infrastructure.Query.MealPlan
                 {
                     Id = mealPlan.Id,
                     Name = mealPlan.Name,
-                    DurationType = mealPlan.Duration.Type.ToString(),
-                    TotalDays = mealPlan.Duration.Days(),
+                    DurationType = mealPlan.DurationType,
+                    TotalDays = mealPlan.PlanDays.Count,
                     MealsPerDay = mealPlan.MealsPerDay
                 };
 
@@ -51,12 +54,12 @@ namespace Catalog.Infrastructure.Query.MealPlan
                         };
                         foreach (var asig in mealTime.AssignedRecipes)
                         {
-                            var recipe = await _recipeRepository.GetByIdAsync(asig.RecipeId);
+                            var recipe = await _dbContext.Recipes.FindAsync(new object?[] { asig.RecipeId }, cancellationToken);
                             mtDto.Recipes.Add(new AssignedRecipeDto
                             {
                                 RecipeId = asig.RecipeId,
                                 RecipeName = recipe?.Name ?? "Unknown",
-                                Ration = asig.Ration.Quantity
+                                Ration = asig.RationQuantity
                             });
                         }
                         dayDto.MealTimes.Add(mtDto);

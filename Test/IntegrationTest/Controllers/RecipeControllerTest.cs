@@ -76,6 +76,23 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             createResponse.EnsureSuccessStatusCode();
             var created = await createResponse.Content.ReadFromJsonAsync<RecipeCreateResponse>();
 
+            // Seed the read model so the query handler (which now reads from StoredDbContext) can find it
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var repository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
+                var recipe = await repository.GetByIdAsync(created!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Recipes.Add(new RecipeModel
+                {
+                    Id = recipe!.Id,
+                    Name = recipe.Name,
+                    Instructions = recipe.Instructions,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+                await readDb.SaveChangesAsync();
+            }
+
             //Act
             var response = await client.GetAsync($"/api/v1/recipes/{created!.Data}");
 
@@ -297,6 +314,52 @@ namespace Catalog.Tests.IntegrationTest.Controllers
                 }
             });
             addResponse.EnsureSuccessStatusCode();
+
+            // Seed the read models so the query handler (which now reads from StoredDbContext) can find them
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var recipeRepository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
+                var foodRepository = scope.ServiceProvider.GetRequiredService<Catalog.Domain.Repository.Food.IFoodRepository>();
+                var recipe = await recipeRepository.GetByIdAsync(recipeCreated!.Data);
+                var food = await foodRepository.GetByIdAsync(foodCreated!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+
+                readDb.Foods.Add(new Catalog.Infrastructure.Persistence.StoredModel.Entities.Food.FoodModel
+                {
+                    Id = food!.Id,
+                    Name = food.Name.Name,
+                    Category = food.Category.Name,
+                    UnitOfMeasure = (int)food.UnitOfMeasure,
+                    Quantity = food.BaseNutritionalInfo.Quantity,
+                    Calories = food.BaseNutritionalInfo.Calories,
+                    Protein = food.BaseNutritionalInfo.Protein,
+                    Carbs = food.BaseNutritionalInfo.Carbs,
+                    Fat = food.BaseNutritionalInfo.Fat,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+
+                var recipeModel = new RecipeModel
+                {
+                    Id = recipe!.Id,
+                    Name = recipe.Name,
+                    Instructions = recipe.Instructions,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                foreach (var ing in recipe.Ingredients)
+                {
+                    recipeModel.Ingredients.Add(new IngredientModel
+                    {
+                        Id = Guid.NewGuid(),
+                        FoodId = ing.FoodId,
+                        PortionQuantity = ing.Portion.Quantity,
+                        RecipeId = recipe.Id
+                    });
+                }
+                readDb.Recipes.Add(recipeModel);
+                await readDb.SaveChangesAsync();
+            }
 
             //Act
             var response = await client.GetAsync($"/api/v1/recipes/{recipeCreated.Data}/nutritional-info");

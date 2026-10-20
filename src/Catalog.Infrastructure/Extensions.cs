@@ -60,6 +60,15 @@ namespace Catalog.Infrastructure
         /// <summary>
         /// Name of the single connection string both contexts share.
         /// </summary>
+        /// <remarks>
+        /// The write side (<c>DomainDbContext</c>) and the read side (<c>StoredDbContext</c>) point at
+        /// the SAME database, separated by schema: <c>write</c> for the aggregates, <c>read</c> for
+        /// the projections, <c>outbox</c> for the transactional outbox. One database, one
+        /// credential, one deployment step — matching the reference architecture, which gives each
+        /// microservice exactly one database. The CQRS split is physical at the schema level and
+        /// logical at the code level: every query is served from <c>StoredDbContext</c>, never from
+        /// the write model.
+        /// </remarks>
         public const string ConnectionStringName = "CatalogDbConnectionString";
 
         /// <summary>

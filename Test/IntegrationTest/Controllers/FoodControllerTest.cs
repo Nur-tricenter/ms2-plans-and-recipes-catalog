@@ -89,6 +89,29 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             createResponse.EnsureSuccessStatusCode();
             var created = await createResponse.Content.ReadFromJsonAsync<FoodCreateResponse>();
 
+            // Seed the read model so the query handler (which now reads from StoredDbContext) can find it
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
+                var food = await repository.GetByIdAsync(created!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
+                {
+                    Id = food!.Id,
+                    Name = food.Name.Name,
+                    Category = food.Category.Name,
+                    UnitOfMeasure = (int)food.UnitOfMeasure,
+                    Quantity = food.BaseNutritionalInfo.Quantity,
+                    Calories = food.BaseNutritionalInfo.Calories,
+                    Protein = food.BaseNutritionalInfo.Protein,
+                    Carbs = food.BaseNutritionalInfo.Carbs,
+                    Fat = food.BaseNutritionalInfo.Fat,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+                await readDb.SaveChangesAsync();
+            }
+
             //Act
             var response = await client.GetAsync($"/api/v1/foods/{created!.Data}");
 

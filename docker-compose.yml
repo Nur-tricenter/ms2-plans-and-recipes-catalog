@@ -81,6 +81,8 @@ services:
       # value only shows up in the startup log line.
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__CatalogDbConnectionString: Host=db;Port=5432;Database=catalog;Username=dev-only;Password=dev-only-password
+      # ONE database for both sides. The write/read split is by schema: `write` for the
+      # aggregates, `read` for the projections, `outbox` for the transactional outbox.
       # Schema: applied by webapi-migrate, not here.
       Migrations__ApplyOnStartup: "false"
       # Sample catalogue data (30 foods / 25 recipes / 2 plans). Off in this stack on

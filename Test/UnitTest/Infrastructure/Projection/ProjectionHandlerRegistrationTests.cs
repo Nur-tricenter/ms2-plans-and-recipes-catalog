@@ -31,6 +31,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             // Act
             var foodCreated = provider.GetServices<INotificationHandler<OutboxMessage<FoodCreated>>>();
             var foodUpdated = provider.GetServices<INotificationHandler<OutboxMessage<FoodNutritionalInfoUpdated>>>();
+            var foodFullyUpdated = provider.GetServices<INotificationHandler<OutboxMessage<FoodUpdated>>>();
             var recipeCreated = provider.GetServices<INotificationHandler<OutboxMessage<RecipeCreated>>>();
             var recipeUpdated = provider.GetServices<INotificationHandler<OutboxMessage<RecipeUpdated>>>();
             var ingredientAdded = provider.GetServices<INotificationHandler<OutboxMessage<IngredientAddedToRecipe>>>();
@@ -44,6 +45,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             // Assert
             Assert.Contains(foodCreated, handler => handler is ProjectFoodModelWhenFoodCreated);
             Assert.Contains(foodUpdated, handler => handler is ProjectFoodModelWhenFoodNutritionalInfoUpdated);
+            Assert.Contains(foodFullyUpdated, handler => handler is ProjectFoodModelWhenFoodUpdated);
             Assert.Contains(recipeCreated, handler => handler is ProjectRecipeModelWhenRecipeCreated);
             Assert.Contains(recipeUpdated, handler => handler is ProjectRecipeModelWhenRecipeUpdated);
             Assert.Contains(ingredientAdded, handler => handler is ProjectIngredientModelWhenIngredientAddedToRecipe);

@@ -1,27 +1,22 @@
 using Catalog.Application.Dto;
 using Catalog.Application.UseCase.Query.Recipe;
 using Catalog.Application.Utils;
-using Catalog.Domain.Repository.Food;
-using Catalog.Domain.Repository.Recipe;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Infrastructure.Query.Recipe
 {
     public class GetRecipeByIdHandler : IRequestHandler<GetRecipeByIdQuery, Result<RecipeDto>>
     {
-        private readonly IRecipeRepository _repository;
-        private readonly IFoodRepository _foodRepository;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<GetRecipeByIdHandler> _logger;
 
-        public GetRecipeByIdHandler(
-            IRecipeRepository repository,
-            IFoodRepository foodRepository,
-            ILogger<GetRecipeByIdHandler> logger)
+        public GetRecipeByIdHandler(StoredDbContext dbContext, ILogger<GetRecipeByIdHandler> logger)
         {
-            _repository = repository;
-            _foodRepository = foodRepository;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
@@ -29,7 +24,10 @@ namespace Catalog.Infrastructure.Query.Recipe
         {
             try
             {
-                var recipe = await _repository.GetByIdAsync(request.Id);
+                var recipe = await _dbContext.Recipes
+                    .Include(r => r.Ingredients)
+                    .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+
                 if (recipe == null)
                     return Result.Fail<RecipeDto>("Recipe not found");
 
@@ -42,12 +40,12 @@ namespace Catalog.Infrastructure.Query.Recipe
 
                 foreach (var ing in recipe.Ingredients)
                 {
-                    var food = await _foodRepository.GetByIdAsync(ing.FoodId);
+                    var food = await _dbContext.Foods.FindAsync(new object?[] { ing.FoodId }, cancellationToken);
                     dto.Ingredients.Add(new IngredientDto
                     {
                         FoodId = ing.FoodId,
                         FoodName = food?.Name ?? "Unknown",
-                        Quantity = ing.Portion.Quantity
+                        Quantity = ing.PortionQuantity
                     });
                 }
 
