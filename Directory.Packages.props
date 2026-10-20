@@ -21,8 +21,8 @@
       any other dependency, which is what keeps this repository independent: nothing here knows
       where nur-tricenter-shared-kernels lives on disk.
     -->
-    <PackageVersion Include="Nur.Tricenter.Access" Version="1.0.0" />
-    <PackageVersion Include="Nur.Tricenter.Observability" Version="1.0.0" />
+    <PackageVersion Include="Nur.Tricenter.Access" Version="1.0.4" />
+    <PackageVersion Include="Nur.Tricenter.Observability" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup Label="Joseco">

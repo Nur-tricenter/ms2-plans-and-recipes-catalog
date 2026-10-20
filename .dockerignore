@@ -1,0 +1,38 @@
+# The build context is this repository, and nothing outside it is needed: the platform kernels
+# are NuGet packages from GitHub Packages, not a sibling folder.
+#
+#   docker build -t <image> .
+
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.git/
+**/.gitignore
+**/.github/
+**/node_modules/
+
+# Local development credentials. appsettings.Development.json is git-ignored precisely because
+# it carries a real connection string; it must never end up inside an image layer either.
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/.env
+**/.env.*
+
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/publish/
+**/coverage/
+**/TestResults/
+**/binlog/
+**/*.log
+
+# Test projects are not part of any shipped image.
+**/Test/
+**/tests/
+**/*Tests/
+
+README.md
+LICENSE
