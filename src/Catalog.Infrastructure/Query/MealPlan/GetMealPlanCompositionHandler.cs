@@ -1,30 +1,21 @@
 using Catalog.Application.UseCase.Query.MealPlan;
 using Catalog.Application.Utils;
-using Catalog.Domain.Repository.Food;
-using Catalog.Domain.Repository.MealPlan;
-using Catalog.Domain.Repository.Recipe;
-using Shared.Core;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Infrastructure.Query.MealPlan
 {
     public class GetMealPlanCompositionHandler : IRequestHandler<GetMealPlanCompositionQuery, Result<MealPlanCompositionDto>>
     {
-        private readonly IMealPlanRepository _planRepository;
-        private readonly IRecipeRepository _recipeRepository;
-        private readonly IFoodRepository _foodRepository;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<GetMealPlanCompositionHandler> _logger;
 
-        public GetMealPlanCompositionHandler(
-            IMealPlanRepository planRepository,
-            IRecipeRepository recipeRepository,
-            IFoodRepository foodRepository,
-            ILogger<GetMealPlanCompositionHandler> logger)
+        public GetMealPlanCompositionHandler(StoredDbContext dbContext, ILogger<GetMealPlanCompositionHandler> logger)
         {
-            _planRepository = planRepository;
-            _recipeRepository = recipeRepository;
-            _foodRepository = foodRepository;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
@@ -32,7 +23,12 @@ namespace Catalog.Infrastructure.Query.MealPlan
         {
             try
             {
-                var mealPlan = await _planRepository.FindByIdAsync(request.MealPlanId);
+                var mealPlan = await _dbContext.MealPlans
+                    .Include(p => p.PlanDays)
+                    .ThenInclude(d => d.MealTimes)
+                    .ThenInclude(m => m.AssignedRecipes)
+                    .FirstOrDefaultAsync(p => p.Id == request.MealPlanId, cancellationToken);
+
                 if (mealPlan == null)
                     return Result.Fail<MealPlanCompositionDto>("Meal plan not found");
 
@@ -57,26 +53,28 @@ namespace Catalog.Infrastructure.Query.MealPlan
 
                         foreach (var asig in mealTime.AssignedRecipes)
                         {
-                            var recipe = await _recipeRepository.FindByIdAsync(asig.RecipeId);
+                            var recipe = await _dbContext.Recipes
+                                .Include(r => r.Ingredients)
+                                .FirstOrDefaultAsync(r => r.Id == asig.RecipeId, cancellationToken);
                             if (recipe == null) continue;
 
                             var recipeDto = new AssignedRecipeCompositionDto
                             {
                                 RecipeId = recipe.Id,
                                 RecipeName = recipe.Name,
-                                Ration = new RationDto { Quantity = asig.Ration.Quantity }
+                                Ration = new RationDto { Quantity = asig.RationQuantity }
                             };
 
                             foreach (var ing in recipe.Ingredients)
                             {
-                                var food = await _foodRepository.FindByIdAsync(ing.FoodId);
+                                var food = await _dbContext.Foods.FindAsync(new object?[] { ing.FoodId }, cancellationToken);
                                 recipeDto.Ingredients.Add(new IngredientCompositionDto
                                 {
                                     FoodId = ing.FoodId,
                                     FoodName = food?.Name ?? "Unknown",
                                     Portion = new PortionDto
                                     {
-                                        Quantity = ing.Portion.Quantity
+                                        Quantity = ing.PortionQuantity
                                     }
                                 });
                             }

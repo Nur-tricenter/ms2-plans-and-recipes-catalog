@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!--
+    Dependency rule (reference architecture, section 8): the worker references Infrastructure
+    ONLY. Application arrives transitively through it, so a direct reference here would be a
+    second, redundant edge that the two projects can drift apart on.
+
+    It also owns no telemetry packages: they arrive through the observability shared kernel.
+    Declaring them again here is how two projects end up pinned to different versions of the
+    same OpenTelemetry package.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

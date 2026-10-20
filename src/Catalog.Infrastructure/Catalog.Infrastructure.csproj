@@ -1,21 +1,64 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-preview.2.25163.8">
+    <!--
+      Consul client, used by Catalog.Infrastructure/Consul/ServiceRegistration to register THIS
+      instance in the service registry on start and deregister it on stop.
+
+      Why this package sits here rather than in Catalog.App: ServiceRegistration.cs is a
+      generic-host IHostedService that has no ASP.NET dependency at all â€” its only web-specific
+      concern (reading the bound port) is declared as IServerPortResolver and answered by the web
+      host. That makes Infrastructure the correct home for the class AND for its one dependency.
+
+      What that costs Catalog.WorkerService, which references this project: nothing functional. The
+      Consul client is a plain HTTP/DNS library â€” it does not pull in the ASP.NET Core shared
+      framework, so the console host keeps building and running as a console app. It simply never
+      calls AddConsulServiceRegistration, and it must not: the worker publishes to RabbitMQ, has no
+      HTTP endpoint, and a gateway cannot route to it. Registration is opt-in per host, never a
+      side effect of AddInfrastructure.
+    -->
+    <PackageReference Include="Consul" />
+    <PackageReference Include="Joseco.DDD.Core" />
+    <PackageReference Include="Joseco.Outbox.EFCore" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <!--
+      Declared explicitly because ServiceRegistration implements IHostedService. It already arrived
+      transitively at 9.0.3, and this pin matches that exact version so the graph converges instead
+      of shifting. Referencing a type from an undeclared transitive package is a build that breaks
+      the next time an unrelated package moves.
+    -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scrutor" Version="6.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scrutor" />
+    <!--
+      OpenTelemetry.* and Serilog.* are NOT declared here any more: they arrive through
+      Nur.Tricenter.Observability, which is where the AddObservability/UseLogging bodies and the
+      meter collection list now live. Declaring them again on this side is what let the two hosts
+      drift into collecting different meters; the kernel is the single place that decides.
+    -->
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      The platform kernel arrives as a NuGet package, not as a project reference to a sibling
+      folder. That is what makes this repository buildable on its own: `dotnet restore` resolves
+      the package from the organization feed, so the checkout needs nothing else on disk and the
+      Docker image builds from this folder as the context.
+    -->
+    <PackageReference Include="Nur.Tricenter.Observability" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
   </ItemGroup>
 

@@ -2,7 +2,7 @@ using Catalog.Application.Dto;
 using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Query.Food;
 using Catalog.Domain.ValueObjects;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.StoredModel;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,10 +11,10 @@ namespace Catalog.Infrastructure.Query.Food
 {
     public class SearchFoodsByCategoryHandler : IRequestHandler<SearchFoodsByCategoryQuery, Result<PagedList<FoodDto>>>
     {
-        private readonly ReadDbContext _dbContext;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<SearchFoodsByCategoryHandler> _logger;
 
-        public SearchFoodsByCategoryHandler(ReadDbContext dbContext, ILogger<SearchFoodsByCategoryHandler> logger)
+        public SearchFoodsByCategoryHandler(StoredDbContext dbContext, ILogger<SearchFoodsByCategoryHandler> logger)
         {
             _dbContext = dbContext;
             _logger = logger;

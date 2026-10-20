@@ -1,5 +1,11 @@
+using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
+using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
+using Catalog.Domain.ValueObjects;
+using Joseco.Communication.External.Contracts.Services;
+using Joseco.DDD.Core.Abstractions;
+using Joseco.Outbox.Contracts.Model;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -9,20 +15,153 @@ namespace Catalog.Tests.Application
     public class PublishIntegrationEventWhenMealPlanCreatedTests
     {
         private readonly Mock<ILogger<PublishIntegrationEventWhenMealPlanCreated>> _loggerMock;
+        private readonly Mock<IExternalPublisher> _publisherMock;
         private readonly PublishIntegrationEventWhenMealPlanCreated _handler;
+        private readonly List<MealPlanPublished> _published = new();
 
         public PublishIntegrationEventWhenMealPlanCreatedTests()
         {
             _loggerMock = new Mock<ILogger<PublishIntegrationEventWhenMealPlanCreated>>();
-            _handler = new PublishIntegrationEventWhenMealPlanCreated(_loggerMock.Object);
+            _publisherMock = new Mock<IExternalPublisher>();
+            _publisherMock
+                .Setup(x => x.PublishAsync(It.IsAny<MealPlanPublished>(), It.IsAny<string?>(), It.IsAny<bool>()))
+                .Callback<MealPlanPublished, string?, bool>((message, _, _) => _published.Add(message))
+                .Returns(Task.CompletedTask);
+            _handler = new PublishIntegrationEventWhenMealPlanCreated(
+                _loggerMock.Object,
+                _publisherMock.Object);
         }
 
         [Fact]
-        public async Task Handle_MealPlanCreated_LogsPublishedIntegrationEvent()
+        public async Task Handle_MealPlanCreatedContent_PublishesThePlanPublishedContract()
+        {
+            // Arrange
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _publisherMock.Verify(
+                x => x.PublishAsync(It.IsAny<MealPlanPublished>(), It.IsAny<string?>(), It.IsAny<bool>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_MapsEveryDomainEventMember()
         {
             // Arrange
             var planId = Guid.NewGuid();
-            var notification = new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3);
+            var mealPlanCreated = new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3);
+            var notification = new OutboxMessage<DomainEvent>(mealPlanCreated);
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            var captured = Assert.Single(_published);
+            Assert.Equal(planId, captured.PlanId);
+            Assert.Equal("Plan Saludable", captured.Name);
+            Assert.Equal("FIFTEEN_DAYS", captured.DurationType);
+            Assert.Equal(15, captured.TotalDays);
+            Assert.Equal(3, captured.MealsPerDay);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_PublishesToMealPlanPublishedDestination()
+        {
+            // Arrange
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _publisherMock.Verify(
+                x => x.PublishAsync(It.IsAny<MealPlanPublished>(), "meal-plan-published", It.IsAny<bool>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_DeclaresTheDestinationExchange()
+        {
+            // Arrange
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _publisherMock.Verify(
+                x => x.PublishAsync(It.IsAny<MealPlanPublished>(), It.IsAny<string?>(), true),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_PropagatesTheOutboxCorrelationId()
+        {
+            // Arrange
+            const string correlationId = "correlation-abc-123";
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3),
+                correlationId,
+                "trace-1",
+                "span-1");
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            var captured = Assert.Single(_published);
+            Assert.Equal(correlationId, captured.CorrelationId);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_StampsCatalogAsTheSource()
+        {
+            // Arrange
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            var captured = Assert.Single(_published);
+            Assert.Equal("catalog", captured.Source);
+        }
+
+        [Fact]
+        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
+        {
+            // Arrange
+            var notification = new OutboxMessage<DomainEvent>(
+                new FoodCreated(
+                    Guid.NewGuid(),
+                    "MANZANA",
+                    "FRUTAS",
+                    new NutritionalInfo(100, 52, 0.3m, 14, 0.2m),
+                    UnitOfMeasure.Gram));
+
+            // Act
+            await _handler.Handle(notification, CancellationToken.None);
+
+            // Assert
+            _publisherMock.Verify(
+                x => x.PublishAsync(It.IsAny<MealPlanPublished>(), It.IsAny<string?>(), It.IsAny<bool>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_MealPlanCreatedContent_LogsThePublishedContract()
+        {
+            // Arrange
+            var planId = Guid.NewGuid();
+            var notification = new OutboxMessage<DomainEvent>(
+                new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -33,7 +172,7 @@ namespace Catalog.Tests.Application
                     LogLevel.Information,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>((state, _) =>
-                        state.ToString()!.Contains("CatalogoV1.PlanPublished") &&
+                        state.ToString()!.Contains("MealPlan.Published") &&
                         state.ToString()!.Contains(planId.ToString()) &&
                         state.ToString()!.Contains("Plan Saludable")),
                     It.IsAny<Exception?>(),

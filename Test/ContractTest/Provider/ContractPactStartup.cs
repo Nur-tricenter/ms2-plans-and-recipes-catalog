@@ -1,5 +1,5 @@
 using Catalog.Tests.IntegrationTest.Setup;
-using Catalog.WebApi;
+using Catalog.App;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

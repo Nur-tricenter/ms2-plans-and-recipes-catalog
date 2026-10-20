@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Catalog.Test</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,28 +10,49 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0-preview.2.25163.8" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+    <PackageReference Include="Joseco.DDD.Core" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="PactNet" Version="5.0.0" />
-    <PackageReference Include="coverlet.collector" Version="10.0.1">
+    <PackageReference Include="Moq" />
+    <PackageReference Include="PactNet" />
+    <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!--
+      Required by Test/IntegrationTest/RabbitMq: the broker round-trip, retry and dead-letter tests
+      exercise the real publisher and the real consumer against a live AMQP broker, so the test
+      project compiles against the library itself instead of only reaching it transitively through
+      Catalog.WorkerService. RabbitMQ.Client (7.1.2) flows in transitively and is used to poll
+      queue depth, read dead-letter headers and clean up the exchanges/queues the tests declare.
+    -->
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" />
+    <!--
+      Pin: Joseco.Communication.External.RabbitMQ 1.1.0 drags OpenTelemetry.Api 1.12.0, which
+      carries advisory GHSA-g94r-2vxg-569j (NU1902). The shared kernel pins 1.16.0 for the same
+      reason; this project stays above both so the whole graph converges instead of the test host
+      resolving a different OpenTelemetry build than the code under test. Do NOT remove this pin
+      unless the RabbitMQ package stops requesting OpenTelemetry.Api < 1.16.0.
+    -->
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\src\Catalog.Domain\Catalog.Domain.csproj" />
-    <ProjectReference Include="..\src\Catalog.Shared\Catalog.Shared.csproj" />
-    <ProjectReference Include="..\src\Catalog.WebApi\Catalog.WebApi.csproj" />
+    <ProjectReference Include="..\src\Catalog.App\Catalog.App.csproj" />
     <ProjectReference Include="..\src\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+    <!--
+      Referenced so the WorkerService composition root (RabbitMqExtensions.AddCatalogRabbitMq and
+      DefaultQueueRegistrar) can be unit-tested without a live broker.
+    -->
+    <ProjectReference Include="..\src\Catalog.WorkerService\Catalog.WorkerService.csproj" />
   </ItemGroup>
 
 </Project>

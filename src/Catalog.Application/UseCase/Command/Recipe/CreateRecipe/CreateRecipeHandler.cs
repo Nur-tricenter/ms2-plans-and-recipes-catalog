@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Factory.Recipe;
 using Catalog.Domain.Repository.Recipe;
@@ -32,8 +32,8 @@ namespace Catalog.Application.UseCase.Command.Recipe.CreateRecipe
             {
                 var recipe = _factory.Create(request.Name, request.Instructions);
 
-                await _repository.CreateAsync(recipe);
-                await _unitOfWork.Commit();
+                await _repository.AddAsync(recipe);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 return Result<Guid>.Ok(recipe.Id, "Recipe created successfully");
             }

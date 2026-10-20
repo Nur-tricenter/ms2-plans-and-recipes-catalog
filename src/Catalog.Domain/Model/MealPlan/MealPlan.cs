@@ -1,10 +1,11 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 using Catalog.Domain.Event.MealPlan;
 
 namespace Catalog.Domain.Model.MealPlans
 {
-    public class MealPlan : AggregateRoot<Guid>
+    public class MealPlan : AuditableAggregateRoot
     {
         public MealPlanName Name { get; private set; }
         public PlanDuration Duration { get; private set; }

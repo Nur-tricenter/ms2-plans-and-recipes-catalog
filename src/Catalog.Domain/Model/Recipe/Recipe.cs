@@ -1,11 +1,12 @@
 using Catalog.Domain.Model.Foods;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 using Catalog.Domain.Event.Recipe;
 
 namespace Catalog.Domain.Model.Recipes
 {
-    public class Recipe : AggregateRoot<Guid>
+    public class Recipe : AuditableAggregateRoot
     {
         public RecipeName Name { get; private set; }
         public string Instructions { get; private set; }
@@ -25,7 +26,7 @@ namespace Catalog.Domain.Model.Recipes
             Instructions = instructions;
             _ingredients = new List<RecipeIngredient>();
 
-            AddDomainEvent(new RecipeCreated(Id, Name));
+            AddDomainEvent(new RecipeCreated(Id, Name, Instructions));
         }
 
         public void Update(string instructions)

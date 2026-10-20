@@ -1,21 +1,22 @@
 using Catalog.Application.Dto;
 using Catalog.Application.UseCase.Query.Food;
 using Catalog.Application.Utils;
-using Catalog.Domain.Repository.Food;
-using Shared.Core;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Infrastructure.Query.Food
 {
     public class GetFoodByIdHandler : IRequestHandler<GetFoodByIdQuery, Result<FoodDto>>
     {
-        private readonly IFoodRepository _repository;
+        private readonly StoredDbContext _dbContext;
         private readonly ILogger<GetFoodByIdHandler> _logger;
 
-        public GetFoodByIdHandler(IFoodRepository repository, ILogger<GetFoodByIdHandler> logger)
+        public GetFoodByIdHandler(StoredDbContext dbContext, ILogger<GetFoodByIdHandler> logger)
         {
-            _repository = repository;
+            _dbContext = dbContext;
             _logger = logger;
         }
 
@@ -23,7 +24,7 @@ namespace Catalog.Infrastructure.Query.Food
         {
             try
             {
-                var food = await _repository.FindByIdAsync(request.Id);
+                var food = await _dbContext.Foods.FindAsync(new object?[] { request.Id }, cancellationToken);
                 if (food == null)
                     return Result.Fail<FoodDto>("Food not found");
 
@@ -32,12 +33,12 @@ namespace Catalog.Infrastructure.Query.Food
                     Id = food.Id,
                     Name = food.Name,
                     Category = food.Category,
-                    UnitOfMeasure = food.UnitOfMeasure.ToString(),
-                    Quantity = food.BaseNutritionalInfo.Quantity,
-                    Calories = food.BaseNutritionalInfo.Calories,
-                    Protein = food.BaseNutritionalInfo.Protein,
-                    Carbs = food.BaseNutritionalInfo.Carbs,
-                    Fat = food.BaseNutritionalInfo.Fat
+                    UnitOfMeasure = ((Catalog.Domain.ValueObjects.UnitOfMeasure)food.UnitOfMeasure).ToString(),
+                    Quantity = food.Quantity,
+                    Calories = food.Calories,
+                    Protein = food.Protein,
+                    Carbs = food.Carbs,
+                    Fat = food.Fat
                 }, "Food retrieved successfully");
             }
             catch (Exception ex)

@@ -1,8 +1,9 @@
 using Catalog.Domain.Event.Recipe;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Model.Foods;
 using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.ValueObjects;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Domain
@@ -25,6 +26,20 @@ namespace Catalog.Tests.Domain
             Assert.Empty(recipe.Ingredients);
             var evt = Assert.IsType<RecipeCreated>(Assert.Single(recipe.DomainEvents));
             Assert.Equal(recipe.Id, evt.RecipeId);
+        }
+
+        [Fact]
+        public void Constructor_ValidData_RaisesRecipeCreatedWithTheInstructions()
+        {
+            // Arrange
+            var nombre = new RecipeName("Ensalada");
+
+            // Act
+            var recipe = new Recipe(nombre, "Mezclar todos los ingredientes");
+
+            // Assert
+            var evt = Assert.IsType<RecipeCreated>(Assert.Single(recipe.DomainEvents));
+            Assert.Equal("Mezclar todos los ingredientes", evt.Instructions);
         }
 
         [Theory]

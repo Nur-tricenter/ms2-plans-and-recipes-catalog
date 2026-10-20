@@ -1,8 +1,9 @@
 using Catalog.Domain;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
 using Catalog.Domain.ValueObjects;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Domain

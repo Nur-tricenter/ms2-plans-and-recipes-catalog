@@ -4,24 +4,24 @@ using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using System.Collections.Concurrent;
 
 namespace Catalog.Tests.IntegrationTest.Setup
 {
     public class InMemoryUnitOfWork : IUnitOfWork
     {
-        public Task Commit() => Task.CompletedTask;
+        public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 
     public class InMemoryFoodRepository : IFoodRepository
     {
         private readonly ConcurrentDictionary<Guid, Food> _items = new();
 
-        public Task<Food?> FindByIdAsync(Guid id) =>
+        public Task<Food?> GetByIdAsync(Guid id, bool readOnly = false) =>
             Task.FromResult<Food?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(Food obj)
+        public Task AddAsync(Food obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;
@@ -44,10 +44,10 @@ namespace Catalog.Tests.IntegrationTest.Setup
     {
         private readonly ConcurrentDictionary<Guid, Recipe> _items = new();
 
-        public Task<Recipe?> FindByIdAsync(Guid id) =>
+        public Task<Recipe?> GetByIdAsync(Guid id, bool readOnly = false) =>
             Task.FromResult<Recipe?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(Recipe obj)
+        public Task AddAsync(Recipe obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;
@@ -70,10 +70,10 @@ namespace Catalog.Tests.IntegrationTest.Setup
     {
         private readonly ConcurrentDictionary<Guid, MealPlan> _items = new();
 
-        public Task<MealPlan?> FindByIdAsync(Guid id) =>
+        public Task<MealPlan?> GetByIdAsync(Guid id, bool readOnly = false) =>
             Task.FromResult<MealPlan?>(_items.TryGetValue(id, out var item) ? item : null);
 
-        public Task CreateAsync(MealPlan obj)
+        public Task AddAsync(MealPlan obj)
         {
             _items[obj.Id] = obj;
             return Task.CompletedTask;

@@ -1,4 +1,5 @@
 using Catalog.Application.UseCase.Command.MealPlan.CreateMealPlan;
+using Catalog.Domain.Primitives;
 using Catalog.Domain;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -6,7 +7,7 @@ using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -44,8 +45,8 @@ namespace Catalog.Tests.Application
             Assert.Equal(plan.Id, result.Value);
             Assert.Equal("Meal plan created successfully", result.Message);
             _factoryMock.Verify(f => f.Create("Plan Saludable", It.Is<PlanDuration>(d => d.Type == DurationType.FIFTEEN_DAYS), 3), Times.Once);
-            _repoMock.Verify(r => r.CreateAsync(It.Is<MealPlan>(p => p.Name.Name == "Plan Saludable")), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _repoMock.Verify(r => r.AddAsync(It.Is<MealPlan>(p => p.Name.Name == "Plan Saludable")), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Theory]
@@ -63,8 +64,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             _factoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>()), Times.Never);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<MealPlan>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<MealPlan>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -83,8 +84,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Plan name cannot be null", result.Message);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<MealPlan>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<MealPlan>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

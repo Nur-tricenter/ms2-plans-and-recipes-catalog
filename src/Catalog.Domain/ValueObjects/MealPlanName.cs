@@ -1,5 +1,5 @@
-using Shared.Core;
-using Shared.Rules;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 
 namespace Catalog.Domain.ValueObjects
 {

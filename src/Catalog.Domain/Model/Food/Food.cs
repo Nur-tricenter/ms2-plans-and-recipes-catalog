@@ -1,10 +1,11 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 using Catalog.Domain.Event.Food;
 
 namespace Catalog.Domain.Model.Foods
 {
-    public class Food : AggregateRoot<Guid>
+    public class Food : AuditableAggregateRoot
     {
         public FoodName Name { get; private set; }
         public CategoryName Category { get; private set; }
@@ -21,7 +22,7 @@ namespace Catalog.Domain.Model.Foods
             UnitOfMeasure = unitOfMeasure;
             BaseNutritionalInfo = baseNutritionalInfo;
 
-            AddDomainEvent(new FoodCreated(Id, Name, Category, BaseNutritionalInfo));
+            AddDomainEvent(new FoodCreated(Id, Name, Category, BaseNutritionalInfo, UnitOfMeasure));
         }
 
         public void UpdateNutritionalInfo(NutritionalInfo info)
@@ -37,10 +38,9 @@ namespace Catalog.Domain.Model.Foods
             Name = name;
             Category = category;
             UnitOfMeasure = unitOfMeasure;
-            var previous = BaseNutritionalInfo;
             BaseNutritionalInfo = info;
 
-            AddDomainEvent(new FoodNutritionalInfoUpdated(Id, previous, info));
+            AddDomainEvent(new FoodUpdated(Id, name, category, unitOfMeasure, info));
         }
     }
 }

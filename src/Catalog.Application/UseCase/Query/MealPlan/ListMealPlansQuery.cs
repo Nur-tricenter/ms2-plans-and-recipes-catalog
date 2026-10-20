@@ -1,11 +1,12 @@
 using Catalog.Application.Dto;
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
+using Catalog.Application.Abstractions;
 
 namespace Catalog.Application.UseCase.Query.MealPlan
 {
-    public class ListMealPlansQuery : IRequest<Result<IEnumerable<MealPlanDto>>>
+    public class ListMealPlansQuery : IQuery<Result<IEnumerable<MealPlanDto>>>
     {
     }
 }

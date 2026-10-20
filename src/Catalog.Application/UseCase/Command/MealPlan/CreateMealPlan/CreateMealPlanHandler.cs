@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain;
 using Catalog.Domain.Factory.MealPlan;
@@ -38,8 +38,8 @@ namespace Catalog.Application.UseCase.Command.MealPlan.CreateMealPlan
 
                 var mealPlan = _factory.Create(request.Name, duration, request.MealsPerDay);
 
-                await _repository.CreateAsync(mealPlan);
-                await _unitOfWork.Commit();
+                await _repository.AddAsync(mealPlan);
+                await _unitOfWork.CommitAsync(cancellationToken);
 
                 return Result<Guid>.Ok(mealPlan.Id, "Meal plan created successfully");
             }

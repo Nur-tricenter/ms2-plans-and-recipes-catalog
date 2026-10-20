@@ -1,6 +1,6 @@
 using Catalog.Domain.Repository.Food;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.Food;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.Food;
 using Catalog.Tests.IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -48,7 +48,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
-            var food = await repository.FindByIdAsync(body.Data);
+            var food = await repository.GetByIdAsync(body.Data);
             Assert.NotNull(food);
             Assert.Equal("MANZANA", food!.Name.Name);
             Assert.Equal(52m, food.BaseNutritionalInfo.Calories);
@@ -89,6 +89,29 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             createResponse.EnsureSuccessStatusCode();
             var created = await createResponse.Content.ReadFromJsonAsync<FoodCreateResponse>();
 
+            // Seed the read model so the query handler (which now reads from StoredDbContext) can find it
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
+                var food = await repository.GetByIdAsync(created!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
+                {
+                    Id = food!.Id,
+                    Name = food.Name.Name,
+                    Category = food.Category.Name,
+                    UnitOfMeasure = (int)food.UnitOfMeasure,
+                    Quantity = food.BaseNutritionalInfo.Quantity,
+                    Calories = food.BaseNutritionalInfo.Calories,
+                    Protein = food.BaseNutritionalInfo.Protein,
+                    Carbs = food.BaseNutritionalInfo.Carbs,
+                    Fat = food.BaseNutritionalInfo.Fat,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+                await readDb.SaveChangesAsync();
+            }
+
             //Act
             var response = await client.GetAsync($"/api/v1/foods/{created!.Data}");
 
@@ -121,8 +144,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.Foods.Add(new FoodReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "MANZANA",
@@ -158,8 +181,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.Foods.Add(new FoodReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.Foods.Add(new FoodModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "BANANA",
@@ -219,7 +242,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IFoodRepository>();
-            var food = await repository.FindByIdAsync(created.Data);
+            var food = await repository.GetByIdAsync(created.Data);
             Assert.NotNull(food);
             Assert.Equal("PERA", food!.Name.Name);
             Assert.Equal(60m, food.BaseNutritionalInfo.Calories);

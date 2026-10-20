@@ -21,20 +21,99 @@ services:
       start_period: 5s
     restart: unless-stopped
 
+  # NOTE: RabbitMQ is intentionally NOT declared here.
+  # The broker is provided project-level by the container `nur-tricenter-rabbitmq`
+  # (image rabbitmq:3-management-alpine) attached to the `nur-tricenter-net` network, and it is
+  # published on the host at AMQP 5672 / management 15672 with guest/guest
+  # on vhost "/". Declaring a second broker here would collide with that published port.
+  #
+  # Host port 5672 is a hard requirement, not a default:
+  # Joseco.Communication.External.RabbitMQ 1.1.0 builds its ConnectionFactory from
+  # HostName/UserName/Password only and silently ignores RabbitMqSettings.Port and UseSsl, so any
+  # other host port makes the publisher and consumer talk to the wrong broker with no error.
+
+  # ---------------------------------------------------------------------------
+  # Schema is applied by a ONE-SHOT step, not by the API on boot.
+  #
+  #   docker compose run --rm webapi-migrate
+  #
+  # or let `up` do it, which is what the service_completed_successfully dependency
+  # below does. Inside the image that is literally:
+  #
+  #   ENTRYPOINT ["dotnet", "Catalog.App.dll"]  command: ["--migrate"]
+  #
+  # so the command being run is `dotnet Catalog.App.dll --migrate`. It builds the
+  # host (which registers both DbContexts), applies pending migrations to the WRITE
+  # side (DomainDbContext) and then to the READ side (StoredDbContext), and exits 0 on
+  # success or 1 on failure. The API service below has `Migrations__ApplyOnStartup`
+  # UNSET, i.e. false, so it never races this job for the schema. It also never seeds:
+  # Seed__Enabled is not set here.
+  #
+  # Both histories apply cleanly on an empty database: the write side owns the
+  # `write` schema, the read side owns `read`, and the outbox stays in `outbox`
+  # (pinned by Joseco.Outbox.EFCore). Verified against postgres:16-alpine; a
+  # re-run is a no-op. `docker compose up` therefore gets all the way through.
+  # Both migration histories start from zero, so a `catalog-db-data` volume left
+  # over from the older single-schema model has to be recreated with
+  # `docker compose down -v`.
+  # ---------------------------------------------------------------------------
+  webapi-migrate:
+    # Rebuild the image before using it, because `:latest` on Docker Hub is whatever somebody
+    # pushed last and nothing here guarantees it matches this working tree:
+    #
+    #   cd <parent folder>   # the one holding ms2-plans-and-recipes-catalog AND nur-tricenter-shared-kernels
+    #   docker build -f ms2-plans-and-recipes-catalog/Dockerfile -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
+    #
+    # The context is the PARENT folder on purpose: the shared kernels are referenced by relative
+    # path from this repository, and Docker cannot COPY from outside the build context.
+    image: robertperezlino/ms2-plans-and-recipes-catalog:latest
+    container_name: ms2-plans-and-recipes-catalog-migrate
+    command: ["--migrate"]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__CatalogDbConnectionString: Host=db;Port=5432;Database=catalog;Username=dev-only;Password=dev-only-password
+    networks: [backend]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   webapi:
     image: robertperezlino/ms2-plans-and-recipes-catalog:latest
     container_name: ms2-plans-and-recipes-catalog-api
     ports:
       - "8082:8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      # NOT Development. Nothing in Startup reads the environment name to decide
+      # behaviour any more — every switch below is explicit configuration, so this
+      # value only shows up in the startup log line.
+      ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__CatalogDbConnectionString: Host=db;Port=5432;Database=catalog;Username=dev-only;Password=dev-only-password
+      # ONE database for both sides. The write/read split is by schema: `write` for the
+      # aggregates, `read` for the projections, `outbox` for the transactional outbox.
+      # Schema: applied by webapi-migrate, not here.
+      Migrations__ApplyOnStartup: "false"
+      # Sample catalogue data (30 foods / 25 recipes / 2 plans). Off in this stack on
+      # purpose; set it to "true" if you want the demo data in this database.
+      Seed__Enabled: "false"
+      # Swagger stays OFF here. The healthcheck below probes /health, so this stack no longer
+      # needs the OpenAPI document served. Turning Swagger on here was only ever there to give
+      # the healthcheck something to hit, and it published an endpoint nobody in this stack uses.
+      Swagger__Enabled: "false"
+      # TLS terminates at whatever fronts this container; plain HTTP is what arrives.
+      HttpsRedirection__Enabled: "false"
     networks: [backend]
     depends_on:
       db:
         condition: service_healthy
+      webapi-migrate:
+        # The API must not serve traffic against a schema that does not exist.
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/swagger/v1/swagger.json || exit 1"]
+      # /health, NOT the OpenAPI document. Consul registers this service against /health, so a
+      # healthcheck that probes anything else is measuring a different contract than the one the
+      # gateway and the orchestrator depend on.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

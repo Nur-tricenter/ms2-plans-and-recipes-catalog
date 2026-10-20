@@ -21,7 +21,7 @@ namespace Catalog.Tests.ContractTest.Provider
         public CatalogApiProviderFixture()
         {
             var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-            var webApiRoot = Path.Combine(repositoryRoot, "src", "Catalog.WebApi");
+            var webApiRoot = Path.Combine(repositoryRoot, "src", "Catalog.App");
 
             _host = Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>

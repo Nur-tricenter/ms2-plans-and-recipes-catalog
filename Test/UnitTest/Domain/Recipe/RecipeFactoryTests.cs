@@ -1,6 +1,7 @@
 using Catalog.Domain.Factory.Recipe;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Model.Recipes;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Domain

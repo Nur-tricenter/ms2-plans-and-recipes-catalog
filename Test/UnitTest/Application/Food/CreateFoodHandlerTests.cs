@@ -1,11 +1,12 @@
 using Catalog.Application.UseCase.Command.Food.CreateFood;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Factory.Food;
 using Catalog.Domain.Model.Foods;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -57,8 +58,8 @@ namespace Catalog.Tests.Application
             Assert.Equal(food.Id, result.Value);
             Assert.Equal("Food created successfully", result.Message);
             _factoryMock.Verify(f => f.Create("MANZANA", "FRUTA", UnitOfMeasure.Gram, It.Is<NutritionalInfo>(i => i.Calories == 52m)), Times.Once);
-            _repoMock.Verify(r => r.CreateAsync(It.Is<Food>(a => a.Name.Name == "MANZANA")), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _repoMock.Verify(r => r.AddAsync(It.Is<Food>(a => a.Name.Name == "MANZANA")), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Theory]
@@ -78,8 +79,8 @@ namespace Catalog.Tests.Application
             Assert.False(result.IsSuccess);
             Assert.Contains("Invalid unit of measure", result.Message);
             _factoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UnitOfMeasure>(), It.IsAny<NutritionalInfo>()), Times.Never);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<Food>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<Food>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -97,8 +98,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("NutritionalInfo quantity must be greater than zero", result.Message);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<Food>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<Food>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -115,8 +116,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Food name cannot be null", result.Message);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<Food>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<Food>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

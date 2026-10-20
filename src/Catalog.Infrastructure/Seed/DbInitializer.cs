@@ -7,16 +7,16 @@ using Catalog.Domain.Repository.Food;
 using Catalog.Domain.Repository.MealPlan;
 using Catalog.Domain.Repository.Recipe;
 using Catalog.Domain.ValueObjects;
-using Catalog.Infrastructure.EntityFramework.Context;
+using Catalog.Infrastructure.Persistence.DomainModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 
 namespace Catalog.Infrastructure.Seed
 {
     public class DbInitializer : IDbInitializer
     {
-        private readonly WriteDbContext _context;
+        private readonly DomainDbContext _context;
         private readonly IFoodFactory _foodFactory;
         private readonly IRecipeFactory _recipeFactory;
         private readonly IMealPlanFactory _mealPlanFactory;
@@ -27,7 +27,7 @@ namespace Catalog.Infrastructure.Seed
         private readonly ILogger<DbInitializer> _logger;
 
         public DbInitializer(
-            WriteDbContext context,
+            DomainDbContext context,
             IFoodFactory foodFactory,
             IRecipeFactory recipeFactory,
             IMealPlanFactory mealPlanFactory,
@@ -103,10 +103,10 @@ namespace Catalog.Infrastructure.Seed
 
             foreach (var food in foods)
             {
-                await _foodRepo.CreateAsync(food);
+                await _foodRepo.AddAsync(food);
             }
 
-            await _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             _logger.LogInformation("Seeded {Count} foods", foods.Length);
         }
 
@@ -329,10 +329,10 @@ namespace Catalog.Infrastructure.Seed
 
             foreach (var r in recipes)
             {
-                await _recipeRepo.CreateAsync(r);
+                await _recipeRepo.AddAsync(r);
             }
 
-            await _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             _logger.LogInformation("Seeded {Count} recipes", recipes.Count);
         }
 
@@ -384,7 +384,7 @@ namespace Catalog.Infrastructure.Seed
             await CreateMealPlan("Plan Comidas Bolivianas 15 Dias", DurationType.FIFTEEN_DAYS, 5, breakfasts, lunches, desserts, dinners);
             await CreateMealPlan("Plan Comidas Bolivianas 30 Dias", DurationType.THIRTY_DAYS, 5, breakfasts, lunches, desserts, dinners);
 
-            await _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             _logger.LogInformation("Seeded 2 meal plans (15 and 30 days)");
         }
 
@@ -416,7 +416,7 @@ namespace Catalog.Infrastructure.Seed
                 mealPlan.AssignRecipeToMealTime(day, dinner.Id, dinners[(day - 1) % dinners.Length], new Ration(1));
             }
 
-            await _mealPlanRepo.CreateAsync(mealPlan);
+            await _mealPlanRepo.AddAsync(mealPlan);
         }
     }
 }

@@ -1,9 +1,10 @@
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.ValueObjects;
 
 namespace Catalog.Domain.Model.MealPlans
 {
-    public class MealTime : Entity<Guid>
+    public class MealTime : AuditableEntity
     {
         public string Name { get; private set; } = null!;
         public int Order { get; private set; }

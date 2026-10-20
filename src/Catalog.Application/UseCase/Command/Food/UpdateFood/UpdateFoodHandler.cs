@@ -1,5 +1,5 @@
 using Catalog.Application.Utils;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Catalog.Domain.Repository.Food;
 using Catalog.Domain.ValueObjects;
@@ -27,7 +27,7 @@ namespace Catalog.Application.UseCase.Command.Food.UpdateFood
         {
             try
             {
-                var food = await _repository.FindByIdAsync(request.FoodId);
+                var food = await _repository.GetByIdAsync(request.FoodId);
                 if (food == null)
                     return Result.Fail("Food not found");
 
@@ -47,7 +47,7 @@ namespace Catalog.Application.UseCase.Command.Food.UpdateFood
 
                 food.Update(name, category, unitOfMeasure, info);
 
-                await _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync(cancellationToken);
                 return Result.Ok("Food updated successfully");
             }
             catch (Exception ex)

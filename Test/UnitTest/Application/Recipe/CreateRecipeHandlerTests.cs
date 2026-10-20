@@ -1,11 +1,12 @@
 using Catalog.Application.UseCase.Command.Recipe.CreateRecipe;
+using Catalog.Domain.Primitives;
 using Catalog.Domain.Factory.Recipe;
 using Catalog.Domain.Model.Recipes;
 using Catalog.Domain.Repository.Recipe;
 using Catalog.Domain.ValueObjects;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.Core;
+using Joseco.DDD.Core.Abstractions;
 using Xunit;
 
 namespace Catalog.Tests.Application
@@ -43,8 +44,8 @@ namespace Catalog.Tests.Application
             Assert.Equal(recipe.Id, result.Value);
             Assert.Equal("Recipe created successfully", result.Message);
             _factoryMock.Verify(f => f.Create("Ensalada", "Mezclar todos los ingredientes"), Times.Once);
-            _repoMock.Verify(r => r.CreateAsync(It.Is<Recipe>(r2 => r2.Name.Name == "Ensalada")), Times.Once);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _repoMock.Verify(r => r.AddAsync(It.Is<Recipe>(r2 => r2.Name.Name == "Ensalada")), Times.Once);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Theory]
@@ -65,8 +66,8 @@ namespace Catalog.Tests.Application
             // Assert
             Assert.False(result.IsSuccess);
             Assert.Equal("Recipe instructions cannot be empty", result.Message);
-            _repoMock.Verify(r => r.CreateAsync(It.IsAny<Recipe>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+            _repoMock.Verify(r => r.AddAsync(It.IsAny<Recipe>()), Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
             _loggerMock.Verify(
                 x => x.Log(
                     LogLevel.Error,

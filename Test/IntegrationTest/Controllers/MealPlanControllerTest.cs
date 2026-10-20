@@ -1,6 +1,6 @@
 using Catalog.Domain.Repository.MealPlan;
-using Catalog.Infrastructure.EntityFramework.Context;
-using Catalog.Infrastructure.EntityFramework.ReadModel.MealPlan;
+using Catalog.Infrastructure.Persistence.StoredModel;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan;
 using Catalog.Tests.IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
@@ -43,7 +43,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-            var mealPlan = await repository.FindByIdAsync(body.Data);
+            var mealPlan = await repository.GetByIdAsync(body.Data);
             Assert.NotNull(mealPlan);
             Assert.Equal("Dieta equilibrada", mealPlan!.Name.Name);
             Assert.Equal(3, mealPlan.MealsPerDay);
@@ -111,7 +111,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-            var mealPlan = await repository.FindByIdAsync(created.Data);
+            var mealPlan = await repository.GetByIdAsync(created.Data);
             Assert.NotNull(mealPlan);
             Assert.Single(mealPlan!.PlanDays.Single(d => d.DayNumber == 1).MealTimes);
         }
@@ -166,7 +166,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             using (var scope = _factory.Services.CreateScope())
             {
                 var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-                var mealPlan = await repository.FindByIdAsync(planCreated.Data);
+                var mealPlan = await repository.GetByIdAsync(planCreated.Data);
                 mealTimeId = mealPlan!.PlanDays.Single(d => d.DayNumber == 1).MealTimes.Single().Id;
             }
 
@@ -189,7 +189,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var verifyScope = _factory.Services.CreateScope();
             var verifyRepository = verifyScope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-            var persistedPlan = await verifyRepository.FindByIdAsync(planCreated.Data);
+            var persistedPlan = await verifyRepository.GetByIdAsync(planCreated.Data);
             Assert.NotNull(persistedPlan);
             var mealTime = persistedPlan!.PlanDays.Single(d => d.DayNumber == 1).MealTimes.Single();
             Assert.Contains(mealTime.AssignedRecipes, a => a.RecipeId == recipeCreated.Data);
@@ -238,7 +238,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             using (var scope = _factory.Services.CreateScope())
             {
                 var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-                var mealPlan = await repository.FindByIdAsync(planCreated.Data);
+                var mealPlan = await repository.GetByIdAsync(planCreated.Data);
                 mealTimeId = mealPlan!.PlanDays.Single(d => d.DayNumber == 1).MealTimes.Single().Id;
             }
 
@@ -265,7 +265,7 @@ namespace Catalog.Tests.IntegrationTest.Controllers
 
             using var verifyScope = _factory.Services.CreateScope();
             var verifyRepository = verifyScope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
-            var persistedPlan = await verifyRepository.FindByIdAsync(planCreated.Data);
+            var persistedPlan = await verifyRepository.GetByIdAsync(planCreated.Data);
             Assert.NotNull(persistedPlan);
             var mealTime = persistedPlan!.PlanDays.Single(d => d.DayNumber == 1).MealTimes.Single();
             Assert.DoesNotContain(mealTime.AssignedRecipes, a => a.RecipeId == recipeCreated.Data);
@@ -279,6 +279,36 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var createResponse = await client.PostAsJsonAsync("/api/v1/meal-plans", NewMealPlan());
             createResponse.EnsureSuccessStatusCode();
             var created = await createResponse.Content.ReadFromJsonAsync<MealPlanCreateResponse>();
+
+            // Seed the read model so the query handler (which now reads from StoredDbContext) can find it
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var repository = scope.ServiceProvider.GetRequiredService<IMealPlanRepository>();
+                var mealPlan = await repository.GetByIdAsync(created!.Data);
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                var model = new MealPlanModel
+                {
+                    Id = mealPlan!.Id,
+                    Name = mealPlan.Name.Name,
+                    DurationType = mealPlan.Duration.Type.ToString(),
+                    MealsPerDay = mealPlan.MealsPerDay,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+                foreach (var day in mealPlan.PlanDays)
+                {
+                    model.PlanDays.Add(new PlanDayModel
+                    {
+                        Id = day.Id,
+                        DayNumber = day.DayNumber,
+                        MealPlanId = mealPlan.Id,
+                        CreatedAt = DateTime.UtcNow,
+                        IsDeleted = false
+                    });
+                }
+                readDb.MealPlans.Add(model);
+                await readDb.SaveChangesAsync();
+            }
 
             //Act
             var response = await client.GetAsync($"/api/v1/meal-plans/{created!.Data}");
@@ -310,8 +340,8 @@ namespace Catalog.Tests.IntegrationTest.Controllers
             var client = _factory.CreateClient();
             using (var scope = _factory.Services.CreateScope())
             {
-                var readDb = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
-                readDb.MealPlans.Add(new MealPlanReadModel
+                var readDb = scope.ServiceProvider.GetRequiredService<StoredDbContext>();
+                readDb.MealPlans.Add(new MealPlanModel
                 {
                     Id = Guid.NewGuid(),
                     Name = "Plan deportista",

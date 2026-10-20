@@ -29,6 +29,22 @@ namespace Catalog.Tests.Domain
         }
 
         [Fact]
+        public void Constructor_ValidData_RaisesFoodCreatedWithTheUnitOfMeasure()
+        {
+            // Arrange
+            var name = new FoodName("Manzana");
+            var category = new CategoryName("Fruta");
+            var info = new NutritionalInfo(100, 52, 0.3m, 14, 0.2m);
+
+            // Act
+            var food = new Food(name, category, UnitOfMeasure.Kilogram, info);
+
+            // Assert
+            var evento = Assert.IsType<FoodCreated>(Assert.Single(food.DomainEvents));
+            Assert.Equal(UnitOfMeasure.Kilogram, evento.UnitOfMeasure);
+        }
+
+        [Fact]
         public void UpdateNutritionalInfo_ValidInfo_UpdatesAndQueuesEvent()
         {
             // Arrange
@@ -60,7 +76,28 @@ namespace Catalog.Tests.Domain
             Assert.Equal(UnitOfMeasure.Kilogram, food.UnitOfMeasure);
             Assert.Equal(60m, food.BaseNutritionalInfo.Calories);
             Assert.Equal(2, food.DomainEvents.Count);
-            Assert.IsType<FoodNutritionalInfoUpdated>(food.DomainEvents.Last());
+            Assert.IsType<FoodUpdated>(food.DomainEvents.Last());
+        }
+
+        [Fact]
+        public void Update_ValidData_RaisesFoodUpdatedWithAllFields()
+        {
+            // Arrange
+            var food = new Food(new FoodName("Manzana"), new CategoryName("Fruta"), UnitOfMeasure.Gram, new NutritionalInfo(100, 52, 0.3m, 14, 0.2m));
+
+            // Act
+            food.Update(new FoodName("Manzana Roja"), new CategoryName("Fruta de temporada"), UnitOfMeasure.Kilogram, new NutritionalInfo(100, 60, 0.5m, 16, 0.3m));
+
+            // Assert
+            var evento = Assert.IsType<FoodUpdated>(food.DomainEvents.Last());
+            Assert.Equal(food.Id, evento.FoodId);
+            Assert.Equal("Manzana Roja", evento.Name.Name);
+            Assert.Equal("Fruta de temporada", evento.Category.Name);
+            Assert.Equal(UnitOfMeasure.Kilogram, evento.UnitOfMeasure);
+            Assert.Equal(60m, evento.NewNutritionalInfo.Calories);
+            Assert.Equal(0.5m, evento.NewNutritionalInfo.Protein);
+            Assert.Equal(16m, evento.NewNutritionalInfo.Carbs);
+            Assert.Equal(0.3m, evento.NewNutritionalInfo.Fat);
         }
     }
 }
