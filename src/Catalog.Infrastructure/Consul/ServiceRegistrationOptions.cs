@@ -4,11 +4,10 @@ namespace Catalog.Infrastructure.Consul
     /// Configuration that drives this instance's <em>self</em>-registration in Consul.
     /// </summary>
     /// <remarks>
-    /// The key names are deliberately the ones the MS2026 reference architecture
-    /// (<c>nur-university/ms2026-store-catalog</c>) uses, because the shared compose file in that
-    /// ecosystem feeds them as <c>ServiceRegistration__ServiceDiscoveryAddress</c>,
-    /// <c>ServiceRegistration__Host</c> and <c>ServiceRegistration__Port</c>. Renaming them here
-    /// would make this service the one that cannot be dropped into the same compose stack.
+    /// The key names are the platform's: every service on this platform is fed the same
+    /// <c>ServiceRegistration__ServiceDiscoveryAddress</c>, <c>ServiceRegistration__Host</c> and
+    /// <c>ServiceRegistration__Port</c> from its compose stack. Renaming them here would make this
+    /// service the one that cannot be dropped into the same compose stack as its siblings.
     /// </remarks>
     public class ServiceRegistrationOptions
     {

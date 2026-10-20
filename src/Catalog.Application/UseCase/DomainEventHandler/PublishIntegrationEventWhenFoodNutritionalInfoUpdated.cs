@@ -7,9 +7,9 @@ using Catalog.Contracts.Integration;
 using Microsoft.Extensions.Logging;
 
 // The domain event (Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated) and the integration
-// contract (Catalog.Contracts.Integration.FoodNutritionalInfoUpdated) deliberately share
-// this name, mirroring MS2026 where ProductCreated exists in both namespaces. The alias pins the
-// wire type; the bare name keeps meaning the domain event.
+// contract (Catalog.Contracts.Integration.FoodNutritionalInfoUpdated) deliberately share this
+// name: the first stays inside the service, the second goes on the wire. The alias pins the wire
+// type; the bare name keeps meaning the domain event.
 using IntegrationContract = Catalog.Contracts.Integration.FoodNutritionalInfoUpdated;
 
 namespace Catalog.Application.UseCase.DomainEventHandler

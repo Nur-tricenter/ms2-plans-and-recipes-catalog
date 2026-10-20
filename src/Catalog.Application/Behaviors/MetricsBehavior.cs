@@ -58,7 +58,7 @@ namespace Catalog.Application.Behaviors
         /// Meter name, prefixed to match the scope Observability collects.
         /// </summary>
         /// <remarks>
-        /// MS2026's <c>AddObservability</c> collects the meters
+        /// The observability kernel collects the meters
         /// <c>["Joseco.Communication.RabbitMQ", "Joseco.Outbox", "Npgsql", "Store.*"]</c>.
         /// A meter named after this assembly matches none of those, so every instrument below
         /// would be emitted correctly and collected nowhere: not a visible gap on a dashboard,

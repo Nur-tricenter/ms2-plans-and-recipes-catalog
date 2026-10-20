@@ -11,8 +11,8 @@ namespace Catalog.Infrastructure.Persistence
     /// transactional outbox in <see cref="Outbox"/>.
     /// </para>
     /// <para>
-    /// <b>Why one database and separate schemas.</b> The reference architecture gives each
-    /// microservice exactly one database, and this service keeps that: one connection string, one
+    /// <b>Why one database and separate schemas.</b> One database per microservice is the
+    /// platform rule, and this service keeps it: one connection string, one
     /// credential, one migration story. The CQRS split is physical at the schema level
     /// (<c>write</c> vs <c>read</c>) and logical at the code level — every query is served from
     /// <see cref="StoredModel.StoredDbContext"/> and never from the write model — which is what

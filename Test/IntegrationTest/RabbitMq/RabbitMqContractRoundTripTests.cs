@@ -13,7 +13,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// <see cref="IExternalPublisher"/> comes back out of the real consumer with its payload intact.
     /// </summary>
     /// <remarks>
-    /// This is the check the ROADMAP could not close without a broker: everything downstream of
+    /// Everything downstream of
     /// <c>PublishAsync</c> (the fanout exchange the consumer declares, the queue binding, the
     /// Newtonsoft serialization of the record, and the deserialization back into
     /// <see cref="IntegrationMessage"/>'s derived contract) is exercised end to end. The other two

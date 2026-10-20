@@ -6,11 +6,12 @@ namespace Catalog.Contracts.Integration
     /// External contract announcing that a meal plan was published in the catalog.
     /// </summary>
     /// <remarks>
-    /// This contract deliberately does NOT extend <c>Nur.Store2026.Integration</c> messages.
-    /// That package describes the MS2026 Product/Inventory/Orders/Payments domain, not the
-    /// Food/Recipe/MealPlan domain owned by this service, and a NuGet package we do not own
-    /// cannot be extended anyway. What is aligned with MS2026 is the BASE SHAPE: every contract
-    /// derives from <see cref="IntegrationMessage"/> and therefore carries the shared envelope
+    /// These contracts are owned by this service and live in <c>contracts/</c>, not in a shared
+    /// kernel. A kernel that carried them would force the next service to fork it to publish its
+    /// own messages, and the two copies would drift.
+    ///
+    /// What IS shared is the base shape: every contract derives from
+    /// <see cref="IntegrationMessage"/>, so it carries the common envelope
     /// (<c>Id</c>, <c>CreatedAt</c>, <c>CorrelationId</c>, <c>Source</c>) that
     /// <c>Joseco.Communication.External.RabbitMQ</c> publishes and consumes.
     /// </remarks>
