@@ -3,12 +3,12 @@ using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Command.Food.CreateFood;
 using Catalog.Application.UseCase.Command.Food.UpdateFood;
 using Catalog.Application.UseCase.Query.Food;
-using Catalog.WebApi.Utils;
+using Catalog.App.Utils;
 using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Catalog.WebApi.Controllers
+namespace Catalog.App.Controllers
 {
     [ApiController]
     [Route("api/v1/foods")]

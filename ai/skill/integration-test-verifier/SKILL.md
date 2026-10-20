@@ -60,7 +60,7 @@ applicable rule**. Group checks by the sections of the rules doc:
 - **Fakes** (F1–F5) — `InMemory{Repository}` per interface, `ConcurrentDictionary` backing,
   Singleton registration, no invented unique-key behavior, no business logic.
 - **WebApplicationFactory** (W1–W5) — extends `WebApplicationFactory<Program>`
-  (`Catalog.WebApi.Program`), remove-then-add fakes, Singleton, no pipeline overrides.
+  (`Catalog.App.Program`), remove-then-add fakes, Singleton, no pipeline overrides.
 - **EF Core InMemory** (E1–E8) — both `DbContextOptions<T>` swapped for InMemory; fixed db
   name per factory; no second `AddDbContext<T>`; **list endpoints seed the InMemory
   `ReadDbContext` read models directly** (E6); no mixing of domain aggregates and read models.

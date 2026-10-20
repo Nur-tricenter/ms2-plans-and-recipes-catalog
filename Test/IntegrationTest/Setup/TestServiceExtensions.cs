@@ -20,7 +20,7 @@ namespace Catalog.Tests.IntegrationTest.Setup
         /// <summary>
         /// Environment name for the test host. <c>WebApplicationFactory</c> forces
         /// <c>Development</c>, which is what makes it load
-        /// <c>src/Catalog.WebApi/appsettings.Development.json</c> — the file that points at a real
+        /// <c>src/Catalog.App/appsettings.Development.json</c> — the file that points at a real
         /// Consul on http://localhost:8500. A test host is not a developer workstation, so it runs
         /// under a name of its own and the developer profile never applies to it.
         /// </summary>
@@ -32,8 +32,8 @@ namespace Catalog.Tests.IntegrationTest.Setup
         /// <remarks>
         /// This is not optional politeness, it is what keeps the suite hermetic.
         /// <c>WebApplicationFactory</c> runs the real host in the <c>Development</c> environment with
-        /// the content root set to <c>src/Catalog.WebApi</c>, so
-        /// <c>src/Catalog.WebApi/appsettings.Development.json</c> — which points at the real Consul
+        /// the content root set to <c>src/Catalog.App</c>, so
+        /// <c>src/Catalog.App/appsettings.Development.json</c> — which points at the real Consul
         /// on http://localhost:8500 — is loaded by every integration test. Without this override each
         /// test class would register a phantom <c>catalog-service</c> instance in the developer's
         /// live registry, advertise the Npgsql health check against a database the InMemory provider

@@ -70,7 +70,7 @@ covered at the unit level.
 Client (HttpClient from WebApplicationFactory)
         │  HTTP request (PostAsJsonAsync / GetAsync)
         ▼
-   Controller (real, Catalog.WebApi)            [Alimento | Receta | PlanAlimentario]
+   Controller (real, Catalog.App)            [Alimento | Receta | PlanAlimentario]
         │  injects only IMediator (real pipeline)
         ▼
    MediatR pipeline (real)
@@ -119,7 +119,7 @@ Query handlers are **not** homogeneous:
 
 ## 5. Entry point and required production change (read this first)
 
-**TEntryPoint:** `Catalog.WebApi.Program` — a `public class Program` using the classic
+**TEntryPoint:** `Catalog.App.Program` — a `public class Program` using the classic
 `Host.CreateDefaultBuilder(...).UseStartup<Startup>()` bootstrap
 (`WebApi/Program.cs`).
 
@@ -328,7 +328,7 @@ var response = await client.GetAsync($"/api/v1/alimentos?page=1&pageSize=10");
 
 | # | Rule |
 |---|------|
-| W1 | Name the factory `{Controller}WebApplicationFactory`, extending `WebApplicationFactory<Program>` where `Program` is `Catalog.WebApi.Program` |
+| W1 | Name the factory `{Controller}WebApplicationFactory`, extending `WebApplicationFactory<Program>` where `Program` is `Catalog.App.Program` |
 | W2 | Override `ConfigureWebHost`; inside `ConfigureServices` remove every real infrastructure registration **before** adding the fake (repositories, `IUnitOfWork`, both `DbContextOptions<T>`) |
 | W3 | Register fakes as `Singleton` so state persists across requests within the same test (needed to assert persisted state after the HTTP call) |
 | W4 | Do **NOT** override routing, middleware or controllers — only the DI container for outbound dependencies. If `UseHttpsRedirection()` (present in `Startup.Configure`) ever produces unexpected redirects in tests, override only the HTTPS-port setting (`builder.UseSetting("https_port", "0")`) — never touch the middleware pipeline |

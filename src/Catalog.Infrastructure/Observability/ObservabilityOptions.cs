@@ -4,7 +4,7 @@ namespace Catalog.Infrastructure.Observability;
 /// Telemetry identity shared by every host in this service.
 /// </summary>
 /// <remarks>
-/// One constant in <c>Catalog.Infrastructure</c>, referenced by both <c>Catalog.WebApi</c> and
+/// One constant in <c>Catalog.Infrastructure</c>, referenced by both <c>Catalog.App</c> and
 /// <c>Catalog.WorkerService</c>, because the two are processes of a single service rather than two
 /// services. A trace that leaves an HTTP request in the API, lands in an outbox row and is picked up
 /// by the worker has to read as one trace of one service; two different names split it in the

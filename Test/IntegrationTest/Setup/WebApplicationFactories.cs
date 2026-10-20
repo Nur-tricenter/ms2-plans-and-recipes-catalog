@@ -1,4 +1,4 @@
-using Catalog.WebApi;
+using Catalog.App;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 // produce a SECOND type named Program, so an unqualified `Program` in this file does not reliably
 // mean the API's. That ambiguity is the whole subject of CatalogWebApplicationFactory below, and
 // leaving it unqualified here would reintroduce it one level down.
-using WebApiProgram = Catalog.WebApi.Program;
+using WebApiProgram = Catalog.App.Program;
 
 namespace Catalog.Tests.IntegrationTest.Setup
 {

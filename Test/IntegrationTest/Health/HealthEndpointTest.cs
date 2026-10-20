@@ -79,7 +79,7 @@ namespace Catalog.Tests.IntegrationTest.Health
         /// </summary>
         // Fully qualified: an unqualified 'Program' inside this nested type would bind to the Test
             // assembly's own entry point instead of the WebApi one.
-        public class HealthWebApplicationFactory : WebApplicationFactory<Catalog.WebApi.Program>
+        public class HealthWebApplicationFactory : WebApplicationFactory<Catalog.App.Program>
         {
             private readonly string _dbName = $"HealthTests_{Guid.NewGuid()}";
 

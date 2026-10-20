@@ -40,9 +40,9 @@ services:
   # or let `up` do it, which is what the service_completed_successfully dependency
   # below does. Inside the image that is literally:
   #
-  #   ENTRYPOINT ["dotnet", "Catalog.WebApi.dll"]  command: ["--migrate"]
+  #   ENTRYPOINT ["dotnet", "Catalog.App.dll"]  command: ["--migrate"]
   #
-  # so the command being run is `dotnet Catalog.WebApi.dll --migrate`. It builds the
+  # so the command being run is `dotnet Catalog.App.dll --migrate`. It builds the
   # host (which registers both DbContexts), applies pending migrations to the WRITE
   # side (DomainDbContext) and then to the READ side (StoredDbContext), and exits 0 on
   # success or 1 on failure. The API service below has `Migrations__ApplyOnStartup`
@@ -58,6 +58,14 @@ services:
   # `docker compose down -v`.
   # ---------------------------------------------------------------------------
   webapi-migrate:
+    # Rebuild the image before using it, because `:latest` on Docker Hub is whatever somebody
+    # pushed last and nothing here guarantees it matches this working tree:
+    #
+    #   cd <parent folder>   # the one holding ms2-plans-and-recipes-catalog AND nur-tricenter-shared-kernels
+    #   docker build -f ms2-plans-and-recipes-catalog/Dockerfile -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
+    #
+    # The context is the PARENT folder on purpose: the shared kernels are referenced by relative
+    # path from this repository, and Docker cannot COPY from outside the build context.
     image: robertperezlino/ms2-plans-and-recipes-catalog:latest
     container_name: ms2-plans-and-recipes-catalog-migrate
     command: ["--migrate"]
@@ -88,8 +96,10 @@ services:
       # Sample catalogue data (30 foods / 25 recipes / 2 plans). Off in this stack on
       # purpose; set it to "true" if you want the demo data in this database.
       Seed__Enabled: "false"
-      # The healthcheck below probes the OpenAPI document, so this stack serves it.
-      Swagger__Enabled: "true"
+      # Swagger stays OFF here. The healthcheck below probes /health, so this stack no longer
+      # needs the OpenAPI document served. Turning Swagger on here was only ever there to give
+      # the healthcheck something to hit, and it published an endpoint nobody in this stack uses.
+      Swagger__Enabled: "false"
       # TLS terminates at whatever fronts this container; plain HTTP is what arrives.
       HttpsRedirection__Enabled: "false"
     networks: [backend]
@@ -100,7 +110,10 @@ services:
         # The API must not serve traffic against a schema that does not exist.
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/swagger/v1/swagger.json || exit 1"]
+      # /health, NOT the OpenAPI document. Consul registers this service against /health, so a
+      # healthcheck that probes anything else is measuring a different contract than the one the
+      # gateway and the orchestrator depend on.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

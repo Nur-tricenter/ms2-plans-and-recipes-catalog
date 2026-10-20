@@ -51,7 +51,7 @@ namespace Catalog.Infrastructure.Configuration
             else
             {
                 _logger.LogInformation(
-                    "Startup migration skipped because {Section}:{Setting} is false. Apply schema changes with 'dotnet Catalog.WebApi.dll --migrate'.",
+                    "Startup migration skipped because {Section}:{Setting} is false. Apply schema changes with 'dotnet Catalog.App.dll --migrate'.",
                     MigrationsOptions.SectionName,
                     nameof(MigrationsOptions.ApplyOnStartup));
             }

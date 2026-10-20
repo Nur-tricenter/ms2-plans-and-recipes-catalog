@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Catalog.Infrastructure.Configuration;
-using Catalog.WebApi.Configuration;
+using Catalog.App.Configuration;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -24,7 +24,7 @@ namespace Catalog.Tests.Infrastructure.Configuration
     public class TrackedConfigurationTests
     {
         [Theory]
-        [InlineData("src", "Catalog.WebApi", "appsettings.json")]
+        [InlineData("src", "Catalog.App", "appsettings.json")]
         [InlineData("src", "Catalog.WorkerService", "appsettings.json")]
         public void TrackedAppsettings_ContainsNoConnectionStringSection(string project, string folder, string fileName)
         {
@@ -44,7 +44,7 @@ namespace Catalog.Tests.Infrastructure.Configuration
         }
 
         [Theory]
-        [InlineData("src", "Catalog.WebApi", "appsettings.json")]
+        [InlineData("src", "Catalog.App", "appsettings.json")]
         [InlineData("src", "Catalog.WorkerService", "appsettings.json")]
         public void TrackedAppsettings_ContainsNoInlinePassword(string project, string folder, string fileName)
         {
@@ -64,7 +64,7 @@ namespace Catalog.Tests.Infrastructure.Configuration
         }
 
         [Theory]
-        [InlineData("src", "Catalog.WebApi", "appsettings.json")]
+        [InlineData("src", "Catalog.App", "appsettings.json")]
         [InlineData("src", "Catalog.WorkerService", "appsettings.json")]
         public void TrackedAppsettings_BindsToTheSafeDefaults(string project, string folder, string fileName)
         {
@@ -84,7 +84,7 @@ namespace Catalog.Tests.Infrastructure.Configuration
             Assert.True(migrations.TimeoutSeconds > 0);
             Assert.False(seed.Enabled);
 
-            if (folder == "Catalog.WebApi")
+            if (folder == "Catalog.App")
             {
                 var swagger = configuration.GetSection(SwaggerOptions.SectionName).Get<SwaggerOptions>() ?? new SwaggerOptions();
                 var httpsRedirection = configuration.GetSection(HttpsRedirectionOptions.SectionName).Get<HttpsRedirectionOptions>() ?? new HttpsRedirectionOptions();
@@ -95,7 +95,7 @@ namespace Catalog.Tests.Infrastructure.Configuration
         }
 
         [Theory]
-        [InlineData("src", "Catalog.WebApi")]
+        [InlineData("src", "Catalog.App")]
         [InlineData("src", "Catalog.WorkerService")]
         public void DevelopmentTemplate_ExistsAndCarriesTheLocalCredentials(string project, string folder)
         {

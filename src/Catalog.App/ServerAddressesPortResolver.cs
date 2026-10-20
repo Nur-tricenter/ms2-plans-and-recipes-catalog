@@ -2,7 +2,7 @@ using Catalog.Infrastructure.Consul;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
-namespace Catalog.WebApi
+namespace Catalog.App
 {
     /// <summary>
     /// Answers <see cref="IServerPortResolver"/> with the port Kestrel actually bound to.

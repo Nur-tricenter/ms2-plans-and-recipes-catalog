@@ -2,8 +2,8 @@ using Catalog.Infrastructure;
 using Catalog.Infrastructure.Configuration;
 using Catalog.Infrastructure.Observability;
 using Catalog.Infrastructure.Consul;
-using Catalog.WebApi.Configuration;
-using Catalog.WebApi.Utils;
+using Catalog.App.Configuration;
+using Catalog.App.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Nur.Tricenter.Observability.Tracing;
 
-namespace Catalog.WebApi
+namespace Catalog.App
 {
     public class Startup
     {
@@ -52,7 +52,7 @@ namespace Catalog.WebApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog.WebApi", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog.App", Version = "v1" });
             });
 
             // /health is always available and always mapped, because Consul probes it. It is wired
@@ -101,7 +101,7 @@ namespace Catalog.WebApi
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(typeof(Startup))
                 .LogInformation(
-                    "Catalog.WebApi starting in the {EnvironmentName} environment (content root {ContentRootPath}).",
+                    "Catalog.App starting in the {EnvironmentName} environment (content root {ContentRootPath}).",
                     env.EnvironmentName,
                     env.ContentRootPath);
 
@@ -111,7 +111,7 @@ namespace Catalog.WebApi
             if (swaggerOptions.Enabled)
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog.WebApi v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog.App v1"));
             }
 
             var httpsRedirectionOptions = app.ApplicationServices

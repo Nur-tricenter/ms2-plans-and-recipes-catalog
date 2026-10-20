@@ -1,4 +1,4 @@
-namespace Catalog.WebApi.Configuration
+namespace Catalog.App.Configuration
 {
     /// <summary>
     /// Controls whether <c>UseHttpsRedirection</c> is added to the pipeline.

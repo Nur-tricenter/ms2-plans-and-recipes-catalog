@@ -4,12 +4,12 @@ using Catalog.Application.UseCase.Command.Recipe.CreateRecipe;
 using Catalog.Application.UseCase.Command.Recipe.AddIngredient;
 using Catalog.Application.UseCase.Command.Recipe.RemoveIngredient;
 using Catalog.Application.UseCase.Query.Recipe;
-using Catalog.WebApi.Utils;
+using Catalog.App.Utils;
 using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Catalog.WebApi.Controllers
+namespace Catalog.App.Controllers
 {
     [ApiController]
     [Route("api/v1/recipes")]

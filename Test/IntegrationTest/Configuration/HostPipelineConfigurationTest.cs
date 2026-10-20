@@ -1,6 +1,6 @@
 using System.Net;
 using Catalog.Tests.IntegrationTest.Setup;
-using Catalog.WebApi.Configuration;
+using Catalog.App.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -104,7 +104,7 @@ namespace Catalog.Tests.IntegrationTest.Configuration
         }
 
         /// <summary>
-        /// Boots the real <c>Catalog.WebApi.Startup</c> with two configuration values injected.
+        /// Boots the real <c>Catalog.App.Startup</c> with two configuration values injected.
         /// </summary>
         /// <remarks>
         /// The overrides are appended through <c>ConfigureAppConfiguration</c>, not
@@ -114,7 +114,7 @@ namespace Catalog.Tests.IntegrationTest.Configuration
         /// happened to say. It also calls <c>DisableServiceDiscovery()</c> and replaces the
         /// persistence layer, so no test here can reach a real Consul or a real PostgreSQL.
         /// </remarks>
-        private sealed class ConfiguredWebApplicationFactory : WebApplicationFactory<Catalog.WebApi.Program>
+        private sealed class ConfiguredWebApplicationFactory : WebApplicationFactory<Catalog.App.Program>
         {
             private readonly bool _swaggerEnabled;
             private readonly bool _httpsRedirectionEnabled;

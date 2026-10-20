@@ -5,12 +5,12 @@ using Catalog.Application.UseCase.Command.MealPlan.AddMealTime;
 using Catalog.Application.UseCase.Command.MealPlan.AssignRecipeToMealTime;
 using Catalog.Application.UseCase.Command.MealPlan.RemoveRecipeFromMealTime;
 using Catalog.Application.UseCase.Query.MealPlan;
-using Catalog.WebApi.Utils;
+using Catalog.App.Utils;
 using Joseco.DDD.Core.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Catalog.WebApi.Controllers
+namespace Catalog.App.Controllers
 {
     [ApiController]
     [Route("api/v1/meal-plans")]

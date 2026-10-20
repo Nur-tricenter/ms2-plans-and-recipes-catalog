@@ -11,7 +11,7 @@
       Consul client, used by Catalog.Infrastructure/Consul/ServiceRegistration to register THIS
       instance in the service registry on start and deregister it on stop.
 
-      Why this package sits here rather than in Catalog.WebApi: ServiceRegistration.cs is a
+      Why this package sits here rather than in Catalog.App: ServiceRegistration.cs is a
       generic-host IHostedService that has no ASP.NET dependency at all â€” its only web-specific
       concern (reading the bound port) is declared as IServerPortResolver and answered by the web
       host. That makes Infrastructure the correct home for the class AND for its one dependency.
@@ -52,8 +52,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      The platform kernel arrives as a NuGet package, not as a project reference to a sibling
+      folder. That is what makes this repository buildable on its own: `dotnet restore` resolves
+      the package from the organization feed, so the checkout needs nothing else on disk and the
+      Docker image builds from this folder as the context.
+    -->
+    <PackageReference Include="Nur.Tricenter.Observability" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
-    <ProjectReference Include="..\..\..\nur-tricenter-shared-kernels\nur-tricenter-observability\nur-tricenter-observability.csproj" />
   </ItemGroup>
 
 </Project>

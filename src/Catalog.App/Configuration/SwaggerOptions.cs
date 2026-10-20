@@ -1,4 +1,4 @@
-namespace Catalog.WebApi.Configuration
+namespace Catalog.App.Configuration
 {
     /// <summary>
     /// Controls whether the OpenAPI document and its UI are mapped.

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Catalog.WebApi.Utils
+namespace Catalog.App.Utils
 {
     /// <summary>
     /// Serialises a <see cref="HealthReport"/> as JSON for <c>/health</c>.

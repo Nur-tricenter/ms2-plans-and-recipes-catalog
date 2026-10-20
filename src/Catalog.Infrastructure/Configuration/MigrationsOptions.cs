@@ -4,14 +4,14 @@ namespace Catalog.Infrastructure.Configuration
     /// Controls the SCHEMA lifecycle of the two <see cref="Microsoft.EntityFrameworkCore.DbContext"/>s.
     /// </summary>
     /// <remarks>
-    /// Lives in <c>Catalog.Infrastructure</c> rather than in <c>Catalog.WebApi</c> because the schema
+    /// Lives in <c>Catalog.Infrastructure</c> rather than in <c>Catalog.App</c> because the schema
     /// belongs to the data layer, not to the HTTP host: <c>Catalog.WorkerService</c> composes the same
     /// <c>AddInfrastructure</c> and could equally need to apply migrations as a deployment step.
     /// <para>
     /// The default is the SAFE one. <see cref="ApplyOnStartup"/> defaults to <c>false</c> because a
     /// web process is a bad place to run DDL: several replicas starting at once race each other,
     /// and a deployment that migrates implicitly migrates with whatever credentials the app happens
-    /// to hold. Schema changes belong in an explicit step (<c>dotnet Catalog.WebApi.dll --migrate</c>);
+    /// to hold. Schema changes belong in an explicit step (<c>dotnet Catalog.App.dll --migrate</c>);
     /// this flag exists only so a developer's <c>dotnet run</c> still works without ceremony.
     /// </para>
     /// </remarks>

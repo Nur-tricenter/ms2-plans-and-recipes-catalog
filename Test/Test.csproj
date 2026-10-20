@@ -46,7 +46,7 @@
   <ItemGroup>
     <ProjectReference Include="..\src\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\src\Catalog.Domain\Catalog.Domain.csproj" />
-    <ProjectReference Include="..\src\Catalog.WebApi\Catalog.WebApi.csproj" />
+    <ProjectReference Include="..\src\Catalog.App\Catalog.App.csproj" />
     <ProjectReference Include="..\src\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
     <!--
       Referenced so the WorkerService composition root (RabbitMqExtensions.AddCatalogRabbitMq and

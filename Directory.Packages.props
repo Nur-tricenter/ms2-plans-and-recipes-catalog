@@ -15,6 +15,16 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <ItemGroup Label="Nur-Tricenter platform kernels">
+    <!--
+      Published to GitHub Packages, not vendored. A service consumes a kernel the way it consumes
+      any other dependency, which is what keeps this repository independent: nothing here knows
+      where nur-tricenter-shared-kernels lives on disk.
+    -->
+    <PackageVersion Include="Nur.Tricenter.Access" Version="1.0.0" />
+    <PackageVersion Include="Nur.Tricenter.Observability" Version="1.0.0" />
+  </ItemGroup>
+
   <ItemGroup Label="Joseco">
     <!--
       The four vendor libraries this service is built on. They are generic infrastructure with

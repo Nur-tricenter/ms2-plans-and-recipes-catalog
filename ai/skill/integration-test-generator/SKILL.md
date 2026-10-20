@@ -91,7 +91,7 @@ Test/IntegrationTest/
 - Test method: English `{Endpoint}_{Scenario}` — `Create_WithValidRequest`,
   `GetById_WhenNotFound_Returns404`, `AgregarIngrediente_WithUnknownAlimento_Returns400`.
 - Factory: `{Controller}WebApplicationFactory : WebApplicationFactory<Program>` where
-  `Program` is `Catalog.WebApi.Program`.
+  `Program` is `Catalog.App.Program`.
 - Fake repository: `InMemory{Repository}` implementing the interface from `Catalog.Domain`.
 - Response DTO: `{Feature}Response`, with `Success`, `Message`, `Errors` (+ `Data` on the
   generic one) to mirror `ApiResponse`/`ApiResponse<T>`.

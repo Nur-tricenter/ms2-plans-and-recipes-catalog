@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nur.Tricenter.Observability.Tracing;
 
-namespace Catalog.WebApi
+namespace Catalog.App
 {
     public class Program
     {
@@ -71,7 +71,7 @@ namespace Catalog.WebApi
 
             var logger = host.Services
                 .GetRequiredService<ILoggerFactory>()
-                .CreateLogger("Catalog.WebApi.Migrations");
+                .CreateLogger("Catalog.App.Migrations");
 
             using var scope = host.Services.CreateScope();
 

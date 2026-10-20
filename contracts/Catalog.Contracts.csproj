@@ -33,9 +33,10 @@
   <ItemGroup>
     <!--
       ScopeAccessRule is the type a rule is expressed in, and it lives in the kernel because every
-      service needs it and none of them own it.
+      service needs it and none of them own it. Consumed as a package so this repository builds
+      without the kernel's source on disk.
     -->
-    <ProjectReference Include="..\..\nur-tricenter-shared-kernels\nur-tricenter-access\nur-tricenter-access.csproj" />
+    <PackageReference Include="Nur.Tricenter.Access" />
   </ItemGroup>
 
 </Project>

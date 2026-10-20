@@ -103,12 +103,12 @@ ahora por **configuración explícita**, con valores por defecto que son siempre
 | `Swagger` | `Enabled` | `false` | Servir `/swagger` y `/swagger/v1/swagger.json` |
 | `HttpsRedirection` | `Enabled` | `false` | Agregar `UseHttpsRedirection()` |
 
-**No hay secretos en archivos versionados.** `src/Catalog.WebApi/appsettings.json` y
+**No hay secretos en archivos versionados.** `src/Catalog.App/appsettings.json` y
 `src/Catalog.WorkerService/appsettings.json` ya **no** contienen la cadena de conexión. Cada proyecto
 tiene un template versionado con los valores de desarrollo:
 
 ```bash
-cp src/Catalog.WebApi/appsettings.Development.template.json         src/Catalog.WebApi/appsettings.Development.json
+cp src/Catalog.App/appsettings.Development.template.json         src/Catalog.App/appsettings.Development.json
 cp src/Catalog.WorkerService/appsettings.Development.template.json  src/Catalog.WorkerService/appsettings.Development.json
 ```
 
@@ -130,9 +130,9 @@ dos `appsettings.json` versionados.
 El esquema se aplica con un **paso explícito**, no al arrancar el servicio:
 
 ```bash
-dotnet run --project src/Catalog.WebApi/Catalog.WebApi.csproj -- --migrate
+dotnet run --project src/Catalog.App/Catalog.App.csproj -- --migrate
 # o, sobre el binario publicado:
-dotnet Catalog.WebApi.dll --migrate
+dotnet Catalog.App.dll --migrate
 ```
 
 Aplica las migraciones del **lado escritura** (`DomainDbContext`) y después las del **lado lectura**
@@ -188,7 +188,7 @@ Levanta PostgreSQL, aplica el esquema con un paso one-shot y levanta la API:
 
 ```bash
 # 1. Configuración local, una sola vez (crea appsettings.Development.json, fuera de git)
-cp src/Catalog.WebApi/appsettings.Development.template.json src/Catalog.WebApi/appsettings.Development.json
+cp src/Catalog.App/appsettings.Development.template.json src/Catalog.App/appsettings.Development.json
 
 # 2. Levantar el stack (Postgres -> webapi-migrate -> webapi)
 docker compose up -d
@@ -197,7 +197,7 @@ docker compose up -d
 docker compose run --rm webapi-migrate
 ```
 
-El servicio `webapi-migrate` corre `dotnet Catalog.WebApi.dll --migrate`, y `webapi` espera a que
+El servicio `webapi-migrate` corre `dotnet Catalog.App.dll --migrate`, y `webapi` espera a que
 termine con éxito (`service_completed_successfully`) antes de arrancar. `webapi` **no** migra ni
 sembra por su cuenta.
 
@@ -205,6 +205,40 @@ sembra por su cuenta.
 > con un esquema viejo (tablas en `public`, nombres en español de una versión anterior), recrealo
 > con `docker compose down -v` antes de volver a intentarlo: las dos historias parten de cero y no
 > migran un esquema preexistente.
+
+### Docker Hub — construir y publicar la imagen
+
+El compose consume `robertperezlino/ms2-plans-and-recipes-catalog:latest`. **No hay pipeline que
+la publique**: la imagen hay que construirla y empujarla a mano, y `:latest` no garantiza que
+corresponda a tu working tree.
+
+El contexto de build es **la carpeta padre**, no este repositorio:
+
+```bash
+cd <carpeta que contiene ms2-plans-and-recipes-catalog Y nur-tricenter-shared-kernels>
+
+docker build \
+  -f ms2-plans-and-recipes-catalog/Dockerfile \
+  -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
+
+docker push robertperezlino/ms2-plans-and-recipes-catalog:latest
+```
+
+**Por qué la carpeta padre y no este repositorio:** `Catalog.Application` e
+`Catalog.Infrastructure` referencian `nur-tricenter-shared-kernels/*` por ruta relativa, y Docker
+no puede copiar archivos de fuera del contexto de build. Construir desde adentro de este repo
+falla en la primera copia de un `.csproj` de los kernels.
+
+> `.dockerignore` vive en la carpeta padre, que es el contexto real. Las reglas para
+> `nur-tricenter-api-gateway/` o `Docker Proyecto/` que estuviera dentro de este repo no
+> excluirían nada: esas carpetas no forman parte de su contexto.
+
+### Imagen para producción
+
+La imagen no declara `ASPNETCORE_ENVIRONMENT`: el compose la fija en `Production`. Para un
+despliegue propio hay que exportar las variables de configuración, sobre todo
+`ConnectionStrings__CatalogDbConnectionString`, y dejar `Migrations__ApplyOnStartup` en `false`:
+el esquema se aplica con el paso explícito `--migrate`, no al arrancar el proceso web.
 
 | Recurso | URL |
 |---------|-----|
@@ -224,10 +258,10 @@ docker compose down
 Requiere un PostgreSQL disponible (por ejemplo el de `docker compose`) y la configuración local:
 
 ```bash
-cp src/Catalog.WebApi/appsettings.Development.template.json src/Catalog.WebApi/appsettings.Development.json
+cp src/Catalog.App/appsettings.Development.template.json src/Catalog.App/appsettings.Development.json
 
 dotnet restore
-dotnet run --project src/Catalog.WebApi/Catalog.WebApi.csproj
+dotnet run --project src/Catalog.App/Catalog.App.csproj
 ```
 
 Si preferís no tocar ningún archivo, exportá las variables de entorno equivalentes (los valores

@@ -32,7 +32,7 @@ namespace Catalog.Infrastructure
             // Resolved LAZILY, inside the AddDbContext callbacks below, on purpose. Reading it here
             // would make a missing connection string a failure of composition time, which the
             // integration suite hits on every single test: it boots the real Startup with the real
-            // src/Catalog.WebApi/appsettings.json and then replaces DbContextOptions<T> with the
+            // src/Catalog.App/appsettings.json and then replaces DbContextOptions<T> with the
             // InMemory ones, so the callbacks never run. Reading it inside the callbacks means the
             // suite never needs a PostgreSQL credential, while a real deployment that forgot to
             // supply one still fails immediately — with a message naming the setting and the fix —
@@ -92,8 +92,8 @@ namespace Catalog.Infrastructure
                 throw new InvalidOperationException(
                     $"No value was found for configuration 'ConnectionStrings:{ConnectionStringName}'. " +
                     "Supply it through the ConnectionStrings__" + ConnectionStringName + " environment variable, " +
-                    "or copy src/Catalog.WebApi/appsettings.Development.template.json to " +
-                    "src/Catalog.WebApi/appsettings.Development.json and fill it in for local runs.");
+                    "or copy src/Catalog.App/appsettings.Development.template.json to " +
+                    "src/Catalog.App/appsettings.Development.json and fill it in for local runs.");
             }
 
             return connectionString;

@@ -1,4 +1,4 @@
-namespace Catalog.WebApi.Utils
+namespace Catalog.App.Utils
 {
     public class ApiResponse
     {
