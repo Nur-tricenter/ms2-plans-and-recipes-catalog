@@ -33,6 +33,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
 
             var plan = await _dbContext.MealPlans
                 .Include(x => x.PlanDays)
+                    .ThenInclude(x => x.MealTimes)
                 .FirstOrDefaultAsync(x => x.Id == mealTimeAdded.PlanId, cancellationToken);
 
             if (plan is null)
