@@ -24,7 +24,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// their own queues to.
     /// </remarks>
     public class PublishIntegrationEventWhenRecipeUpdated
-        : INotificationHandler<OutboxMessage<DomainEvent>>
+        : INotificationHandler<OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>>
     {
         /// <summary>
         /// Exchange/routing destination for this contract. It MUST be passed explicitly: the
@@ -47,13 +47,10 @@ namespace Catalog.Application.UseCase.DomainEventHandler
             _publisher = publisher;
         }
 
-        public async Task Handle(OutboxMessage<DomainEvent> notification, CancellationToken cancellationToken = default)
+        public async Task Handle(OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated> notification, CancellationToken cancellationToken = default)
         {
             // Qualified on purpose: the bare name is ambiguous (see the IntegrationContract alias).
-            if (notification.Content is not Catalog.Domain.Event.Recipe.RecipeUpdated recipeUpdated)
-            {
-                return;
-            }
+            var recipeUpdated = notification.Content;
 
             var message = new IntegrationContract(notification.CorrelationId, Source)
             {

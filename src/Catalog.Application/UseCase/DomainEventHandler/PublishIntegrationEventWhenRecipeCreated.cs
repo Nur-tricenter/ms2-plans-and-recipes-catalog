@@ -22,7 +22,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// </para>
     /// </remarks>
     public class PublishIntegrationEventWhenRecipeCreated
-        : INotificationHandler<OutboxMessage<DomainEvent>>
+        : INotificationHandler<OutboxMessage<RecipeCreated>>
     {
         /// <summary>
         /// Exchange/routing destination for this contract. It MUST be passed explicitly: the
@@ -45,12 +45,9 @@ namespace Catalog.Application.UseCase.DomainEventHandler
             _publisher = publisher;
         }
 
-        public async Task Handle(OutboxMessage<DomainEvent> notification, CancellationToken cancellationToken = default)
+        public async Task Handle(OutboxMessage<RecipeCreated> notification, CancellationToken cancellationToken = default)
         {
-            if (notification.Content is not RecipeCreated recipeCreated)
-            {
-                return;
-            }
+            var recipeCreated = notification.Content;
 
             var message = new RecipePublished(notification.CorrelationId, Source)
             {

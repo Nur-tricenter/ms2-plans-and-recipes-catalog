@@ -16,12 +16,16 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// Published to <see cref="CatalogExchanges.FoodPublished"/>, which the production microservice
     /// binds its own queue to: an ingredient, once registered, is what production has to buy.
     /// <para>
-    /// No name alias is needed here: the domain event is <c>FoodCreated</c> and the contract is
-    /// <c>FoodPublished</c>, so the two do not collide (unlike <c>RecipeUpdated</c>).
+    /// The handler is typed against <see cref="OutboxMessage{T}"/> for the concrete
+    /// <see cref="FoodCreated"/> event rather than <see cref="DomainEvent"/>. The outbox
+    /// processor dispatches messages through MediatR with the runtime event type, so a
+    /// handler registered against the base <see cref="DomainEvent"/> would never match a
+    /// specific <see cref="OutboxMessage{FoodCreated}"/> delivery: per-event handlers are
+    /// what MediatR can resolve.
     /// </para>
     /// </remarks>
     public class PublishIntegrationEventWhenFoodCreated
-        : INotificationHandler<OutboxMessage<DomainEvent>>
+        : INotificationHandler<OutboxMessage<FoodCreated>>
     {
         /// <summary>
         /// Exchange/routing destination for this contract. It MUST be passed explicitly: the
@@ -44,12 +48,9 @@ namespace Catalog.Application.UseCase.DomainEventHandler
             _publisher = publisher;
         }
 
-        public async Task Handle(OutboxMessage<DomainEvent> notification, CancellationToken cancellationToken = default)
+        public async Task Handle(OutboxMessage<FoodCreated> notification, CancellationToken cancellationToken = default)
         {
-            if (notification.Content is not FoodCreated foodCreated)
-            {
-                return;
-            }
+            var foodCreated = notification.Content;
 
             var message = new FoodPublished(notification.CorrelationId, Source)
             {

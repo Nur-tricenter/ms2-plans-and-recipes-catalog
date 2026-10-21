@@ -13,7 +13,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// <see cref="MealPlanPublished"/> external contract and publishes it to RabbitMQ.
     /// </summary>
     public class PublishIntegrationEventWhenMealPlanCreated
-        : INotificationHandler<OutboxMessage<DomainEvent>>
+        : INotificationHandler<OutboxMessage<MealPlanCreated>>
     {
         /// <summary>
         /// Exchange/routing destination for this contract. It MUST be passed explicitly: the
@@ -36,12 +36,9 @@ namespace Catalog.Application.UseCase.DomainEventHandler
             _publisher = publisher;
         }
 
-        public async Task Handle(OutboxMessage<DomainEvent> notification, CancellationToken cancellationToken = default)
+        public async Task Handle(OutboxMessage<MealPlanCreated> notification, CancellationToken cancellationToken = default)
         {
-            if (notification.Content is not MealPlanCreated mealPlanCreated)
-            {
-                return;
-            }
+            var mealPlanCreated = notification.Content;
 
             var message = new MealPlanPublished(notification.CorrelationId, Source)
             {
