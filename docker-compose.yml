@@ -58,15 +58,26 @@ services:
   # `docker compose down -v`.
   # ---------------------------------------------------------------------------
   webapi-migrate:
-    # Rebuild the image before using it, because `:latest` on Docker Hub is whatever somebody
-    # pushed last and nothing here guarantees it matches this working tree:
+    # The image is BUILT from this working tree, not pulled.
     #
-    #   cd <parent folder>   # the one holding ms2-plans-and-recipes-catalog AND nur-tricenter-shared-kernels
-    #   docker build -f ms2-plans-and-recipes-catalog/Dockerfile -t robertperezlino/ms2-plans-and-recipes-catalog:latest .
+    # It used to be `image: robertperezlino/...:latest` from Docker Hub, which meant
+    # whatever somebody pushed last is what you ran — nothing tied the running container to
+    # the code you had just edited. `build` makes the image a function of this tree.
     #
-    # The context is the PARENT folder on purpose: the shared kernels are referenced by relative
-    # path from this repository, and Docker cannot COPY from outside the build context.
-    image: robertperezlino/ms2-plans-and-recipes-catalog:latest
+    # `context` is the repository ROOT, not src/Catalog.App: the Dockerfile has to COPY
+    # Directory.Packages.props and NuGet.config, which live at the root, and Docker cannot
+    # copy from outside the build context. `dockerfile` is therefore the path from the
+    # context root to the file.
+    #
+    # The private feed needs credentials, and they arrive as build secrets rather than
+    # ARG/ENV so no token is baked into an image layer. Supply them when building:
+    #
+    #   $env:NUGET_USERNAME = "..."
+    #   $env:NUGET_TOKEN    = "..."
+    #   docker compose build
+    build:
+      context: .
+      dockerfile: src/Catalog.App/Dockerfile
     container_name: ms2-plans-and-recipes-catalog-migrate
     command: ["--migrate"]
     environment:
@@ -79,7 +90,11 @@ services:
     restart: "no"
 
   webapi:
-    image: robertperezlino/ms2-plans-and-recipes-catalog:latest
+    # Same build as webapi-migrate: one source, one Dockerfile. Compose builds it once and
+    # both services share the resulting image layer.
+    build:
+      context: .
+      dockerfile: src/Catalog.App/Dockerfile
     container_name: ms2-plans-and-recipes-catalog-api
     ports:
       - "8082:8080"
@@ -117,6 +132,50 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  workerservice:
+    # The outbox drain. Built from its own Dockerfile because it is a separate publishable
+    # artifact: two hosts, two assemblies, two images. Sharing the API's image would mean
+    # shipping MVC and Swagger into a process that serves no HTTP.
+    build:
+      context: .
+      dockerfile: src/Catalog.WorkerService/Dockerfile
+    container_name: ms2-plans-and-recipes-catalog-worker
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      ConnectionStrings__CatalogDbConnectionString: Host=db;Port=5432;Database=catalog;Username=dev-only;Password=dev-only-password
+      # RabbitMQ is deliberately NOT declared in this file. A second broker would collide
+      # with the platform's on host port 5672, and Joseco.Communication.External.RabbitMQ 1.1.0
+      # builds its ConnectionFactory from HostName/UserName/Password only, silently ignoring
+      # Port — so a broker on any other host port would make publish and consume talk to
+      # different endpoints with no error at all. Host 5672 is a hard requirement.
+      #
+      # That means this stack's worker starts but cannot publish: there is nothing on
+      # localhost:5672 unless the platform's broker is up. The outbox rows stay
+      # `processed = false`, which is correct and observable rather than a silent failure.
+      RabbitMqSettings__Host: "localhost"
+      RabbitMqSettings__UserName: "guest"
+      RabbitMqSettings__Password: "guest"
+      RabbitMqSettings__VirtualHost: "/"
+      RabbitMqSettings__MaxRetryAttempts: "3"
+      RabbitMqSettings__RetryBaseDelayMilliseconds: "500"
+    networks: [backend]
+    depends_on:
+      db:
+        condition: service_healthy
+      webapi-migrate:
+        # The drain must not run against a schema that does not exist.
+        condition: service_completed_successfully
+    healthcheck:
+      # No port to probe: this host serves no HTTP. Reading the kernel's own view of the
+      # process needs no extra tool, and the runtime image ships no procps, so pgrep would
+      # fail forever while the worker is running perfectly.
+      test: ["CMD-SHELL", "grep -qs 'Catalog.WorkerService' /proc/*/cmdline || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
       start_period: 20s
     restart: unless-stopped
 

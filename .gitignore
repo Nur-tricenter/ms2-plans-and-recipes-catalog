@@ -143,15 +143,12 @@ _ReSharper*/
 # Jupyter / Guías locales
 ###########################################################
 
-Guia.ipynb
 .ipynb_checkpoints/
 
 ###########################################################
 # Documentos de análisis locales (no versionar)
 ###########################################################
 
-ANALISIS-ARQUITECTURA-MS2026.md
-ROADMAP-MS2026.md
 .atl/
 
 ###########################################################
