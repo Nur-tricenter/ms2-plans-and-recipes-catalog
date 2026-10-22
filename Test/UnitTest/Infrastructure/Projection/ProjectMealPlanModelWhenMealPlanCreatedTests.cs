@@ -1,4 +1,4 @@
-using Catalog.Domain.Event.MealPlan;
+﻿using Catalog.Domain.Event.MealPlan;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan;
 using Catalog.Infrastructure.Persistence.StoredModel.Projection;
 using Joseco.Outbox.Contracts.Model;
@@ -19,7 +19,7 @@ namespace Catalog.Tests.Infrastructure.Projection
 
             // Act
             await _sut.Handle(new OutboxMessage<MealPlanCreated>(
-                new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 5)));
+                new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 5, Guid.NewGuid())));
 
             // Assert
             var stored = await dbContext.MealPlans.SingleAsync();
@@ -38,7 +38,7 @@ namespace Catalog.Tests.Infrastructure.Projection
 
             // Act
             await _sut.Handle(new OutboxMessage<MealPlanCreated>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5)));
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5, Guid.NewGuid())));
 
             // Assert
             var stored = await dbContext.MealPlans.Include(x => x.PlanDays).SingleAsync();
@@ -54,7 +54,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             // Arrange
             await using var dbContext = StoredDbContextFactory.Create();
             var _sut = new ProjectMealPlanModelWhenMealPlanCreated(dbContext);
-            var planCreated = new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5);
+            var planCreated = new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5, Guid.NewGuid());
 
             // Act
             await _sut.Handle(new OutboxMessage<MealPlanCreated>(planCreated));
@@ -70,7 +70,7 @@ namespace Catalog.Tests.Infrastructure.Projection
             // Arrange
             await using var dbContext = StoredDbContextFactory.Create();
             var _sut = new ProjectMealPlanModelWhenMealPlanCreated(dbContext);
-            var planCreated = new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5);
+            var planCreated = new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 5, Guid.NewGuid());
             await _sut.Handle(new OutboxMessage<MealPlanCreated>(planCreated));
 
             // Act
@@ -101,7 +101,7 @@ namespace Catalog.Tests.Infrastructure.Projection
 
             // Act
             await _sut.Handle(new OutboxMessage<MealPlanCreated>(
-                new MealPlanCreated(planId, "Plan Saludable", "THIRTY_DAYS", 30, 5)));
+                new MealPlanCreated(planId, "Plan Saludable", "THIRTY_DAYS", 30, 5, Guid.NewGuid())));
 
             // Assert
             var stored = await dbContext.MealPlans.Include(x => x.PlanDays).SingleAsync();

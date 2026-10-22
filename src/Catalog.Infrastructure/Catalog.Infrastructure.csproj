@@ -26,6 +26,14 @@
     <PackageReference Include="Consul" />
     <PackageReference Include="Joseco.DDD.Core" />
     <PackageReference Include="Joseco.Outbox.EFCore" />
+    <!--
+      The RabbitMQ transport. Infrastructure owns it because the consumer subscription is
+      registered here: IdempotentConsumer is infrastructure, and it cannot be resolved without the
+      library that will deliver to it. Catalog.Contracts declares the message shape only, and
+      Catalog.Application stays free of any broker dependency.
+    -->
+    <PackageReference Include="Joseco.Communication.External.RabbitMQ" />
+    <PackageReference Include="Joseco.Communication.External.Contracts" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <!--
       Declared explicitly because ServiceRegistration implements IHostedService. It already arrived

@@ -1,4 +1,4 @@
-using Catalog.Domain;
+﻿using Catalog.Domain;
 using Catalog.Domain.Primitives;
 using Catalog.Domain.Event.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -16,7 +16,7 @@ namespace Catalog.Tests.Domain
         public void Constructor_ValidDuration_CreatesPlanWithExpectedDays(DurationType type, int expectedDays)
         {
             // Act
-            var plan = new MealPlan(new MealPlanName("Plan Saludable"), new PlanDuration(type), 3);
+            var plan = new MealPlan(new MealPlanName("Plan Saludable"), new PlanDuration(type), 3, Guid.NewGuid());
 
             // Assert
             Assert.NotEqual(Guid.Empty, plan.Id);
@@ -32,7 +32,7 @@ namespace Catalog.Tests.Domain
         public void AddMealTimeToDay_ValidDay_AddsMealTime()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
@@ -48,7 +48,7 @@ namespace Catalog.Tests.Domain
         public void AddMealTimeToDay_InvalidDay_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
@@ -60,7 +60,7 @@ namespace Catalog.Tests.Domain
         public void AddMealTimeToDay_DuplicateOrder_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
 
             // Act + Assert
@@ -73,7 +73,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_WithDayAndExistingTime_AssignsRecipeAndQueuesEvent()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
@@ -96,7 +96,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_InvalidDay_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
@@ -108,7 +108,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_TimeNotInDay_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
@@ -120,7 +120,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_WithoutDay_FindsTimeInAnyDayAndAssigns()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(3, MealTimeType.Lunch);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 3).MealTimes.Single();
             var recipeId = Guid.NewGuid();
@@ -139,7 +139,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_WithoutDayAndTimeNotFound_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
@@ -151,7 +151,7 @@ namespace Catalog.Tests.Domain
         public void AssignRecipeToMealTime_DuplicateRecipeInTime_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
@@ -167,7 +167,7 @@ namespace Catalog.Tests.Domain
         public void RemoveRecipeFromMealTime_ExistingAssignment_RemovesAndQueuesEvent()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
@@ -188,7 +188,7 @@ namespace Catalog.Tests.Domain
         public void RemoveRecipeFromMealTime_TimeNotFound_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
@@ -200,7 +200,7 @@ namespace Catalog.Tests.Domain
         public void RemoveRecipeFromMealTime_RecipeNotAssigned_ThrowsException()
         {
             // Arrange
-            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlan(new MealPlanName("Plan"), new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
 

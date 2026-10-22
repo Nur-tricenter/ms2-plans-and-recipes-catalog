@@ -26,65 +26,139 @@ namespace Catalog.Tests.Application
             _factoryMock = new Mock<IMealPlanFactory>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<CreateMealPlanHandler>>();
-            _handler = new CreateMealPlanHandler(_repoMock.Object, _factoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
+
+            _handler = new CreateMealPlanHandler(
+                _repoMock.Object,
+                _factoryMock.Object,
+                _unitOfWorkMock.Object,
+                _loggerMock.Object);
         }
 
         [Fact]
         public async Task Handle_ValidCommand_ReturnsSuccessAndVerifiesInteractions()
         {
-            // Arrange
-            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
-            _factoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>())).Returns(plan);
-            var command = new CreateMealPlanCommand { Name = "Plan Saludable", DurationType = "FIFTEEN_DAYS", MealsPerDay = 3 };
+            var authorId = Guid.NewGuid();
+            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, authorId);
+            _factoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>(), It.IsAny<Guid>())).Returns(plan);
 
-            // Act
+            var command = new CreateMealPlanCommand
+            {
+                Name = "Plan Saludable",
+                DurationType = "FIFTEEN_DAYS",
+                MealsPerDay = 3,
+                AuthorIdFromToken = authorId
+            };
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.True(result.IsSuccess);
             Assert.Equal(plan.Id, result.Value);
             Assert.Equal("Meal plan created successfully", result.Message);
-            _factoryMock.Verify(f => f.Create("Plan Saludable", It.Is<PlanDuration>(d => d.Type == DurationType.FIFTEEN_DAYS), 3), Times.Once);
+            _factoryMock.Verify(f => f.Create("Plan Saludable", It.Is<PlanDuration>(d => d.Type == DurationType.FIFTEEN_DAYS), 3, authorId), Times.Once);
             _repoMock.Verify(r => r.AddAsync(It.Is<MealPlan>(p => p.Name.Name == "Plan Saludable")), Times.Once);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Theory]
-        [InlineData("SEMANAL")]
-        [InlineData("")]
-        [InlineData(null)]
-        public async Task Handle_InvalidDurationType_ReturnsFailureAndNoCommit(string? durationType)
+        [Fact]
+        public async Task Handle_EmptyAuthor_FailsWithoutReachingTheFactory()
         {
-            // Arrange
-            var command = new CreateMealPlanCommand { Name = "Plan", DurationType = durationType!, MealsPerDay = 3 };
+            // The author comes from the validated bearer token, so an empty id means the caller is
+            // not authenticated. The handler must refuse it itself rather than letting the factory
+            // throw from inside the aggregate.
+            var command = new CreateMealPlanCommand
+            {
+                Name = "Plan Saludable",
+                DurationType = "FIFTEEN_DAYS",
+                MealsPerDay = 3,
+                AuthorIdFromToken = Guid.Empty
+            };
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
-            Assert.False(result.IsSuccess);
-            _factoryMock.Verify(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>()), Times.Never);
-            _repoMock.Verify(r => r.AddAsync(It.IsAny<MealPlan>()), Times.Never);
+            Assert.True(result.IsFailed);
+            _factoryMock.Verify(
+                f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>(), It.IsAny<Guid>()),
+                Times.Never);
+            _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_CreatesThePlanAgainstTheAuthenticatedAccount()
+        {
+            // The plan's author must be the account from the token, never anything the caller
+            // supplied: a request that claims a different author is ignored, because the command
+            // carries one id and it comes from the credential.
+            var tokenAccount = Guid.NewGuid();
+            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, tokenAccount);
+            _factoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>(), tokenAccount)).Returns(plan);
+
+            await _handler.Handle(new CreateMealPlanCommand
+            {
+                Name = "Plan Saludable",
+                DurationType = "FIFTEEN_DAYS",
+                MealsPerDay = 3,
+                AuthorIdFromToken = tokenAccount
+            }, CancellationToken.None);
+
+            _repoMock.Verify(
+                r => r.AddAsync(It.Is<MealPlan>(p => HasAuthor(p, tokenAccount))),
+                Times.Once);
+        }
+
+        /// <summary>
+        /// Whether the plan carries the given author.
+        /// </summary>
+        /// <remarks>
+        /// A named method rather than an inline expression because Moq builds an expression tree,
+        /// and chained null-forgiving accessors on a nullable value type do not survive being
+        /// rewritten inside one.
+        /// </remarks>
+        private static bool HasAuthor(MealPlan plan, Guid authorId)
+        {
+            PlanAuthorId? author = plan.AuthorId;
+            return author != null && author.Value == authorId;
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("NO_SUCH_DURATION")]
+        public async Task Handle_InvalidDurationType_ReturnsFailureAndNoCommit(string? durationType)
+        {
+            var command = new CreateMealPlanCommand
+            {
+                Name = "Plan Saludable",
+                DurationType = durationType!,
+                MealsPerDay = 3,
+                AuthorIdFromToken = Guid.NewGuid()
+            };
+
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            Assert.True(result.IsFailed);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
-        [InlineData("")]
         [InlineData(null)]
+        [InlineData("")]
         public async Task Handle_InvalidName_FactoryThrows_ReturnsFailureAndNoCommit(string? name)
         {
-            // Arrange
-            _factoryMock.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>()))
-                .Throws(new BussinessRuleValidationException("Plan name cannot be null"));
-            var command = new CreateMealPlanCommand { Name = name!, DurationType = "FIFTEEN_DAYS", MealsPerDay = 3 };
+            _factoryMock
+                .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<PlanDuration>(), It.IsAny<int>(), It.IsAny<Guid>()))
+                .Throws(new BussinessRuleValidationException("Invalid plan name"));
 
-            // Act
+            var command = new CreateMealPlanCommand
+            {
+                Name = name!,
+                DurationType = "FIFTEEN_DAYS",
+                MealsPerDay = 3,
+                AuthorIdFromToken = Guid.NewGuid()
+            };
+
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.Equal("Plan name cannot be null", result.Message);
-            _repoMock.Verify(r => r.AddAsync(It.IsAny<MealPlan>()), Times.Never);
+            Assert.True(result.IsFailed);
             _unitOfWorkMock.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
     }

@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+﻿using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
@@ -36,8 +36,8 @@ namespace Catalog.Tests.Application
         public async Task Handle_MealPlanCreatedContent_PublishesThePlanPublishedContract()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -53,8 +53,8 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var planId = Guid.NewGuid();
-            var mealPlanCreated = new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3);
-            var notification = new OutboxMessage<DomainEvent>(mealPlanCreated);
+            var mealPlanCreated = new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid());
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(mealPlanCreated);
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -72,8 +72,8 @@ namespace Catalog.Tests.Application
         public async Task Handle_MealPlanCreatedContent_PublishesToMealPlanPublishedDestination()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -88,8 +88,8 @@ namespace Catalog.Tests.Application
         public async Task Handle_MealPlanCreatedContent_DeclaresTheDestinationExchange()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -105,8 +105,8 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             const string correlationId = "correlation-abc-123";
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3),
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()),
                 correlationId,
                 "trace-1",
                 "span-1");
@@ -123,8 +123,8 @@ namespace Catalog.Tests.Application
         public async Task Handle_MealPlanCreatedContent_StampsCatalogAsTheSource()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -135,24 +135,23 @@ namespace Catalog.Tests.Application
         }
 
         [Fact]
-        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
+        public void Handle_IsRegisteredOnlyForMealPlanCreated_AndNotForOtherDomainEvents()
         {
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new FoodCreated(
-                    Guid.NewGuid(),
-                    "MANZANA",
-                    "FRUTAS",
-                    new NutritionalInfo(100, 52, 0.3m, 14, 0.2m),
-                    UnitOfMeasure.Gram));
+            // The guarantee is structural: this handler is registered for
+            // INotificationHandler<OutboxMessage<MealPlanCreated>>, so a FoodCreated outbox row is
+            // never dispatched to it by MediatR. The mismatched call would not compile, which is
+            // exactly the property this test records.
+            var handlerContract = typeof(PublishIntegrationEventWhenMealPlanCreated)
+                .GetInterfaces()
+                .Single();
 
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
+            Assert.Equal(
+                typeof(OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>),
+                handlerContract.GetGenericArguments()[0]);
 
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(It.IsAny<MealPlanPublished>(), It.IsAny<string?>(), It.IsAny<bool>()),
-                Times.Never);
+            Assert.DoesNotContain(
+                typeof(PublishIntegrationEventWhenMealPlanCreated).GetInterfaces(),
+                i => i.GetGenericArguments()[0] == typeof(OutboxMessage<DomainEvent>));
         }
 
         [Fact]
@@ -160,8 +159,8 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var planId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            var notification = new OutboxMessage<Catalog.Domain.Event.MealPlan.MealPlanCreated>(
+                new MealPlanCreated(planId, "Plan Saludable", "FIFTEEN_DAYS", 15, 3, Guid.NewGuid()));
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);

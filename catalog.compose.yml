@@ -1,5 +1,5 @@
 # =============================================================================
-#  Catalog — platform variant.
+#  Catalog â€” platform variant.
 #
 #  This file declares the catalog's two business processes attached to the
 #  SHARED platform infrastructure: the same `nur-tricenter-net` network, the same
@@ -48,6 +48,16 @@ services:
       # not the default `postgres` one. Created by the init.sql that
       # mounts at /docker-entrypoint-initdb.d inside the postgres container.
       ConnectionStrings__CatalogDbConnectionString: "Host=nur-tricenter-postgres;Port=5432;Database=ms2-plans-and-recipes-catalog;Username=dev-only;Password=dev-only-password"
+
+      # The catalog VALIDATES the token the identity service signs; it does not issue one.
+      # These four values MUST equal the identity service's Jwt__* -- same signing key, same
+      # issuer, same audience. A mismatch does not fail as a configuration error: it fails as a
+      # 401 on every authenticated request, which reads like a gateway routing problem and sends
+      # you looking in the wrong place.
+      Jwt__SecretKey: "dev-only-signing-key-not-a-secret-0123456789"
+      Jwt__ValidIssuer: "nur-tricenter-identity"
+      Jwt__ValidAudience: "nur-tricenter-clients"
+      Jwt__Lifetime: "3600"
       RabbitMqSettings__Host: "nur-tricenter-rabbitmq"
       RabbitMqSettings__UserName: "guest"
       RabbitMqSettings__Password: "guest"
@@ -103,6 +113,16 @@ services:
     environment:
       DOTNET_ENVIRONMENT: Development
       ConnectionStrings__CatalogDbConnectionString: "Host=nur-tricenter-postgres;Port=5432;Database=ms2-plans-and-recipes-catalog;Username=dev-only;Password=dev-only-password"
+
+      # The catalog VALIDATES the token the identity service signs; it does not issue one.
+      # These four values MUST equal the identity service's Jwt__* -- same signing key, same
+      # issuer, same audience. A mismatch does not fail as a configuration error: it fails as a
+      # 401 on every authenticated request, which reads like a gateway routing problem and sends
+      # you looking in the wrong place.
+      # REQUIRED since the catalog became a consumer: without it the settings bind Host as
+      # null and RabbitMqConsumer throws ArgumentNullException("hostName") at startup, so
+      # the worker crash-loops before draining anything. Harmless when the catalog only
+      # published; fatal now.
       RabbitMqSettings__Host: "nur-tricenter-rabbitmq"
       RabbitMqSettings__UserName: "guest"
       RabbitMqSettings__Password: "guest"
@@ -114,25 +134,17 @@ services:
       db:
         condition: service_healthy
       rabbitmq:
-        # service_healthy, not service_started: the outbox processor connects to the broker as
-        # soon as it starts, and a broker that is still booting turns the first publish attempt
-        # into an exception on every poll until it settles.
+        # service_healthy, not service_started: the outbox processor connects to the
+        # broker as soon as it starts, and a broker still booting turns every publish
+        # attempt into an exception on every poll until it settles.
         condition: service_healthy
-    # This process is NOT registered in Consul, and that is deliberate.
-    #
-    # Consul registration exists so the gateway can route traffic to a service. The worker
-    # publishes to RabbitMQ and serves no HTTP at all: it has no listener, no controller and no
-    # address to register. Registering it would publish a route to an endpoint that cannot
-    # answer, and the gateway would happily proxy into a black hole.
-    #
-    # Its liveness is a container concern, not a routing concern, so it belongs in a Docker
-    # healthcheck. The process is a long-running OutboxProcessor: if it exits, the outbox stops
-    # being drained and no event is ever projected. That is exactly what a restart policy is for.
+
+    # NOT registered in Consul, deliberately: the worker serves no HTTP, so a registration would
+    # advertise a route to an endpoint that cannot answer.
     healthcheck:
-      # `/proc/<pid>/cmdline` rather than `pgrep`: the aspnet runtime image ships no procps, so
-      # `pgrep: not found` fails the check forever while the worker is running perfectly. Reading
-      # the kernel's own view of the process needs no extra tool. There is no port to probe
-      # either — this host has no listener.
+      # /proc/<pid>/cmdline rather than pgrep: the aspnet runtime image ships no procps, so
+      # `pgrep: not found` fails the check forever while the worker is running perfectly. There is
+      # no port to probe either — this host has no listener.
       test: ["CMD-SHELL", "grep -qs 'Catalog.WorkerService' /proc/*/cmdline || exit 1"]
       interval: 15s
       timeout: 5s
@@ -142,6 +154,4 @@ services:
 
 networks:
   nur-tricenter-net:
-    # The platform network, owned by the orchestrator's infra compose. The catalog attaches to it
-    # and resolves Postgres, RabbitMQ and Consul by container name.
     external: true

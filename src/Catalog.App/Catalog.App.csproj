@@ -9,6 +9,14 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" />
+    <!--
+      JWT bearer validation. The catalog validates the token the identity service signs; without it
+      the gateway forwards a credential nobody checks and every endpoint is effectively public.
+    -->
+    <PackageReference Include="Nur.Tricenter.Security" />
+    <!-- Permission NAMES come from the shared kernel so identity can grant them without
+         depending on this service. -->
+    <PackageReference Include="Nur.Tricenter.Access" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -41,6 +49,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+    <!--
+      The public contract project: CatalogPermissions (one entry per authorization policy),
+      CatalogRoutes (the route table the gateway aggregates) and the integration messages.
+      The App needs it to register policies and to annotate controllers; without this reference
+      the contract files were compiled nowhere reachable from the host.
+    -->
+    <ProjectReference Include="..\..\contracts\Catalog.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

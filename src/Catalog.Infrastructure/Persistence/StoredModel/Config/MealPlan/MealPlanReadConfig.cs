@@ -19,6 +19,10 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan
             builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(500);
             builder.Property(x => x.DurationType).HasColumnName("durationType");
             builder.Property(x => x.MealsPerDay).HasColumnName("mealsPerDay");
+
+            // Plain Guid, nullable, no FK. The read side joins it to PlanAuthors explicitly; see
+            // MealPlanModel.AuthorId for why there is deliberately no navigation or constraint.
+            builder.Property(x => x.AuthorId).HasColumnName("authorId");
             builder.Property(x => x.CreatedAt).HasColumnName("createdAt");
             builder.Property(x => x.UpdatedAt).HasColumnName("updatedAt");
             builder.Property(x => x.DeletedAt).HasColumnName("deletedAt");

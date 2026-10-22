@@ -37,6 +37,9 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
                     Name = planCreated.Name,
                     DurationType = planCreated.DurationType,
                     MealsPerDay = planCreated.MealsPerDay,
+                    // Copied straight from the event so the read side can join to PlanAuthors
+                    // without reaching into the write side, which is the whole point of the split.
+                    AuthorId = planCreated.AuthorId,
                     CreatedAt = DateTime.UtcNow,
                     IsDeleted = false
                 };
@@ -48,6 +51,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Projection
                 model.Name = planCreated.Name;
                 model.DurationType = planCreated.DurationType;
                 model.MealsPerDay = planCreated.MealsPerDay;
+                model.AuthorId = planCreated.AuthorId;
                 model.UpdatedAt = DateTime.UtcNow;
             }
 

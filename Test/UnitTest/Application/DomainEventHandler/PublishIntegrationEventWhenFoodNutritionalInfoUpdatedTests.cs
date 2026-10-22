@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+﻿using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
@@ -41,7 +41,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodNutritionalInfoUpdatedContent_PublishesTheAlimentoContract()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodNutritionalInfoUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(BuildFoodNutritionalInfoUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -62,7 +62,7 @@ namespace Catalog.Tests.Application
             var foodId = Guid.NewGuid();
             var previous = new NutritionalInfo(100, 52, 0.3m, 14, 0.2m);
             var newInfo = new NutritionalInfo(100, 60, 0.5m, 16, 0.3m);
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(
                 new Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated(foodId, previous, newInfo));
 
             // Act
@@ -85,7 +85,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodNutritionalInfoUpdatedContent_PublishesToFoodNutritionalInfoUpdatedDestination()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodNutritionalInfoUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(BuildFoodNutritionalInfoUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -103,7 +103,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodNutritionalInfoUpdatedContent_DeclaresTheDestinationExchange()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodNutritionalInfoUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(BuildFoodNutritionalInfoUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -122,7 +122,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             const string correlationId = "correlation-abc-123";
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(
                 BuildFoodNutritionalInfoUpdated(),
                 correlationId,
                 "trace-1",
@@ -140,7 +140,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodNutritionalInfoUpdatedContent_StampsCatalogAsTheSource()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodNutritionalInfoUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(BuildFoodNutritionalInfoUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -151,22 +151,24 @@ namespace Catalog.Tests.Application
         }
 
         [Fact]
-        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
+        public void Handle_IsRegisteredOnlyForFoodNutritionalInfoUpdated_AndNotForOtherDomainEvents()
         {
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            // The guarantee is structural: this handler is registered for
+            // INotificationHandler<OutboxMessage<FoodNutritionalInfoUpdated>>, so a
+            // OutboxMessage<DomainEvent> carrying a MealPlanCreated is never dispatched to it by
+            // MediatR. There is nothing to invoke here — the mismatched call would not compile,
+            // which is exactly the property this test records.
+            var handlerContract = typeof(PublishIntegrationEventWhenFoodNutritionalInfoUpdated)
+                .GetInterfaces()
+                .Single();
 
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
+            Assert.Equal(
+                typeof(OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>),
+                handlerContract.GetGenericArguments()[0]);
 
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(
-                    It.IsAny<IntegrationContract>(),
-                    It.IsAny<string?>(),
-                    It.IsAny<bool>()),
-                Times.Never);
+            Assert.DoesNotContain(
+                typeof(PublishIntegrationEventWhenFoodNutritionalInfoUpdated).GetInterfaces(),
+                i => i.GetGenericArguments()[0] == typeof(OutboxMessage<DomainEvent>));
         }
 
         [Fact]
@@ -176,7 +178,7 @@ namespace Catalog.Tests.Application
             var foodId = Guid.NewGuid();
             var previous = new NutritionalInfo(100, 52, 0.3m, 14, 0.2m);
             var newInfo = new NutritionalInfo(100, 60, 0.5m, 16, 0.3m);
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated>(
                 new Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated(foodId, previous, newInfo));
 
             // Act
@@ -195,7 +197,7 @@ namespace Catalog.Tests.Application
                 Times.Once);
         }
 
-        private static DomainEvent BuildFoodNutritionalInfoUpdated()
+        private static Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated BuildFoodNutritionalInfoUpdated()
         {
             return new Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated(
                 Guid.NewGuid(),

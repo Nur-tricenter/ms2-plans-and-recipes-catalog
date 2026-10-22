@@ -1,4 +1,4 @@
-using Catalog.Application.UseCase.Command.MealPlan.AssignRecipeToMealTime;
+﻿using Catalog.Application.UseCase.Command.MealPlan.AssignRecipeToMealTime;
 using Catalog.Domain;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -28,7 +28,7 @@ namespace Catalog.Tests.Application
 
         private static MealPlan CreatePlanWithMealTime()
         {
-            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             return plan;
         }

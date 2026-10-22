@@ -1,3 +1,4 @@
+using Catalog.Contracts;
 using Catalog.Infrastructure;
 using Catalog.Infrastructure.Configuration;
 using Catalog.Infrastructure.Observability;
@@ -5,6 +6,7 @@ using Catalog.Infrastructure.Consul;
 using Catalog.App.Configuration;
 using Catalog.App.Utils;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Nur.Tricenter.Observability.Tracing;
+using Nur.Tricenter.Security;
 
 namespace Catalog.App
 {
@@ -29,6 +32,36 @@ namespace Catalog.App
         public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddInfrastructure(Configuration);
+
+            // -------------------------------------------------------------------------
+            // Authentication.
+            //
+            // The catalog used to have none: the token from the gateway arrived, nothing
+            // validated it, `User` was an anonymous principal and no claim was readable. That was
+            // invisible while the service only published and projected, and became visible the
+            // moment a controller needed to know WHO was calling — a meal plan's author is an
+            // authorization fact read from the `sub` claim.
+            //
+            // AddSecurity is the shared kernel's: it registers JWT bearer validation plus one
+            // authorization policy per permission, so a controller asks for
+            // [Authorize(Policy = CatalogPermissions.MealPlanEdit)] instead of hand-rolling a scheme.
+            //
+            // The Jwt section MUST be identical to the identity service's — same signing key, same
+            // issuer, same audience. They are one credential: identity signs it, catalog validates
+            // it. A mismatch does not fail as a configuration error, it fails as a 401 on every
+            // authenticated request, which reads like a gateway routing problem.
+            // -------------------------------------------------------------------------
+            services.AddSecurity(
+                Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions(),
+                CatalogPermissions.PermissionsList);
+
+            // The kernel's policies read FindAll("scope") by that LITERAL name. MapInboundClaims
+            // defaults to true, which rewrites JWT claim names to WS-Federation URIs on the way in,
+            // so a token minted by identity would arrive renamed and every policy would deny it —
+            // producing a valid token that authorizes nothing.
+            services.PostConfigure<JwtBearerOptions>(options => options.MapInboundClaims = false);
+
+            services.AddAuthorization();
 
             // Traces, metrics and the meter collection list, wired by the shared kernel. Registered
             // after AddInfrastructure so the outbox decorator registered there resolves against the
@@ -127,6 +160,12 @@ namespace Catalog.App
             }
 
             app.UseRouting();
+
+            // Authentication BEFORE Authorization, always. UseAuthorization reads the principal
+            // that UseAuthentication produced; with the order reversed it sees an anonymous user,
+            // every policy denies, and the host answers 401 on endpoints that are correctly
+            // configured — which reads as a bad permission rather than a missing middleware.
+            app.UseAuthentication();
             app.UseAuthorization();
 
             using (var scope = app.ApplicationServices.CreateScope())

@@ -18,7 +18,7 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("read")
-                .HasAnnotation("ProductVersion", "10.0.0-preview.2.25163.8")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -93,11 +93,44 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     b.ToTable("Food", "read");
                 });
 
+            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.InboxMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("MessageCreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("ProcessedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ProcessedOn")
+                        .HasDatabaseName("IX_InboxMessages_ProcessedOn");
+
+                    b.ToTable("InboxMessages", "read");
+                });
+
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan.MealPlanModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authorId");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -245,6 +278,36 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Migrations
                     b.HasIndex("MealTimeId");
 
                     b.ToTable("RecipeAssignment", "read");
+                });
+
+            modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.PlanAuthorModel", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("IsAdministrator")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("SeenOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("UserName")
+                        .HasDatabaseName("IX_PlanAuthors_UserName");
+
+                    b.ToTable("PlanAuthors", "read");
                 });
 
             modelBuilder.Entity("Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe.IngredientModel", b =>

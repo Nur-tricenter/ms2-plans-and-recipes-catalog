@@ -10,13 +10,38 @@ namespace Catalog.Domain.Model.MealPlans
         public MealPlanName Name { get; private set; }
         public PlanDuration Duration { get; private set; }
         public int MealsPerDay { get; private set; }
+
+        /// <summary>
+        /// The account that owns this plan, or null when the plan is a system-generated sample.
+        /// </summary>
+        /// <remarks>
+        /// Nullable because the seeded catalogue has no author, and null is a truer answer than
+        /// inventing a "system" user that never existed in the identity service. It is NOT nullable
+        /// at the command: CreateMealPlan requires the caller's id, so every plan a real user creates
+        /// has one.
+        /// </remarks>
+        public PlanAuthorId? AuthorId { get; private set; }
+
         private readonly ICollection<PlanDay> _planDays;
 
         public IEnumerable<PlanDay> PlanDays => _planDays;
 
         private MealPlan() { Name = null!; Duration = null!; _planDays = null!; }
 
-        public MealPlan(MealPlanName name, PlanDuration duration, int mealsPerDay)
+        /// <summary>Creates a plan owned by an account.</summary>
+        public MealPlan(MealPlanName name, PlanDuration duration, int mealsPerDay, Guid authorId)
+            : this(name, duration, mealsPerDay, PlanAuthorId.Create(authorId))
+        {
+        }
+
+        /// <summary>
+        /// Creates a plan with no author, for the seeded sample catalogue.
+        /// </summary>
+        /// <remarks>
+        /// A separate constructor rather than an optional parameter so the authorless case is a
+        /// deliberate call in the code and cannot be reached by passing a default Guid.
+        /// </remarks>
+        public MealPlan(MealPlanName name, PlanDuration duration, int mealsPerDay, PlanAuthorId? authorId)
         {
             if (!duration.IsValid())
                 throw new BussinessRuleValidationException("Invalid plan duration");
@@ -25,6 +50,7 @@ namespace Catalog.Domain.Model.MealPlans
             Name = name;
             Duration = duration;
             MealsPerDay = mealsPerDay;
+            AuthorId = authorId;
             _planDays = new List<PlanDay>();
 
             for (int i = 1; i <= duration.Days(); i++)
@@ -32,7 +58,13 @@ namespace Catalog.Domain.Model.MealPlans
                 _planDays.Add(new PlanDay(i));
             }
 
-            AddDomainEvent(new MealPlanCreated(Id, Name, Duration.Type.ToString(), Duration.Days(), mealsPerDay));
+            AddDomainEvent(new MealPlanCreated(
+                Id,
+                Name,
+                Duration.Type.ToString(),
+                Duration.Days(),
+                mealsPerDay,
+                AuthorId?.Value));
         }
 
         public void Update(MealPlanName name, PlanDuration duration, int mealsPerDay)

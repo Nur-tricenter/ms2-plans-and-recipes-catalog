@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+﻿using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.MealPlan;
 using Joseco.Communication.External.Contracts.Services;
@@ -39,7 +39,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeUpdatedContent_PublishesTheRecipeUpdatedContract()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildRecipeUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(BuildRecipeUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -55,7 +55,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipeId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(
                 new Catalog.Domain.Event.Recipe.RecipeUpdated(recipeId, "Ensalada Caesar", "Romana."));
 
             // Act
@@ -72,7 +72,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeUpdatedContent_PublishesToRecipeUpdatedDestination()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildRecipeUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(BuildRecipeUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -87,7 +87,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeUpdatedContent_DeclaresTheDestinationExchange()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildRecipeUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(BuildRecipeUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -103,7 +103,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             const string correlationId = "correlation-abc-123";
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(
                 BuildRecipeUpdated(),
                 correlationId,
                 "trace-1",
@@ -121,7 +121,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeUpdatedContent_StampsCatalogAsTheSource()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildRecipeUpdated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(BuildRecipeUpdated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -132,38 +132,27 @@ namespace Catalog.Tests.Application
         }
 
         [Fact]
-        public async Task Handle_RecipeCreatedContent_DoesNotPublish()
+        public void Handle_IsRegisteredOnlyForRecipeUpdated_AndNotForOtherDomainEvents()
         {
             // RecipeCreated and RecipeUpdated are different facts on different exchanges: publishing
             // the creation message on the update exchange (or vice versa) would deliver a contract
             // whose discriminator does not match what the consumer subscribed to.
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar."));
+            //
+            // The guarantee is structural. This handler is registered for
+            // INotificationHandler<OutboxMessage<RecipeUpdated>>, so neither a RecipeCreated row nor
+            // a MealPlanCreated row is ever dispatched to it. The mismatched calls would not
+            // compile, which is exactly the property this test records.
+            var handlerContract = typeof(PublishIntegrationEventWhenRecipeUpdated)
+                .GetInterfaces()
+                .Single();
 
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
+            Assert.Equal(
+                typeof(OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>),
+                handlerContract.GetGenericArguments()[0]);
 
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(It.IsAny<IntegrationContract>(), It.IsAny<string?>(), It.IsAny<bool>()),
-                Times.Never);
-        }
-
-        [Fact]
-        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
-        {
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
-
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
-
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(It.IsAny<IntegrationContract>(), It.IsAny<string?>(), It.IsAny<bool>()),
-                Times.Never);
+            Assert.DoesNotContain(
+                typeof(PublishIntegrationEventWhenRecipeUpdated).GetInterfaces(),
+                i => i.GetGenericArguments()[0] == typeof(OutboxMessage<DomainEvent>));
         }
 
         [Fact]
@@ -171,7 +160,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipeId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>(
                 new Catalog.Domain.Event.Recipe.RecipeUpdated(recipeId, "Ensalada Caesar", "Romana."));
 
             // Act
@@ -190,7 +179,7 @@ namespace Catalog.Tests.Application
                 Times.Once);
         }
 
-        private static DomainEvent BuildRecipeUpdated()
+        private static Catalog.Domain.Event.Recipe.RecipeUpdated BuildRecipeUpdated()
         {
             return new Catalog.Domain.Event.Recipe.RecipeUpdated(
                 Guid.NewGuid(),

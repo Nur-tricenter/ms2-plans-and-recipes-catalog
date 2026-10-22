@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
 using Catalog.Domain.Event.Recipe;
@@ -25,7 +25,7 @@ namespace Catalog.Tests.Domain.Events
     /// PARAMETERLESS CONSTRUCTOR together with get-only payload properties deserialized into an
     /// instance whose payload was never written. Newtonsoft picked the parameterless constructor,
     /// found every payload property read-only, skipped each one, and returned an event holding
-    /// <c>Guid.Empty</c>, <c>string.Empty</c> and <c>null</c> — with no error. The null
+    /// <c>Guid.Empty</c>, <c>string.Empty</c> and <c>null</c> â€” with no error. The null
     /// <see cref="NutritionalInfo"/> then threw <see cref="NullReferenceException"/> inside
     /// <c>ProjectFoodModelWhenFoodCreated</c> before any INSERT was issued, leaving
     /// <c>read.Food</c> empty. The other events did not throw, they simply projected empty rows.
@@ -59,7 +59,8 @@ namespace Catalog.Tests.Domain.Events
                 "Plan Saludable",
                 "FIFTEEN_DAYS",
                 15,
-                3),
+                3,
+                Guid.Parse("99999999-9999-9999-9999-999999999999")),
             new MealPlanUpdated(
                 Guid.Parse("44444444-4444-4444-4444-444444444444"),
                 "Plan Balanceado",
@@ -171,7 +172,7 @@ namespace Catalog.Tests.Domain.Events
         /// choose it as the default creator, after which every get-only payload property is skipped
         /// and the event deserializes empty WITHOUT raising anything. Removing the parameterless
         /// constructors is what forces Newtonsoft onto the fully parameterized constructor, so this
-        /// test fails the moment one is reintroduced — the unit tests above only fail once a value
+        /// test fails the moment one is reintroduced â€” the unit tests above only fail once a value
         /// actually happens to be non-default.
         /// </summary>
         [Fact]

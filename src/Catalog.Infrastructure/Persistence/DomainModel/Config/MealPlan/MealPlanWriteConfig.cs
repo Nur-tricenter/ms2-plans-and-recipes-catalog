@@ -18,6 +18,22 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Config.MealPlan
             builder.ToTable("MealPlan", DatabaseSchemas.Write);
             builder.HasKey(x => x.Id);
 
+            // PlanAuthorId has a private constructor taking a bare value, which EF cannot bind: it
+            // sees only `PlanAuthorId(PlanAuthorId original)` from the record and reports "no
+            // suitable constructor". An explicit converter is the fix.
+            //
+            // Nullable because the seeded catalogue has no author, so there is no value to convert
+            // and no Create to route through. The guard against Guid.Empty lives in the aggregate
+            // and the command, not here.
+            var planAuthorIdConverter = new ValueConverter<PlanAuthorId?, Guid?>(
+                author => author == null ? null : author.Value,
+                value => value == null ? null : PlanAuthorId.Create(value.Value)
+            );
+
+            builder.Property(x => x.AuthorId)
+                .HasConversion(planAuthorIdConverter)
+                .HasColumnName("authorId");
+
             var mealPlanNameConverter = new ValueConverter<MealPlanName, string>(
                 name => name.Name,
                 s => (MealPlanName)s

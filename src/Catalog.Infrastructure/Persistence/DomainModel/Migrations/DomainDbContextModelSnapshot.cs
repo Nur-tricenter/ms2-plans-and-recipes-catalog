@@ -18,7 +18,7 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("write")
-                .HasAnnotation("ProductVersion", "10.0.0-preview.2.25163.8")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -73,6 +73,10 @@ namespace Catalog.Infrastructure.Persistence.DomainModel.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("AuthorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authorId");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")

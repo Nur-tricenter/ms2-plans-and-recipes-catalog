@@ -36,7 +36,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeCreatedContent_PublishesTheRecipePublishedContract()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -53,7 +53,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipeId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(recipeId, "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -70,7 +70,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeCreatedContent_PublishesToRecipePublishedDestination()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -86,7 +86,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeCreatedContent_DeclaresTheDestinationExchange()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -103,7 +103,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             const string correlationId = "correlation-abc-123";
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."),
                 correlationId,
                 "trace-1",
@@ -121,7 +121,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_RecipeCreatedContent_StampsCatalogAsTheSource()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -133,19 +133,23 @@ namespace Catalog.Tests.Application
         }
 
         [Fact]
-        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
+        public void Handle_IsRegisteredOnlyForRecipeCreated_AndNotForOtherDomainEvents()
         {
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            // The guarantee is structural: this handler is registered for
+            // INotificationHandler<OutboxMessage<RecipeCreated>>, so a MealPlanCreated outbox row is
+            // never dispatched to it by MediatR. The mismatched call would not compile, which is
+            // exactly the property this test records.
+            var handlerContract = typeof(PublishIntegrationEventWhenRecipeCreated)
+                .GetInterfaces()
+                .Single();
 
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
+            Assert.Equal(
+                typeof(OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>),
+                handlerContract.GetGenericArguments()[0]);
 
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(It.IsAny<RecipePublished>(), It.IsAny<string?>(), It.IsAny<bool>()),
-                Times.Never);
+            Assert.DoesNotContain(
+                typeof(PublishIntegrationEventWhenRecipeCreated).GetInterfaces(),
+                i => i.GetGenericArguments()[0] == typeof(OutboxMessage<DomainEvent>));
         }
 
         [Fact]
@@ -153,7 +157,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var recipeId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(recipeId, "Ensalada", "Picar y mezclar."));
 
             // Act
@@ -179,7 +183,7 @@ namespace Catalog.Tests.Application
             // The documented limitation, made executable: the domain event has no ingredients at
             // creation time, so neither does the contract.
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Recipe.RecipeCreated>(
                 new Catalog.Domain.Event.Recipe.RecipeCreated(Guid.NewGuid(), "Ensalada", "Picar y mezclar."));
 
             // Act

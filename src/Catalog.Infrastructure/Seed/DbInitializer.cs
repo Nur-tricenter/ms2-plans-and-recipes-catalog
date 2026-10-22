@@ -36,8 +36,7 @@ namespace Catalog.Infrastructure.Seed
             IMealPlanRepository mealPlanRepo,
             IUnitOfWork unitOfWork,
             ILogger<DbInitializer> logger)
-        {
-            _context = context;
+        {            _context = context;
             _foodFactory = foodFactory;
             _recipeFactory = recipeFactory;
             _mealPlanFactory = mealPlanFactory;
@@ -390,7 +389,13 @@ namespace Catalog.Infrastructure.Seed
 
         private async Task CreateMealPlan(string name, DurationType type, int mealsPerDay, Guid[] breakfasts, Guid[] lunches, Guid[] desserts, Guid[] dinners)
         {
-            var mealPlan = _mealPlanFactory.Create(name, new PlanDuration(type), mealsPerDay);
+            // The seeded plans have NO author, and null says exactly that: they are sample data, not
+            // something a person created. Inventing a "system" account to hang them on would put a
+            // user in PlanAuthors that never existed in the identity service — and it would do it
+            // by writing the projection directly, bypassing the inbox that is supposed to be the
+            // only thing that feeds that table.
+            var mealPlan = _mealPlanFactory.CreateWithoutAuthor(
+                name, new PlanDuration(type), mealsPerDay);
             var totalDays = type == DurationType.FIFTEEN_DAYS ? 15 : 30;
 
             for (int day = 1; day <= totalDays; day++)

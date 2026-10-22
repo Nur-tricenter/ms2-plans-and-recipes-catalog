@@ -1,4 +1,4 @@
-using Catalog.Domain;
+﻿using Catalog.Domain;
 using Catalog.Domain.Primitives;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -20,7 +20,7 @@ namespace Catalog.Tests.Domain
             var duration = new PlanDuration(type);
 
             // Act
-            var plan = factory.Create("Plan Saludable", duration, 3);
+            var plan = factory.Create("Plan Saludable", duration, 3, Guid.NewGuid());
 
             // Assert
             Assert.IsType<MealPlan>(plan);
@@ -42,7 +42,7 @@ namespace Catalog.Tests.Domain
 
             // Act + Assert
             var ex = Assert.Throws<BussinessRuleValidationException>(() =>
-                factory.Create(name!, duration, 3));
+                factory.Create(name!, duration, 3, Guid.NewGuid()));
             Assert.Equal("string cannot be null", ex.Details);
         }
 
@@ -54,7 +54,7 @@ namespace Catalog.Tests.Domain
             var duration = new PlanDuration(DurationType.FIFTEEN_DAYS);
 
             // Act
-            var plan = factory.Create("   ", duration, 3);
+            var plan = factory.Create("   ", duration, 3, Guid.NewGuid());
 
             // Assert
             Assert.Equal("   ", plan.Name.Name);
@@ -68,7 +68,7 @@ namespace Catalog.Tests.Domain
             var duration = new PlanDuration(DurationType.FIFTEEN_DAYS);
 
             // Act
-            var plan = factory.Create("Plan", duration, 0);
+            var plan = factory.Create("Plan", duration, 0, Guid.NewGuid());
 
             // Assert
             Assert.Equal(0, plan.MealsPerDay);

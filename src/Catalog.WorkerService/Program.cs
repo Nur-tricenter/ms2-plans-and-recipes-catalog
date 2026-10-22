@@ -3,6 +3,7 @@ using Joseco.Outbox.EFCore;
 using Catalog.Application;
 using Catalog.Infrastructure;
 using Catalog.Infrastructure.Observability;
+using Catalog.Infrastructure.Messaging;
 using Catalog.WorkerService;
 using Nur.Tricenter.Observability.Tracing;
 using Serilog;
@@ -51,6 +52,16 @@ builder.Services.AddCatalogRabbitMq(builder.Configuration);
 // The WorkerService is the only host that runs OutboxProcessor<DomainEvent>, so it is the only
 // host that needs the outbox-to-broker publishers. AddApplication() deliberately leaves them out.
 builder.Services.AddIntegrationMessaging();
+
+// Cross-service CONSUMPTION, the receiving half of the pattern. This is the only host that
+// subscribes: the WebApi must not need the broker at startup, and two processes on the same
+// queue would project the same message twice.
+//
+// Must come AFTER AddCatalogRabbitMq, which binds RabbitMqSettings with TryAddSingleton — a later
+// registration of the same singleton would be ignored. It also comes before nothing else in
+// particular; what matters is that the decorator is registered before AddRabbitMqConsumer, which
+// is handled inside the extension.
+builder.Services.AddUserPublishedConsumer();
 
 builder.Services.AddOutboxBackgroundService<DomainEvent>();
 

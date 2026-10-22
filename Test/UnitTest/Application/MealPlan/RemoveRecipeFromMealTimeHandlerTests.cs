@@ -1,4 +1,4 @@
-using Catalog.Application.UseCase.Command.MealPlan.RemoveRecipeFromMealTime;
+﻿using Catalog.Application.UseCase.Command.MealPlan.RemoveRecipeFromMealTime;
 using Catalog.Domain;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -30,7 +30,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_ValidCommand_ReturnsSuccessAndVerifiesInteractions()
         {
             // Arrange
-            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             plan.AddMealTimeToDay(1, MealTimeType.Breakfast);
             var mealTime = plan.PlanDays.First(d => d.DayNumber == 1).MealTimes.Single();
             var recipeId = Guid.NewGuid();
@@ -69,7 +69,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_TimeNotFound_ReturnsFailureAndNoCommit()
         {
             // Arrange
-            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            var plan = new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
             _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<bool>())).ReturnsAsync(plan);
             var command = new RemoveRecipeFromMealTimeCommand { MealPlanId = plan.Id, MealTimeId = Guid.NewGuid(), RecipeId = Guid.NewGuid() };
 

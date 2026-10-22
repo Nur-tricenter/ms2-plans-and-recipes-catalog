@@ -1,10 +1,12 @@
 using Catalog.Infrastructure.Persistence;
+using Catalog.Infrastructure.Persistence.StoredModel.Entities;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.Food;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities.Recipe;
 using Catalog.Infrastructure.Persistence.StoredModel.Config.Food;
 using Catalog.Infrastructure.Persistence.StoredModel.Config.MealPlan;
 using Catalog.Infrastructure.Persistence.StoredModel.Config.Recipe;
+using Catalog.Infrastructure.Persistence.StoredModel.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Infrastructure.Persistence.StoredModel
@@ -14,6 +16,19 @@ namespace Catalog.Infrastructure.Persistence.StoredModel
         public virtual DbSet<FoodModel> Foods { get; set; } = null!;
         public virtual DbSet<RecipeModel> Recipes { get; set; } = null!;
         public virtual DbSet<MealPlanModel> MealPlans { get; set; } = null!;
+
+        /// <summary>
+        /// Users projected from the identity service. Not catalog-owned data: it is a projection of
+        /// somebody else's events, which is what lets a meal plan name its author without the
+        /// catalog ever calling the identity service.
+        /// </summary>
+        public virtual DbSet<PlanAuthorModel> PlanAuthors { get; set; } = null!;
+
+        /// <summary>
+        /// Messages this service has already handled, keyed by the publisher's message id. Makes
+        /// cross-service consumption idempotent under at-least-once delivery.
+        /// </summary>
+        public virtual DbSet<InboxMessage> InboxMessages { get; set; } = null!;
 
         public StoredDbContext(DbContextOptions<StoredDbContext> options) : base(options)
         {
@@ -39,6 +54,9 @@ namespace Catalog.Infrastructure.Persistence.StoredModel
 
             var foodConfig = new FoodReadConfig();
             modelBuilder.ApplyConfiguration<FoodModel>(foodConfig);
+
+            modelBuilder.ApplyConfiguration<PlanAuthorModel>(new PlanAuthorReadConfig());
+            modelBuilder.ApplyConfiguration<InboxMessage>(new InboxMessageConfig());
         }
 
         public void Migrate() => Database.Migrate();

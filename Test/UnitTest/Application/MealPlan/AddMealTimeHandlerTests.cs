@@ -1,4 +1,4 @@
-using Catalog.Application.UseCase.Command.MealPlan.AddMealTime;
+﻿using Catalog.Application.UseCase.Command.MealPlan.AddMealTime;
 using Catalog.Domain;
 using Catalog.Domain.Factory.MealPlan;
 using Catalog.Domain.Model.MealPlans;
@@ -27,7 +27,7 @@ namespace Catalog.Tests.Application
         }
 
         private static MealPlan CreatePlan() =>
-            new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3);
+            new MealPlanFactory().Create("Plan Saludable", new PlanDuration(DurationType.FIFTEEN_DAYS), 3, Guid.NewGuid());
 
         [Fact]
         public async Task Handle_ValidCommand_ReturnsSuccessAndVerifiesInteractions()

@@ -7,6 +7,24 @@ namespace Catalog.Infrastructure.Persistence.StoredModel.Entities.MealPlan
         public string DurationType { get; set; } = null!;
         public int MealsPerDay { get; set; }
         public List<PlanDayModel> PlanDays { get; set; } = new();
+
+        /// <summary>
+        /// The owning account's id, or null for a seeded sample with no author.
+        /// </summary>
+        /// <remarks>
+        /// The ONLY link to the author. There is no navigation property to
+        /// <c>PlanAuthorModel</c> and no foreign key between the two tables, on purpose:
+        /// <list type="bullet">
+        /// <item><description>A read model is eventually consistent. If the
+        /// <c>UserPublished</c> event arrives after the plan was projected, a foreign key would make
+        /// that INSERT fail outright — turning a transient ordering problem into a permanent
+        /// projection error.</description></item>
+        /// <item><description>The read side joins explicitly when it needs the name. That is clearer
+        /// than a navigation whose nullability hides the timing dependency.</description></item>
+        /// </list>
+        /// </remarks>
+        public Guid? AuthorId { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

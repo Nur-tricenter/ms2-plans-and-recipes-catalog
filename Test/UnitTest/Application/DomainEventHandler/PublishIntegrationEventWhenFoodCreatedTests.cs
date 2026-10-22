@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+﻿using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.MealPlan;
 using Catalog.Domain.ValueObjects;
@@ -35,7 +35,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodCreatedContent_PublishesTheFoodPublishedContract()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodCreated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(BuildFoodCreated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -51,7 +51,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var foodId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(
                 new Catalog.Domain.Event.Food.FoodCreated(
                     foodId,
                     "MANZANA",
@@ -90,7 +90,7 @@ namespace Catalog.Tests.Application
             // The enum NAME travels, not the numeric value: renumbering the domain enum must not
             // silently change the meaning of already-published events.
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(
                 new Catalog.Domain.Event.Food.FoodCreated(
                     Guid.NewGuid(),
                     "MANZANA",
@@ -110,7 +110,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodCreatedContent_PublishesToFoodPublishedDestination()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodCreated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(BuildFoodCreated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -125,7 +125,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodCreatedContent_DeclaresTheDestinationExchange()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodCreated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(BuildFoodCreated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -141,7 +141,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             const string correlationId = "correlation-abc-123";
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(
                 BuildFoodCreated(),
                 correlationId,
                 "trace-1",
@@ -159,7 +159,7 @@ namespace Catalog.Tests.Application
         public async Task Handle_FoodCreatedContent_StampsCatalogAsTheSource()
         {
             // Arrange
-            var notification = new OutboxMessage<DomainEvent>(BuildFoodCreated());
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(BuildFoodCreated());
 
             // Act
             await _handler.Handle(notification, CancellationToken.None);
@@ -170,19 +170,26 @@ namespace Catalog.Tests.Application
         }
 
         [Fact]
-        public async Task Handle_UnrelatedDomainEventContent_DoesNotPublish()
+        public void Handle_IsRegisteredOnlyForFoodCreated_AndNotForOtherDomainEvents()
         {
-            // Arrange
-            var notification = new OutboxMessage<DomainEvent>(
-                new MealPlanCreated(Guid.NewGuid(), "Plan Saludable", "FIFTEEN_DAYS", 15, 3));
+            // A MediatR notification handler is selected by the notification type, so the guarantee
+            // that a FoodCreated outbox row never reaches this handler is structural rather than a
+            // runtime check: `INotificationHandler<OutboxMessage<FoodCreated>>` cannot be
+            // satisfied by an `OutboxMessage<MealPlanCreated>`.
+            //
+            // This asserts that structural fact. Constructing the mismatched message and passing it
+            // to Handle would not compile, which is the point.
+            var handlerContract = typeof(PublishIntegrationEventWhenFoodCreated)
+                .GetInterfaces()
+                .Single();
 
-            // Act
-            await _handler.Handle(notification, CancellationToken.None);
+            Assert.Equal(
+                typeof(OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>),
+                handlerContract.GetGenericArguments()[0]);
 
-            // Assert
-            _publisherMock.Verify(
-                x => x.PublishAsync(It.IsAny<FoodPublished>(), It.IsAny<string?>(), It.IsAny<bool>()),
-                Times.Never);
+            Assert.DoesNotContain(
+                typeof(PublishIntegrationEventWhenFoodCreated).GetInterfaces(),
+                i => i.GetGenericArguments()[0] == typeof(OutboxMessage<DomainEvent>));
         }
 
         [Fact]
@@ -190,7 +197,7 @@ namespace Catalog.Tests.Application
         {
             // Arrange
             var foodId = Guid.NewGuid();
-            var notification = new OutboxMessage<DomainEvent>(
+            var notification = new OutboxMessage<Catalog.Domain.Event.Food.FoodCreated>(
                 new Catalog.Domain.Event.Food.FoodCreated(
                     foodId,
                     "MANZANA",
@@ -215,7 +222,7 @@ namespace Catalog.Tests.Application
                 Times.Once);
         }
 
-        private static DomainEvent BuildFoodCreated()
+        private static Catalog.Domain.Event.Food.FoodCreated BuildFoodCreated()
         {
             return new Catalog.Domain.Event.Food.FoodCreated(
                 Guid.NewGuid(),
