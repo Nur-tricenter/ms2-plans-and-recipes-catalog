@@ -1,5 +1,4 @@
 using Nur.Tricenter.Integration.Messages.Catalog;
-using Catalog.Contracts.Integration;
 using Joseco.Communication.External.Contracts.Services;
 
 namespace Catalog.Tests.IntegrationTest.RabbitMq

@@ -2,7 +2,6 @@ using Joseco.Communication.External.Contracts.Services;
 using Joseco.DDD.Core.Abstractions;
 using Joseco.Outbox.Contracts.Model;
 using MediatR;
-using Catalog.Contracts.Integration;
 using Nur.Tricenter.Integration.Messages.Catalog;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +20,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// publishes it to RabbitMQ.
     /// </summary>
     /// <remarks>
-    /// Published to <see cref="CatalogExchanges.RecipeUpdated"/>, which catering and delivery bind
+    /// Published to <see cref=""recipe-updated""/>, which catering and delivery bind
     /// their own queues to.
     /// </remarks>
     public class PublishIntegrationEventWhenRecipeUpdated
@@ -32,7 +31,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
         /// library derives the default destination from <c>typeof(T)</c>, which for a runtime
         /// type that is not the compile-time generic argument silently routes to the wrong name.
         /// </summary>
-        public const string Destination = CatalogExchanges.RecipeUpdated;
+        public const string Destination = "recipe-updated";
 
         /// <summary>Logical producer name stamped into every published contract.</summary>
         public const string Source = "catalog";

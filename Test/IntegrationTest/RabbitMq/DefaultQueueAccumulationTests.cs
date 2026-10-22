@@ -1,6 +1,5 @@
 using Nur.Tricenter.Integration.Messages.Catalog;
 using System.Text;
-using Catalog.Contracts.Integration;
 using Catalog.WorkerService;
 using Joseco.Communication.External.Contracts.Message;
 using Joseco.Communication.External.Contracts.Services;
@@ -17,7 +16,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// <summary>
     /// Proves against a REAL broker the central claim of the <c>Default</c> queue: one fanout
     /// exchange per event, all bound to the single <c>catalog.default</c> queue, which therefore
-    /// accumulates the COMPLETE RECORD of everything published â€” one message per publish, and each
+    /// accumulates the COMPLETE RECORD of everything published ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â one message per publish, and each
     /// body still deserializable back into the contract it was published as.
     /// </summary>
     /// <remarks>
@@ -36,7 +35,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
         private static readonly TimeSpan TopologyTimeout = TimeSpan.FromSeconds(20);
         private static readonly TimeSpan DeliveryTimeout = TimeSpan.FromSeconds(30);
 
-        private const string QueueName = CatalogExchanges.DefaultQueue;
+        private const string QueueName = "catalog.default";
 
         private readonly ITestOutputHelper _output;
 
@@ -50,7 +49,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
         {
             // Arrange
             var settings = RabbitMqTestSettings.Create();
-            var exchanges = CatalogExchanges.All;
+            var exchanges = Catalog.WorkerService.DefaultQueueRegistrar.BoundExchanges;
 
             using var host = new HostBuilder()
                 .ConfigureServices(services =>
@@ -129,11 +128,11 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
                 {
                     var publisher = scope.ServiceProvider.GetRequiredService<IExternalPublisher>();
 
-                    await publisher.PublishAsync(mealPlan, CatalogExchanges.MealPlanPublished, declareDestination: true);
-                    await publisher.PublishAsync(nutritionalInfo, CatalogExchanges.FoodNutritionalInfoUpdated, declareDestination: true);
-                    await publisher.PublishAsync(recipePublished, CatalogExchanges.RecipePublished, declareDestination: true);
-                    await publisher.PublishAsync(recipeUpdated, CatalogExchanges.RecipeUpdated, declareDestination: true);
-                    await publisher.PublishAsync(foodPublished, CatalogExchanges.FoodPublished, declareDestination: true);
+                    await publisher.PublishAsync(mealPlan, "meal-plan-published", declareDestination: true);
+                    await publisher.PublishAsync(nutritionalInfo, "food-nutritional-info-updated", declareDestination: true);
+                    await publisher.PublishAsync(recipePublished, "recipe-published", declareDestination: true);
+                    await publisher.PublishAsync(recipeUpdated, "recipe-updated", declareDestination: true);
+                    await publisher.PublishAsync(foodPublished, "food-published", declareDestination: true);
                 }
 
                 // Assert - one message per publish, and nothing lost. On a mismatch the broker state

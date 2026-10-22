@@ -3,7 +3,6 @@ using Joseco.DDD.Core.Abstractions;
 using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.Food;
-using Catalog.Contracts.Integration;
 using Nur.Tricenter.Integration.Messages.Catalog;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +28,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
         /// library derives the default destination from <c>typeof(T)</c>, which for a runtime
         /// type that is not the compile-time generic argument silently routes to the wrong name.
         /// </summary>
-        public const string Destination = CatalogExchanges.FoodNutritionalInfoUpdated;
+        public const string Destination = "food-nutritional-info-updated";
 
         /// <summary>Logical producer name stamped into every published contract.</summary>
         public const string Source = "catalog";

@@ -1,4 +1,3 @@
-using Catalog.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Nur.Tricenter.Access.Catalog;
 using Catalog.Application.Dto;

@@ -3,7 +3,6 @@ using Joseco.DDD.Core.Abstractions;
 using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.Recipe;
-using Catalog.Contracts.Integration;
 using Nur.Tricenter.Integration.Messages.Catalog;
 using Microsoft.Extensions.Logging;
 
@@ -14,11 +13,11 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// <see cref="RecipePublished"/> external contract and publishes it to RabbitMQ.
     /// </summary>
     /// <remarks>
-    /// Published to <see cref="CatalogExchanges.RecipePublished"/>, which catering and delivery
+    /// Published to <see cref=""recipe-published""/>, which catering and delivery
     /// bind their own queues to.
     /// <para>
     /// The contract deliberately carries only RecipeId/Name/Instructions because that is all
-    /// <see cref="RecipeCreated"/> exposes at creation time ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â see the limitations documented on
+    /// <see cref="RecipeCreated"/> exposes at creation time ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â see the limitations documented on
     /// <see cref="RecipePublished"/>.
     /// </para>
     /// </remarks>
@@ -30,7 +29,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
         /// library derives the default destination from <c>typeof(T)</c>, which for a runtime
         /// type that is not the compile-time generic argument silently routes to the wrong name.
         /// </summary>
-        public const string Destination = CatalogExchanges.RecipePublished;
+        public const string Destination = "recipe-published";
 
         /// <summary>Logical producer name stamped into every published contract.</summary>
         public const string Source = "catalog";

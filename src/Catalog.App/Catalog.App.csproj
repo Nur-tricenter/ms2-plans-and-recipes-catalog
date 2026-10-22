@@ -50,13 +50,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
-    <!--
-      The public contract project: CatalogPermissions (one entry per authorization policy),
-      CatalogRoutes (the route table the gateway aggregates) and the integration messages.
-      The App needs it to register policies and to annotate controllers; without this reference
-      the contract files were compiled nowhere reachable from the host.
-    -->
-    <ProjectReference Include="..\..\contracts\Catalog.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

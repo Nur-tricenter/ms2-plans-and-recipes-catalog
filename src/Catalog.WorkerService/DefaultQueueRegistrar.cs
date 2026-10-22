@@ -1,4 +1,3 @@
-using Catalog.Contracts.Integration;
 using Nur.Tricenter.Integration.Messages.Catalog;
 using Joseco.Communication.External.RabbitMQ.Services;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +7,7 @@ using RabbitMQ.Client;
 namespace Catalog.WorkerService
 {
     /// <summary>
-    /// Declares the catalog's ONE queue ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â <c>catalog.default</c> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â and binds it to every exchange
+    /// Declares the catalog's ONE queue ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â <c>catalog.default</c> ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â and binds it to every exchange
     /// in <see cref="CatalogExchanges.All"/>. It exists to be the COMPLETE RECORD of everything the
     /// catalog publishes, and for that reason it is deliberately NEVER CONSUMED.
     /// </summary>
@@ -18,14 +17,14 @@ namespace Catalog.WorkerService
     /// queue, binds it to ONE exchange AND starts a consumer. Registering it once per contract on
     /// the same queue name would put five COMPETING consumers on one queue: RabbitMQ delivers each
     /// message to exactly one of them, so a <c>RecipePublished</c> could be handed to the
-    /// <c>FoodPublished</c> consumer, fail to deserialize, and be dead-lettered ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the record would
+    /// <c>FoodPublished</c> consumer, fail to deserialize, and be dead-lettered ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â the record would
     /// be silently destroyed by the very feature meant to preserve it. Per-consumer queues (catering,
     /// production, delivery) are created later by each consuming microservice against these
     /// exchanges; this queue stays a passive sink.
     /// </para>
     /// <para>
     /// Because the queue is durable and never consumed, its depth IS the number of events ever
-    /// published, and its contents are the full history ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â which is exactly what
+    /// published, and its contents are the full history ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â which is exactly what
     /// <c>Test/IntegrationTest/RabbitMq/DefaultQueueAccumulationTests</c> asserts.
     /// </para>
     /// <para>
@@ -36,7 +35,7 @@ namespace Catalog.WorkerService
     /// so declaring them durable here made every publish fail with
     /// <c>406 PRECONDITION_FAILED - inequivalent arg 'durable' for exchange 'meal-plan-published'
     /// ... received 'false' but current is 'true'</c>.
-    /// <b>Do not "harden" this to durable without changing the publisher first</b> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â that trade is
+    /// <b>Do not "harden" this to durable without changing the publisher first</b> ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â that trade is
     /// a decision about losing exchanges on a broker restart (which also drops their bindings, so
     /// <see cref="QueueName"/> would silently stop receiving until the worker restarts), not a
     /// detail this registrar can settle on its own.
@@ -97,13 +96,31 @@ namespace Catalog.WorkerService
         }
 
         /// <summary>The single queue this service declares and binds.</summary>
-        public const string QueueName = CatalogExchanges.DefaultQueue;
+        public const string QueueName = "catalog.default";
 
         /// <summary>
-        /// The exchanges <see cref="QueueName"/> is bound to. Exposed so tests can assert the
-        /// registrar covers every exchange without reaching into a broker.
+        /// The exchanges <see cref="QueueName"/> is bound to â€” every one this service publishes.
         /// </summary>
-        public static IReadOnlyList<string> BoundExchanges => CatalogExchanges.All;
+        /// <remarks>
+        /// Written as literals, matching how the reference architecture publishes
+        /// (<c>publisher.PublishAsync(message, destination)</c> with the destination at the point of
+        /// use). A shared constants class was the alternative, and it created a third copy of a fact
+        /// that already lives in two places the broker actually reads: the definitions file, and
+        /// this list. Nothing forced those two to agree, and a name that drifts between them fails
+        /// silently â€” the exchange is simply never created and the message is dropped.
+        /// <para>
+        /// Exposed so tests can assert this registrar covers every exchange without reaching into a
+        /// broker.
+        /// </para>
+        /// </remarks>
+        public static IReadOnlyList<string> BoundExchanges { get; } = new[]
+        {
+            "meal-plan-published",
+            "food-nutritional-info-updated",
+            "recipe-published",
+            "recipe-updated",
+            "food-published"
+        };
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

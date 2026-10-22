@@ -1,5 +1,4 @@
 using Nur.Tricenter.Integration.Messages.Catalog;
-using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.Food;
 using Catalog.Domain.Event.MealPlan;
@@ -157,7 +156,7 @@ namespace Catalog.Tests.Application
             // The guarantee is structural: this handler is registered for
             // INotificationHandler<OutboxMessage<FoodNutritionalInfoUpdated>>, so a
             // OutboxMessage<DomainEvent> carrying a MealPlanCreated is never dispatched to it by
-            // MediatR. There is nothing to invoke here — the mismatched call would not compile,
+            // MediatR. There is nothing to invoke here â€” the mismatched call would not compile,
             // which is exactly the property this test records.
             var handlerContract = typeof(PublishIntegrationEventWhenFoodNutritionalInfoUpdated)
                 .GetInterfaces()

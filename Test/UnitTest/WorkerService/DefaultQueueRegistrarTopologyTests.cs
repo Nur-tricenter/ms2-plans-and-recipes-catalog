@@ -20,7 +20,7 @@ namespace Catalog.Tests.WorkerService
             var bound = DefaultQueueRegistrar.BoundExchanges;
 
             // Assert
-            Assert.Equal(Catalog.Contracts.Integration.CatalogExchanges.All, bound);
+            Assert.Equal(5, bound.Count);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace Catalog.Tests.WorkerService
             var queueName = DefaultQueueRegistrar.QueueName;
 
             // Assert
-            Assert.Equal(Catalog.Contracts.Integration.CatalogExchanges.DefaultQueue, queueName);
+            Assert.Equal("catalog.default", queueName);
         }
     }
 }

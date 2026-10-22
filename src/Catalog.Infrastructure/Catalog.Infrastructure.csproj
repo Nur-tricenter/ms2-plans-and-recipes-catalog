@@ -12,12 +12,12 @@
       instance in the service registry on start and deregister it on stop.
 
       Why this package sits here rather than in Catalog.App: ServiceRegistration.cs is a
-      generic-host IHostedService that has no ASP.NET dependency at all ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â its only web-specific
+      generic-host IHostedService that has no ASP.NET dependency at all ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â its only web-specific
       concern (reading the bound port) is declared as IServerPortResolver and answered by the web
       host. That makes Infrastructure the correct home for the class AND for its one dependency.
 
       What that costs Catalog.WorkerService, which references this project: nothing functional. The
-      Consul client is a plain HTTP/DNS library ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it does not pull in the ASP.NET Core shared
+      Consul client is a plain HTTP/DNS library ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â it does not pull in the ASP.NET Core shared
       framework, so the console host keeps building and running as a console app. It simply never
       calls AddConsulServiceRegistration, and it must not: the worker publishes to RabbitMQ, has no
       HTTP endpoint, and a gateway cannot route to it. Registration is opt-in per host, never a

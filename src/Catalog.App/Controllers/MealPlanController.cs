@@ -1,6 +1,5 @@
 using Catalog.Application.Dto;
 using System.Security.Claims;
-using Catalog.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Nur.Tricenter.Access.Catalog;
 using Catalog.Application.Utils;
