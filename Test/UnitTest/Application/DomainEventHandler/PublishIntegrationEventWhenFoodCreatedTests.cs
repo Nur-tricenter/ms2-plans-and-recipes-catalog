@@ -1,4 +1,5 @@
-﻿using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Catalog;
+using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Catalog.Domain.Event.MealPlan;
 using Catalog.Domain.ValueObjects;

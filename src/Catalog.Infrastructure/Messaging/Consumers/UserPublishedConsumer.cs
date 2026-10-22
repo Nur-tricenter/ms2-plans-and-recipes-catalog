@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Identity;
 using Catalog.Infrastructure.Persistence.StoredModel;
 using Catalog.Infrastructure.Persistence.StoredModel.Entities;
 using Joseco.Communication.External.Contracts.Services;

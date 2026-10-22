@@ -1,5 +1,6 @@
 using Catalog.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Nur.Tricenter.Access.Catalog;
 using Catalog.Application.Dto;
 using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Command.Recipe.CreateRecipe;
@@ -24,7 +25,7 @@ namespace Catalog.App.Controllers
             _mediator = mediator;
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeCreate)]
+        [Authorize(Policy = CatalogPermission.RecipeCreate)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRecipeCommand command)
         {
@@ -34,7 +35,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse<Guid>.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeEdit)]
+        [Authorize(Policy = CatalogPermission.RecipeEdit)]
         [HttpPost("ingredients")]
         public async Task<IActionResult> AddIngredient([FromBody] AddIngredientCommand command)
         {
@@ -44,7 +45,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeEdit)]
+        [Authorize(Policy = CatalogPermission.RecipeEdit)]
         [HttpDelete("{recipeId:guid}/ingredients/{foodId:guid}")]
         public async Task<IActionResult> RemoveIngredient(Guid recipeId, Guid foodId)
         {
@@ -54,7 +55,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeRead)]
+        [Authorize(Policy = CatalogPermission.RecipeRead)]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -64,7 +65,7 @@ namespace Catalog.App.Controllers
             return NotFound(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeRead)]
+        [Authorize(Policy = CatalogPermission.RecipeRead)]
         [HttpGet]
         public async Task<IActionResult> List([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -75,7 +76,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.RecipeRead)]
+        [Authorize(Policy = CatalogPermission.RecipeRead)]
         [HttpGet("{recipeId:guid}/nutritional-info")]
         public async Task<IActionResult> GetNutritionalInfo(Guid recipeId)
         {

@@ -1,5 +1,6 @@
 using Catalog.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Nur.Tricenter.Access.Catalog;
 using Catalog.Application.Dto;
 using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Command.Food.CreateFood;
@@ -23,7 +24,7 @@ namespace Catalog.App.Controllers
             _mediator = mediator;
         }
 
-        [Authorize(Policy = CatalogPermissions.FoodCreate)]
+        [Authorize(Policy = CatalogPermission.FoodCreate)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateFoodCommand command)
         {
@@ -33,7 +34,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse<Guid>.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.FoodRead)]
+        [Authorize(Policy = CatalogPermission.FoodRead)]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -43,7 +44,7 @@ namespace Catalog.App.Controllers
             return NotFound(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.FoodRead)]
+        [Authorize(Policy = CatalogPermission.FoodRead)]
         [HttpGet]
         public async Task<IActionResult> List([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -54,7 +55,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.FoodRead)]
+        [Authorize(Policy = CatalogPermission.FoodRead)]
         [HttpGet("category/{category}")]
         public async Task<IActionResult> GetByCategory(string category, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -65,7 +66,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.FoodEdit)]
+        [Authorize(Policy = CatalogPermission.FoodEdit)]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateFoodCommand command)
         {

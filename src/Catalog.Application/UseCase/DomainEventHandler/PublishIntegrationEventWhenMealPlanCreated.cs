@@ -4,6 +4,7 @@ using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.MealPlan;
 using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Application.UseCase.DomainEventHandler

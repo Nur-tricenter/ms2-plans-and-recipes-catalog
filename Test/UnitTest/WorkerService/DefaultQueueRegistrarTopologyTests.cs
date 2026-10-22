@@ -1,3 +1,4 @@
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Catalog.WorkerService;
 using Xunit;
 

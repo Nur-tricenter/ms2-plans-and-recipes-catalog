@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Nur.Tricenter.Observability.Tracing;
 using Nur.Tricenter.Security;
+using Nur.Tricenter.Access.Catalog;
 
 namespace Catalog.App
 {
@@ -39,25 +40,25 @@ namespace Catalog.App
             // The catalog used to have none: the token from the gateway arrived, nothing
             // validated it, `User` was an anonymous principal and no claim was readable. That was
             // invisible while the service only published and projected, and became visible the
-            // moment a controller needed to know WHO was calling — a meal plan's author is an
+            // moment a controller needed to know WHO was calling Ã¢â‚¬â€ a meal plan's author is an
             // authorization fact read from the `sub` claim.
             //
             // AddSecurity is the shared kernel's: it registers JWT bearer validation plus one
             // authorization policy per permission, so a controller asks for
-            // [Authorize(Policy = CatalogPermissions.MealPlanEdit)] instead of hand-rolling a scheme.
+            // [Authorize(Policy = CatalogPermission.MealPlanEdit)] instead of hand-rolling a scheme.
             //
-            // The Jwt section MUST be identical to the identity service's — same signing key, same
+            // The Jwt section MUST be identical to the identity service's Ã¢â‚¬â€ same signing key, same
             // issuer, same audience. They are one credential: identity signs it, catalog validates
             // it. A mismatch does not fail as a configuration error, it fails as a 401 on every
             // authenticated request, which reads like a gateway routing problem.
             // -------------------------------------------------------------------------
             services.AddSecurity(
                 Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions(),
-                CatalogPermissions.PermissionsList);
+                CatalogPermission.PermissionsList);
 
             // The kernel's policies read FindAll("scope") by that LITERAL name. MapInboundClaims
             // defaults to true, which rewrites JWT claim names to WS-Federation URIs on the way in,
-            // so a token minted by identity would arrive renamed and every policy would deny it —
+            // so a token minted by identity would arrive renamed and every policy would deny it Ã¢â‚¬â€
             // producing a valid token that authorizes nothing.
             services.PostConfigure<JwtBearerOptions>(options => options.MapInboundClaims = false);
 
@@ -129,7 +130,7 @@ namespace Catalog.App
             // only switch for Swagger, which meant the published compose stack had to run
             // ASPNETCORE_ENVIRONMENT=Development just to get a docs page, and inherited the rest of
             // what "Development" implies. The name is still logged, because it is genuinely useful
-            // when reading a log — it just no longer decides anything.
+            // when reading a log Ã¢â‚¬â€ it just no longer decides anything.
             app.ApplicationServices
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(typeof(Startup))
@@ -164,7 +165,7 @@ namespace Catalog.App
             // Authentication BEFORE Authorization, always. UseAuthorization reads the principal
             // that UseAuthentication produced; with the order reversed it sees an anonymous user,
             // every policy denies, and the host answers 401 on endpoints that are correctly
-            // configured — which reads as a bad permission rather than a missing middleware.
+            // configured Ã¢â‚¬â€ which reads as a bad permission rather than a missing middleware.
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -173,8 +174,8 @@ namespace Catalog.App
                 // Migrate and seed are two independently configured concerns (Migrations:ApplyOnStartup
                 // and Seed:Enabled), both safe defaults off. The previous code applied
                 // StoredDbContext's migrations and then seeded unconditionally whenever the provider
-                // was relational — which is true under Npgsql, so it seeded 30 foods / 25 recipes /
-                // 2 plans on every production boot — and never migrated DomainDbContext at all.
+                // was relational Ã¢â‚¬â€ which is true under Npgsql, so it seeded 30 foods / 25 recipes /
+                // 2 plans on every production boot Ã¢â‚¬â€ and never migrated DomainDbContext at all.
                 scope.ServiceProvider
                     .GetRequiredService<IDatabaseStartup>()
                     .RunAsync()

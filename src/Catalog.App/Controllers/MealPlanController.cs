@@ -2,6 +2,7 @@ using Catalog.Application.Dto;
 using System.Security.Claims;
 using Catalog.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Nur.Tricenter.Access.Catalog;
 using Catalog.Application.Utils;
 using Catalog.Application.UseCase.Command.MealPlan.CreateMealPlan;
 using Catalog.Application.UseCase.Command.MealPlan.AddMealTime;
@@ -33,7 +34,7 @@ namespace Catalog.App.Controllers
             _mediator = mediator;
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanCreate)]
+        [Authorize(Policy = CatalogPermission.MealPlanCreate)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateMealPlanCommand command)
         {
@@ -54,7 +55,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse<Guid>.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanEdit)]
+        [Authorize(Policy = CatalogPermission.MealPlanEdit)]
         [HttpPost("meal-times")]
         public async Task<IActionResult> AddMealTime([FromBody] AddMealTimeCommand command)
         {
@@ -64,7 +65,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanEdit)]
+        [Authorize(Policy = CatalogPermission.MealPlanEdit)]
         [HttpPost("assign-recipes")]
         public async Task<IActionResult> AssignRecipe([FromBody] AssignRecipeToMealTimeCommand command)
         {
@@ -74,7 +75,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanEdit)]
+        [Authorize(Policy = CatalogPermission.MealPlanEdit)]
         [HttpDelete("{mealPlanId:guid}/meal-times/{mealTimeId:guid}/recipes/{recipeId:guid}")]
         public async Task<IActionResult> RemoveRecipeFromMealTime(Guid mealPlanId, Guid mealTimeId, Guid recipeId)
         {
@@ -89,7 +90,7 @@ namespace Catalog.App.Controllers
             return BadRequest(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanRead)]
+        [Authorize(Policy = CatalogPermission.MealPlanRead)]
         [HttpGet("{mealPlanId:guid}")]
         public async Task<IActionResult> GetComposition(Guid mealPlanId)
         {
@@ -99,7 +100,7 @@ namespace Catalog.App.Controllers
             return NotFound(ApiResponse.Fail(result.Message, result.Errors));
         }
 
-        [Authorize(Policy = CatalogPermissions.MealPlanRead)]
+        [Authorize(Policy = CatalogPermission.MealPlanRead)]
         [HttpGet]
         public async Task<IActionResult> List()
         {

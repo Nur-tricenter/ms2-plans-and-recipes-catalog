@@ -4,6 +4,7 @@ using Joseco.Outbox.Contracts.Model;
 using MediatR;
 using Catalog.Domain.Event.Recipe;
 using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Microsoft.Extensions.Logging;
 
 namespace Catalog.Application.UseCase.DomainEventHandler
@@ -17,7 +18,7 @@ namespace Catalog.Application.UseCase.DomainEventHandler
     /// bind their own queues to.
     /// <para>
     /// The contract deliberately carries only RecipeId/Name/Instructions because that is all
-    /// <see cref="RecipeCreated"/> exposes at creation time — see the limitations documented on
+    /// <see cref="RecipeCreated"/> exposes at creation time ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â see the limitations documented on
     /// <see cref="RecipePublished"/>.
     /// </para>
     /// </remarks>

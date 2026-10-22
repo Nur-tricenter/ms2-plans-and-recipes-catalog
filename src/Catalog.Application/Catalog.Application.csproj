@@ -15,6 +15,9 @@
   -->
   <ItemGroup>
     <PackageReference Include="Joseco.DDD.Core" />
+    <!-- Integration contracts now live in the shared kernel, so publisher and consumer
+         compile against the same type instead of two drifting copies. -->
+    <PackageReference Include="Nur.Tricenter.Integration" />
     <PackageReference Include="Joseco.Outbox.Contracts" />
     <!--
       Declared because the five PublishIntegrationEventWhen* handlers take an IExternalPublisher

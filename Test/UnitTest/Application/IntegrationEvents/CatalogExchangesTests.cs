@@ -1,3 +1,4 @@
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Catalog.Contracts.Integration;
 using Catalog.Application.UseCase.DomainEventHandler;
 using Xunit;
@@ -8,7 +9,7 @@ namespace Catalog.Tests.Application
     /// Guards the single source of truth for the catalog's RabbitMQ topology.
     /// <see cref="CatalogExchanges"/> is what the publishers publish to and what
     /// an exchange that is not in the registry, the message is published to a fanout exchange with
-    /// NO queue bound and is silently discarded — no exception, no log entry, just gone. These tests
+    /// NO queue bound and is silently discarded â€” no exception, no log entry, just gone. These tests
     /// are the cheapest possible guard against that class of bug.
     /// </summary>
     public class CatalogExchangesTests

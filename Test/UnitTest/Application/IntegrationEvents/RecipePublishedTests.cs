@@ -1,3 +1,4 @@
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Catalog.Contracts.Integration;
 using Joseco.Communication.External.Contracts.Message;
 using Xunit;
@@ -72,7 +73,7 @@ namespace Catalog.Tests.Application
         {
             // This is the documented limitation of the contract made executable: RecipeCreated fires
             // before any ingredient exists, so there is no ingredient member to assert on. If a
-            // future change adds one, this test must be revisited together with the domain model —
+            // future change adds one, this test must be revisited together with the domain model â€”
             // see the remarks on RecipePublished.
             // Arrange + Act
             var properties = typeof(RecipePublished)

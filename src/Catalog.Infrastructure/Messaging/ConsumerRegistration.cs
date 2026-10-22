@@ -1,4 +1,4 @@
-using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Identity;
 using Catalog.Infrastructure.Messaging.Consumers;
 using Catalog.Infrastructure.Observability;
 using Joseco.Communication.External.Contracts.Services;
@@ -18,7 +18,7 @@ public static class ConsumerRegistration
     /// <remarks>
     /// Must match the <c>ms2.user-published</c> queue declared in
     /// <c>orchestrator/topology/rabbitmq-definitions.json</c>. They are one contract expressed in
-    /// two places — a typo here silently creates a second queue that receives the same messages,
+    /// two places ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a typo here silently creates a second queue that receives the same messages,
     /// so the names match the platform convention <c>{consumer}.{exchange}</c> exactly.
     /// </remarks>
     public const string UserPublishedQueue = "ms2.user-published";
@@ -48,7 +48,7 @@ public static class ConsumerRegistration
     /// </code>
     /// <para>
     /// Tracing is OUTSIDE the inbox on purpose. A redelivery that the inbox skips must still appear
-    /// in the trace — it is a real delivery, and a redelivery storm is exactly what an operator is
+    /// in the trace ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it is a real delivery, and a redelivery storm is exactly what an operator is
     /// looking for. If the inbox swallowed it first, the duplicate would leave no trace at all.
     /// </para>
     /// <para>
@@ -61,7 +61,7 @@ public static class ConsumerRegistration
         // The concrete inner consumer. NEVER registered against IIntegrationMessageConsumer:
         // both decorators take their inner handler through that interface, so an interface
         // registration here makes each decorator depend on itself and DI reports a circular
-        // dependency. Concrete types only — the decorators construct their own chain.
+        // dependency. Concrete types only ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the decorators construct their own chain.
         services.AddTransient<UserPublishedConsumer>();
 
         // INNERMOST FIRST. Each decorator takes the next one's CONCRETE type, so the last one

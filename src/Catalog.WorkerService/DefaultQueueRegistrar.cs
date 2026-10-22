@@ -1,4 +1,5 @@
 using Catalog.Contracts.Integration;
+using Nur.Tricenter.Integration.Messages.Catalog;
 using Joseco.Communication.External.RabbitMQ.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,7 +8,7 @@ using RabbitMQ.Client;
 namespace Catalog.WorkerService
 {
     /// <summary>
-    /// Declares the catalog's ONE queue — <c>catalog.default</c> — and binds it to every exchange
+    /// Declares the catalog's ONE queue ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â <c>catalog.default</c> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â and binds it to every exchange
     /// in <see cref="CatalogExchanges.All"/>. It exists to be the COMPLETE RECORD of everything the
     /// catalog publishes, and for that reason it is deliberately NEVER CONSUMED.
     /// </summary>
@@ -17,14 +18,14 @@ namespace Catalog.WorkerService
     /// queue, binds it to ONE exchange AND starts a consumer. Registering it once per contract on
     /// the same queue name would put five COMPETING consumers on one queue: RabbitMQ delivers each
     /// message to exactly one of them, so a <c>RecipePublished</c> could be handed to the
-    /// <c>FoodPublished</c> consumer, fail to deserialize, and be dead-lettered — the record would
+    /// <c>FoodPublished</c> consumer, fail to deserialize, and be dead-lettered ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the record would
     /// be silently destroyed by the very feature meant to preserve it. Per-consumer queues (catering,
     /// production, delivery) are created later by each consuming microservice against these
     /// exchanges; this queue stays a passive sink.
     /// </para>
     /// <para>
     /// Because the queue is durable and never consumed, its depth IS the number of events ever
-    /// published, and its contents are the full history — which is exactly what
+    /// published, and its contents are the full history ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â which is exactly what
     /// <c>Test/IntegrationTest/RabbitMq/DefaultQueueAccumulationTests</c> asserts.
     /// </para>
     /// <para>
@@ -35,7 +36,7 @@ namespace Catalog.WorkerService
     /// so declaring them durable here made every publish fail with
     /// <c>406 PRECONDITION_FAILED - inequivalent arg 'durable' for exchange 'meal-plan-published'
     /// ... received 'false' but current is 'true'</c>.
-    /// <b>Do not "harden" this to durable without changing the publisher first</b> — that trade is
+    /// <b>Do not "harden" this to durable without changing the publisher first</b> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â that trade is
     /// a decision about losing exchanges on a broker restart (which also drops their bindings, so
     /// <see cref="QueueName"/> would silently stop receiving until the worker restarts), not a
     /// detail this registrar can settle on its own.

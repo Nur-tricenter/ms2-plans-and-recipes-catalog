@@ -1,3 +1,4 @@
+using Nur.Tricenter.Integration.Messages.Catalog;
 using System.Text;
 using Catalog.Contracts.Integration;
 using Catalog.WorkerService;
@@ -16,7 +17,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// <summary>
     /// Proves against a REAL broker the central claim of the <c>Default</c> queue: one fanout
     /// exchange per event, all bound to the single <c>catalog.default</c> queue, which therefore
-    /// accumulates the COMPLETE RECORD of everything published — one message per publish, and each
+    /// accumulates the COMPLETE RECORD of everything published â€” one message per publish, and each
     /// body still deserializable back into the contract it was published as.
     /// </summary>
     /// <remarks>

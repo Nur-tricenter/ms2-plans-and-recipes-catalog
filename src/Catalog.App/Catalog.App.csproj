@@ -17,6 +17,7 @@
     <!-- Permission NAMES come from the shared kernel so identity can grant them without
          depending on this service. -->
     <PackageReference Include="Nur.Tricenter.Access" />
+    <PackageReference Include="Nur.Tricenter.Integration" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

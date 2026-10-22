@@ -1,3 +1,4 @@
+using Nur.Tricenter.Integration.Messages.Catalog;
 using System.Globalization;
 using System.Text;
 using Catalog.Contracts.Integration;
