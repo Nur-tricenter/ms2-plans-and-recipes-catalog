@@ -1,5 +1,10 @@
 using Catalog.Application;
 using Catalog.Application.UseCase.DomainEventHandler;
+using DomainFoodEvent = Catalog.Domain.Event.Food.FoodCreated;
+using DomainFoodNutritionEvent = Catalog.Domain.Event.Food.FoodNutritionalInfoUpdated;
+using DomainMealPlanCreated = Catalog.Domain.Event.MealPlan.MealPlanCreated;
+using DomainRecipeCreated = Catalog.Domain.Event.Recipe.RecipeCreated;
+using DomainRecipeUpdated = Catalog.Domain.Event.Recipe.RecipeUpdated;
 using Catalog.Infrastructure;
 using Catalog.WorkerService;
 using Joseco.Communication.External.Contracts.Services;
@@ -116,14 +121,21 @@ namespace Catalog.Tests.WorkerService
             using var scope = provider.CreateScope();
 
             // Assert
-            var handlers = scope.ServiceProvider
-                .GetServices<INotificationHandler<OutboxMessage<DomainEvent>>>()
-                .ToList();
-            Assert.Contains(handlers, handler => handler is PublishIntegrationEventWhenMealPlanCreated);
-            Assert.Contains(handlers, handler => handler is PublishIntegrationEventWhenFoodNutritionalInfoUpdated);
-            Assert.Contains(handlers, handler => handler is PublishIntegrationEventWhenRecipeCreated);
-            Assert.Contains(handlers, handler => handler is PublishIntegrationEventWhenRecipeUpdated);
-            Assert.Contains(handlers, handler => handler is PublishIntegrationEventWhenFoodCreated);
+            // Asked for the CONCRETE types, not OutboxMessage<DomainEvent>. The publishers
+            // register against the exact event they translate ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â that is what makes MediatR
+            // deliver to them at all, because the outbox processor dispatches with the runtime
+            // type of the message's content. Resolving the base type finds nothing, which is why
+            // this assertion used to fail with an empty collection.
+            Assert.IsType<PublishIntegrationEventWhenMealPlanCreated>(
+                Resolve<DomainMealPlanCreated>(scope));
+            Assert.IsType<PublishIntegrationEventWhenFoodNutritionalInfoUpdated>(
+                Resolve<DomainFoodNutritionEvent>(scope));
+            Assert.IsType<PublishIntegrationEventWhenRecipeCreated>(
+                Resolve<DomainRecipeCreated>(scope));
+            Assert.IsType<PublishIntegrationEventWhenRecipeUpdated>(
+                Resolve<DomainRecipeUpdated>(scope));
+            Assert.IsType<PublishIntegrationEventWhenFoodCreated>(
+                Resolve<DomainFoodEvent>(scope));
         }
 
         [Fact]
@@ -142,12 +154,35 @@ namespace Catalog.Tests.WorkerService
             using var scope = provider.CreateScope();
 
             // Assert
-            Assert.Equal(5, scope.ServiceProvider
-                .GetServices<INotificationHandler<OutboxMessage<DomainEvent>>>()
-                .Count());
+            // Counted per concrete event type, for the same reason as above: there is no single
+            // service type that all five publishers share, by design.
+            Assert.Equal(5, new object?[]
+            {
+                Resolve<DomainMealPlanCreated>(scope),
+                Resolve<DomainFoodNutritionEvent>(scope),
+                Resolve<DomainRecipeCreated>(scope),
+                Resolve<DomainRecipeUpdated>(scope),
+                Resolve<DomainFoodEvent>(scope)
+            }.Count(handler => handler is not null));
+
             Assert.NotNull(scope.ServiceProvider.GetService<IExternalPublisher>());
             Assert.NotNull(scope.ServiceProvider.GetService<IMediator>());
         }
+
+        /// <summary>
+        /// Resolves the handler registered for one concrete outbox message type.
+        /// </summary>
+        /// <remarks>
+        /// Written as a helper because the type argument differs per event, and repeating the
+        /// `GetServices&lt;INotificationHandler&lt;OutboxMessage&lt;T&gt;&gt;&gt;` call at each site is
+        /// where the base-type mistake originally crept in.
+        /// </remarks>
+        private static INotificationHandler<OutboxMessage<TEvent>>? Resolve<TEvent>(
+            IServiceScope scope)
+            where TEvent : DomainEvent =>
+            scope.ServiceProvider
+                .GetServices<INotificationHandler<OutboxMessage<TEvent>>>()
+                .FirstOrDefault();
 
         private static IConfiguration BuildConfiguration()
         {
