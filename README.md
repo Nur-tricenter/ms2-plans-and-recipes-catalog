@@ -323,4 +323,47 @@ Through the gateway, the public entry point, routes are prefixed by service:
 ```
 POST http://localhost:15005/api/catalog/v1/foods
 GET  http://localhost:15005/api/catalog/v1/foods
+
+## Integration & extending the platform
+
+This service is the **reference template** for every new microservice on the platform. A new service
+should mirror its shape:
+
+- **Layers**: `Domain` (or invariants in `Application` for identity-style services) → `Application`
+  (commands/queries/DTOs) → `Infrastructure` (DbContext, repositories, outbox, observability) →
+  `App` (controllers, `Program`, health, Consul registration) + `WorkerService` (outbox drain).
+- **Dependency rule**: Application never references EF or a broker; Infrastructure implements the
+  abstractions; App/Worker reference Infrastructure only.
+- **Central package management**: one `Directory.Packages.props` per service; kernels pinned to a single
+  version (currently 1.0.9).
+- **One database, multiple schemas** for CQRS: `write`, `read`, `outbox`. Schema names live in one place
+  (`Persistence/DatabaseSchemas.cs`).
+- **Outbox chain**: command → `DomainDbContext.SaveChanges()` → domain event → `outbox.outboxMessage`
+  (same transaction) → worker `OutboxProcessor` → projection in `StoredDbContext` → publish integration
+  event to RabbitMQ. `OutboxChainCoverageTests` guards the chain.
+- **Migrations are explicit**: `dotnet run --project src/<Service>.App/<Service>.App.csproj -- --migrate`.
+  Never on boot in production.
+- **Consul registration**: self-registers when `ServiceRegistration:ServiceDiscoveryAddress` is set; host/port
+  are pinned, not sniffed.
+- **Auth**: validates JWTs with `Nur.Tricenter.Security` using the same key/issuer/audience as identity.
+  Meal-plan author comes from the token's `sub` claim.
+- **Gateway route**: prefix `/api/v1/...` so the gateway's `PathPrefix: /api` forwards correctly.
+- **Events published**: `FoodPublished`, `FoodNutritionalInfoUpdated`, `RecipePublished`, `RecipeUpdated`,
+  `MealPlanPublished`. Consumes `UserPublished` / `UserChanged` from identity.
+- **Tests**: 454 (unit, application, infrastructure, worker, integration, contract). RabbitMQ tests skip
+  when no broker is reachable.
+
+### Adding a new microservice that follows this template
+
+1. Clone the structure above; target `net8.0`.
+2. Add the four kernels (`Nur.Tricenter.Access`, `Integration`, `Observability`, `Security`) at the same
+   version to `Directory.Packages.props`.
+3. Create its database in the orchestrator's `postgres-init/01-create-databases.sql`.
+4. Add a compose file with its own profile (`profiles: [<service-name>]`) so the platform owner never edits
+   the orchestrator.
+5. Register in Consul with `ServiceRegistration:ServiceName = <service>-service` and a pinned host/port.
+6. Publish/consume integration events via the shared contracts in `Nur.Tricenter.Integration` (add new
+   contracts there, never duplicate).
+7. Grant scopes to accounts via identity's `POST /api/v1/users` with concrete scope strings.
+8. Wire observability through `Nur.Tricenter.Observability` so meters are exported.
 ```
