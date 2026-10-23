@@ -68,6 +68,8 @@ public class UserPublishedConsumer : IIntegrationMessageConsumer<UserPublished>
                 message.UserId, message.UserName, message.EventType);
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        // No SaveChanges here: the IdempotentConsumer owns the commit so the inbox claim and this
+        // projection land in the same transaction (atomic inbox). A failure rolls both back and
+        // the redelivery retries instead of being silently skipped.
     }
 }

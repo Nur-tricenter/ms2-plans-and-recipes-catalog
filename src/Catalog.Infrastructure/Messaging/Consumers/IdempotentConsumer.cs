@@ -77,33 +77,37 @@ public sealed class IdempotentConsumer<T, TInner> : IIntegrationMessageConsumer<
             return;
         }
 
-        // Claim first, in its own SaveChanges. This is the atomic step: the primary key on
-        // MessageId is what turns two concurrent deliveries into one winner and one duplicate.
+        // Claim first, but DO NOT commit yet. The claim and the handler's mutations commit in the
+        // SAME SaveChanges below, so a crash or a failure rolls the claim back together with the
+        // work and the redelivery retries instead of being silently skipped. This is the atomic
+        // inbox pattern from the reference architecture (Inventory.IdempotentConsumer).
         _context.InboxMessages.Add(new InboxMessage(
             message.Id,
             typeof(T).Name,
             message.CorrelationId,
             message.CreatedAt));
 
-        try
-        {
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException)
-        {
-            // Lost the race. Someone else claimed it, so this delivery is a duplicate and the
-            // correct action is to do nothing at all — not to retry, and not to run the handler.
-            _logger.LogInformation(
-                "{MessageType} {MessageId} was claimed by a concurrent delivery; skipping.",
-                typeof(T).Name, message.Id);
-            return;
-        }
-
         _logger.LogInformation(
             "Handling {MessageType} {MessageId} from {Source}.",
             typeof(T).Name, message.Id, message.Source);
 
         await _inner.HandleAsync(message, cancellationToken);
+
+        // Single commit for claim + work. If a concurrent delivery won the PK race, the insert
+        // fails here and this delivery is a duplicate: do nothing, do not retry.
+        if (_context.ChangeTracker.HasChanges())
+        {
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException)
+            {
+                _logger.LogInformation(
+                    "{MessageType} {MessageId} was claimed by a concurrent delivery; skipping.",
+                    typeof(T).Name, message.Id);
+            }
+        }
     }
 
     private Task<bool> HasProcessedAsync(Guid messageId, CancellationToken cancellationToken) =>
