@@ -21,16 +21,16 @@
       any other dependency, which is what keeps this repository independent: nothing here knows
       where nur-tricenter-shared-kernels lives on disk.
     -->
-    <PackageVersion Include="Nur.Tricenter.Access" Version="1.0.9" />
-    <PackageVersion Include="Nur.Tricenter.Integration" Version="1.0.9" />
-    <PackageVersion Include="Nur.Tricenter.Observability" Version="1.0.9" />
+    <PackageVersion Include="Nur.Tricenter.Access" Version="1.1.0" />
+    <PackageVersion Include="Nur.Tricenter.Integration" Version="1.1.0" />
+    <PackageVersion Include="Nur.Tricenter.Observability" Version="1.1.0" />
     <!--
       JWT bearer validation and one authorization policy per permission. The catalog now
       authenticates: a meal plan's author is read from the token's `sub` claim, so validating that
       token is what makes the author trustworthy. Identity signs it; this validates it, and both
       sides must agree on key, issuer and audience or every request 401s.
     -->
-    <PackageVersion Include="Nur.Tricenter.Security" Version="1.0.9" />
+    <PackageVersion Include="Nur.Tricenter.Security" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup Label="Joseco">
