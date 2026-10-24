@@ -24,13 +24,20 @@ namespace Catalog.Infrastructure.Query.MealPlan
             try
             {
                 var mealPlans = await _dbContext.MealPlans.ToListAsync(cancellationToken);
+                var authorIds = mealPlans.Select(p => p.AuthorId).Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToList();
+                var authors = await _dbContext.PlanAuthors
+                    .Where(a => authorIds.Contains(a.UserId))
+                    .ToDictionaryAsync(a => a.UserId, a => a.UserName, cancellationToken);
+
                 var dtoItems = mealPlans.Select(p => new MealPlanDto
                 {
                     Id = p.Id,
                     Name = p.Name,
                     DurationType = p.DurationType,
                     TotalDays = p.DurationType == "FIFTEEN_DAYS" ? 15 : 30,
-                    MealsPerDay = p.MealsPerDay
+                    MealsPerDay = p.MealsPerDay,
+                    AuthorId = p.AuthorId,
+                    AuthorName = p.AuthorId.HasValue && authors.TryGetValue(p.AuthorId.Value, out var name) ? name : null
                 }).ToList();
 
                 return Result.Ok<IEnumerable<MealPlanDto>>(dtoItems, "Meal plan list retrieved successfully");

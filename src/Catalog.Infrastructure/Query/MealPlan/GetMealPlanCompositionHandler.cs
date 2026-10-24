@@ -35,8 +35,16 @@ namespace Catalog.Infrastructure.Query.MealPlan
                 var dto = new MealPlanCompositionDto
                 {
                     MealPlanId = mealPlan.Id,
-                    Name = mealPlan.Name
+                    Name = mealPlan.Name,
+                    AuthorId = mealPlan.AuthorId
                 };
+
+                if (mealPlan.AuthorId.HasValue)
+                {
+                    var author = await _dbContext.PlanAuthors
+                        .FirstOrDefaultAsync(a => a.UserId == mealPlan.AuthorId.Value, cancellationToken);
+                    dto.AuthorName = author?.UserName;
+                }
 
                 foreach (var day in mealPlan.PlanDays.OrderBy(d => d.DayNumber))
                 {

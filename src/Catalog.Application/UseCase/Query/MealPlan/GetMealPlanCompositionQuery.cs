@@ -16,6 +16,8 @@ namespace Catalog.Application.UseCase.Query.MealPlan
     {
         public Guid MealPlanId { get; set; }
         public string Name { get; set; } = null!;
+        public Guid? AuthorId { get; set; }
+        public string? AuthorName { get; set; }
         public List<PlanDayCompositionDto> Days { get; set; } = new();
     }
 

@@ -9,7 +9,8 @@ namespace Catalog.Application.Dto
         public string DurationType { get; set; } = null!;
         public int TotalDays { get; set; }
         public int MealsPerDay { get; set; }
-        public List<PlanDayDto> Days { get; set; } = new();
+        public Guid? AuthorId { get; set; }
+        public string? AuthorName { get; set; }
     }
 
     public class PlanDayDto

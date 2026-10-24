@@ -39,32 +39,15 @@ namespace Catalog.Infrastructure.Query.MealPlan
                     Name = mealPlan.Name,
                     DurationType = mealPlan.DurationType,
                     TotalDays = mealPlan.PlanDays.Count,
-                    MealsPerDay = mealPlan.MealsPerDay
+                    MealsPerDay = mealPlan.MealsPerDay,
+                    AuthorId = mealPlan.AuthorId
                 };
 
-                foreach (var day in mealPlan.PlanDays.OrderBy(d => d.DayNumber))
+                if (mealPlan.AuthorId.HasValue)
                 {
-                    var dayDto = new PlanDayDto { DayNumber = day.DayNumber };
-                    foreach (var mealTime in day.MealTimes.OrderBy(t => t.Order))
-                    {
-                        var mtDto = new MealTimeDto
-                        {
-                            Name = mealTime.Name,
-                            Order = mealTime.Order
-                        };
-                        foreach (var asig in mealTime.AssignedRecipes)
-                        {
-                            var recipe = await _dbContext.Recipes.FindAsync(new object?[] { asig.RecipeId }, cancellationToken);
-                            mtDto.Recipes.Add(new AssignedRecipeDto
-                            {
-                                RecipeId = asig.RecipeId,
-                                RecipeName = recipe?.Name ?? "Unknown",
-                                Ration = asig.RationQuantity
-                            });
-                        }
-                        dayDto.MealTimes.Add(mtDto);
-                    }
-                    dto.Days.Add(dayDto);
+                    var author = await _dbContext.PlanAuthors
+                        .FirstOrDefaultAsync(a => a.UserId == mealPlan.AuthorId.Value, cancellationToken);
+                    dto.AuthorName = author?.UserName;
                 }
 
                 return Result.Ok<MealPlanDto>(dto, "Meal plan retrieved successfully");
