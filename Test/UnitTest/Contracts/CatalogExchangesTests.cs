@@ -31,7 +31,8 @@ namespace Catalog.Tests.Application
                 PublishIntegrationEventWhenFoodNutritionalInfoUpdated.Destination,
                 PublishIntegrationEventWhenRecipeCreated.Destination,
                 PublishIntegrationEventWhenRecipeUpdated.Destination,
-                PublishIntegrationEventWhenFoodCreated.Destination
+                PublishIntegrationEventWhenFoodCreated.Destination,
+                PublishIntegrationEventWhenMealPlanCompositionChanged.Destination
             };
 
         [Theory]
@@ -62,7 +63,8 @@ namespace Catalog.Tests.Application
                 PublishIntegrationEventWhenFoodNutritionalInfoUpdated.Destination,
                 PublishIntegrationEventWhenRecipeCreated.Destination,
                 PublishIntegrationEventWhenRecipeUpdated.Destination,
-                PublishIntegrationEventWhenFoodCreated.Destination
+                PublishIntegrationEventWhenFoodCreated.Destination,
+                PublishIntegrationEventWhenMealPlanCompositionChanged.Destination
             };
 
             Assert.Equal(destinations.Length, destinations.Distinct(StringComparer.Ordinal).Count());
@@ -79,7 +81,8 @@ namespace Catalog.Tests.Application
                 PublishIntegrationEventWhenFoodNutritionalInfoUpdated.Destination,
                 PublishIntegrationEventWhenRecipeCreated.Destination,
                 PublishIntegrationEventWhenRecipeUpdated.Destination,
-                PublishIntegrationEventWhenFoodCreated.Destination
+                PublishIntegrationEventWhenFoodCreated.Destination,
+                PublishIntegrationEventWhenMealPlanCompositionChanged.Destination
             };
 
             foreach (var destination in publishers)

@@ -154,6 +154,7 @@ RabbitMQ delivery
 | `recipe-published` | Recipe created |
 | `recipe-updated` | Recipe updated / ingredient added or removed |
 | `meal-plan-published` | Meal plan created |
+| `meal-plan-composition-changed` | Meal time added to a plan, or recipe assigned to / removed from a meal time. Full plan snapshot (days, meal times, recipes with names and rations) built from the write side; MS4 projects it so it needs no REST call to the catalog |
 
 ### Consumed
 

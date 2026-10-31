@@ -119,7 +119,8 @@ namespace Catalog.WorkerService
             "food-nutritional-info-updated",
             "recipe-published",
             "recipe-updated",
-            "food-published"
+            "food-published",
+            "meal-plan-composition-changed"
         };
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
