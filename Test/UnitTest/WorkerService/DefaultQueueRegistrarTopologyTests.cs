@@ -20,7 +20,7 @@ namespace Catalog.Tests.WorkerService
             var bound = DefaultQueueRegistrar.BoundExchanges;
 
             // Assert
-            Assert.Equal(5, bound.Count);
+            Assert.Equal(6, bound.Count);
         }
 
         [Fact]

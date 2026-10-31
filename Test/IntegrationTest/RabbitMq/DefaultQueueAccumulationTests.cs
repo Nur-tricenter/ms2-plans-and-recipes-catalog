@@ -25,7 +25,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
     /// The publishes go through the REAL <see cref="IExternalPublisher"/>, so the fanout exchanges
     /// under test are the ones the publishers declare at runtime.
     /// <para>
-    /// The queue and the five exchanges are deleted before AND after the run: a previous run that
+    /// The queue and the six exchanges are deleted before AND after the run: a previous run that
     /// was killed before its <c>finally</c> would otherwise leave messages behind and make the
     /// depth assertion pass or fail for the wrong reason.
     /// </para>
@@ -106,6 +106,19 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
                 UnitOfMeasure = "Gram"
             };
 
+            var compositionChanged = new MealPlanCompositionChanged("correlation-default-queue", "catalog")
+            {
+                PlanId = Guid.Parse("aaaaaaaa-0000-0000-0000-000000000006"),
+                Days =
+                [
+                    new MealPlanDay
+                    {
+                        DayNumber = 1,
+                        MealTimes = [new MealPlanMealTime { Name = "Breakfast", Order = 0, Recipes = [new MealPlanRecipe { RecipeId = Guid.NewGuid(), RecipeName = "Ensalada", Rations = 1 }] }]
+                    }
+                ]
+            };
+
             try
             {
                 // Clean slate: remove leftovers from a previous killed run.
@@ -133,11 +146,12 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
                     await publisher.PublishAsync(recipePublished, "recipe-published", declareDestination: true);
                     await publisher.PublishAsync(recipeUpdated, "recipe-updated", declareDestination: true);
                     await publisher.PublishAsync(foodPublished, "food-published", declareDestination: true);
+                    await publisher.PublishAsync(compositionChanged, "meal-plan-composition-changed", declareDestination: true);
                 }
 
                 // Assert - one message per publish, and nothing lost. On a mismatch the broker state
                 // is reported, so a failure explains itself instead of showing a bare count.
-                var expectedMessages = 5u;
+                var expectedMessages = 6u;
                 var depth = await admin.WaitForMessageCountAsync(QueueName, (int)expectedMessages, DeliveryTimeout);
                 Assert.True(
                     depth == expectedMessages,
@@ -186,12 +200,17 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
                 Assert.Equal(foodPublished.Carbs, publishedFood.Carbs);
                 Assert.Equal(foodPublished.UnitOfMeasure, publishedFood.UnitOfMeasure);
 
-                Assert.Equal(5, received.Count);
+                var publishedComposition = Assert.IsType<MealPlanCompositionChanged>(received[compositionChanged.EventType]);
+                Assert.Equal(compositionChanged.PlanId, publishedComposition.PlanId);
+                var day = Assert.Single(publishedComposition.Days);
+                Assert.Equal("Ensalada", Assert.Single(Assert.Single(day.MealTimes).Recipes).RecipeName);
+
+                Assert.Equal(6, received.Count);
             }
             finally
             {
                 await host.StopAsync();
-                _output.WriteLine("[cleanup] deleting the queue and the five exchanges declared by the run");
+                _output.WriteLine("[cleanup] deleting the queue and the six exchanges declared by the run");
                 await admin.DeleteQueueAsync(QueueName);
                 foreach (var exchange in exchanges)
                 {
@@ -203,7 +222,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
         /// <summary>
         /// Takes every ready message, keyed by the <c>EventType</c> discriminator carried on the wire.
         /// The discriminator is what a real consumer switches on, and it is the only reliable way to
-        /// pair the bodies: five messages arriving from five different fanout exchanges have no
+        /// pair the bodies: six messages arriving from six different fanout exchanges have no
         /// meaningful relative order.
         /// </summary>
         private static async Task<Dictionary<string, IntegrationMessage>> DrainAsync(
@@ -250,6 +269,7 @@ namespace Catalog.Tests.IntegrationTest.RabbitMq
             "Recipe.Published" => typeof(RecipePublished),
             "Recipe.Updated" => typeof(RecipeUpdated),
             "Food.Published" => typeof(FoodPublished),
+            "MealPlan.CompositionChanged" => typeof(MealPlanCompositionChanged),
             _ => null
         };
     }

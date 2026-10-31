@@ -67,7 +67,7 @@ services:
       # Seed the sample catalogue (30 foods / 25 recipes / 2 plans) on startup so the seed
       # events land in the transactional outbox, are drained by the catalog worker, and reach
       # the broker's fanout exchanges (meal-plan-published, food-published, recipe-published,
-      # recipe-updated, food-nutritional-info-updated). The topology that fans those out to
+      # recipe-updated, food-nutritional-info-updated, meal-plan-composition-changed). The topology that fans those out to
       # ms1/ms3/ms4/ms5 is declared by rabbitmq-definitions.json at broker boot.
       Seed__Enabled: "true"
       ServiceRegistration__ServiceDiscoveryAddress: "http://nur-tricenter-consul:8500"

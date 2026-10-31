@@ -52,6 +52,9 @@ namespace Catalog.Application
             services.RemoveAll<INotificationHandler<OutboxMessage<RecipeCreated>>>();
             services.RemoveAll<INotificationHandler<OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>>>();
             services.RemoveAll<INotificationHandler<OutboxMessage<MealPlanCreated>>>();
+            services.RemoveAll<INotificationHandler<OutboxMessage<MealTimeAddedToPlan>>>();
+            services.RemoveAll<INotificationHandler<OutboxMessage<RecipeAssignedToMealTime>>>();
+            services.RemoveAll<INotificationHandler<OutboxMessage<RecipeRemovedFromMealTime>>>();
 
             return services;
         }
@@ -68,6 +71,9 @@ namespace Catalog.Application
             services.AddTransient<INotificationHandler<OutboxMessage<RecipeCreated>>, PublishIntegrationEventWhenRecipeCreated>();
             services.AddTransient<INotificationHandler<OutboxMessage<Catalog.Domain.Event.Recipe.RecipeUpdated>>, PublishIntegrationEventWhenRecipeUpdated>();
             services.AddTransient<INotificationHandler<OutboxMessage<FoodCreated>>, PublishIntegrationEventWhenFoodCreated>();
+            services.AddTransient<INotificationHandler<OutboxMessage<MealTimeAddedToPlan>>, PublishIntegrationEventWhenMealPlanCompositionChanged>();
+            services.AddTransient<INotificationHandler<OutboxMessage<RecipeAssignedToMealTime>>, PublishIntegrationEventWhenMealPlanCompositionChanged>();
+            services.AddTransient<INotificationHandler<OutboxMessage<RecipeRemovedFromMealTime>>, PublishIntegrationEventWhenMealPlanCompositionChanged>();
 
             return services;
         }
